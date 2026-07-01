@@ -1034,7 +1034,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                               || [bundleId isEqualToString:@"com.voidlinkextreme.iOS"]
                               || [bundleId isEqualToString:@"com.voidlink.tf.debug10.iOS"]);
 
-    if ([GenericUtils isIPad] && loadPencilSection) {
+    if ([PublicUtils isIPad] && loadPencilSection) {
         MenuSectionView *pencilSection = [[MenuSectionView alloc] init];
         pencilSection.delegate = self;
         pencilSection.sectionTitle = [LocalizationHelper localizedStringForKey:@"=drawingToolkit"];
@@ -1550,7 +1550,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     if (@available(iOS 13.0, *)) {
         if(stack.isGameProfileSetting){
             UIImage* image;
-            if(GenericUtils.iOS18Available){
+            if(PublicUtils.iOS18Available){
                 UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:14.5 weight:UIImageSymbolWeightRegular];
                 image = [UIImage systemImageNamed:@"gamecontroller.circle" withConfiguration:config];
             }
@@ -1814,7 +1814,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     UIAlertAction *readInstruction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Online Documentation"]
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action){
-        [GenericUtils openUrl:onlineDocLink];
+        [PublicUtils openUrl:onlineDocLink];
     }];
 
     
@@ -2476,7 +2476,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)showCustomOswTip {
-    GenericUtils.autoPopSoftKeyboard = !GenericUtils.isIPhone;
+    GenericUtils.autoPopSoftKeyboard = !PublicUtils.isIPhone;
     NSString* edgeSide = self.slideToSettingsScreenEdgeSelector.selectedSegmentIndex == 1 ? [LocalizationHelper localizedStringForKey:@"left"] : [LocalizationHelper localizedStringForKey:@"right"];
     NSString* slideDist = [NSString stringWithFormat:@"%d%%", (int)(self.slideToMenuDistanceSlider.value*100)];
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey:@"Edit layout during streaming"]
@@ -3316,7 +3316,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         UIAlertAction *okAction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"OK"]
                                                            style:UIAlertActionStyleDefault
                                                          handler:^(UIAlertAction *action) {
-            self->softKeyboardHeight = [GenericUtils toCGFloat:alertController.textFields[0].text];
+            self->softKeyboardHeight = [PublicUtils toCGFloat:alertController.textFields[0].text];
             [GenericUtils setVerticalScaleWithView:self.view show:false];
             [sender setOn:self->softKeyboardHeight!=0];
         }];
@@ -3485,7 +3485,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) promptCustomResolutionDialog {
-    GenericUtils.autoPopSoftKeyboard = !GenericUtils.isIPhone;
+    GenericUtils.autoPopSoftKeyboard = !PublicUtils.isIPhone;
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey: @"Enter Custom Resolution"] message:nil preferredStyle:UIAlertControllerStyleAlert];
 
     [alertController addTextFieldWithConfigurationHandler:^(UITextField *textField) {
@@ -3729,7 +3729,7 @@ BOOL isCustomResolution(int resolutionSelected) {
             UISlider *slider = (UISlider *)subview;
             slider.tintColor = [UIColor clearColor];
             slider.tintColor = ThemeManager.appSecondaryColor;
-            if(GenericUtils.liquidGlassEnabled) slider.maximumTrackTintColor = ThemeManager.liquidGlassSliderMaxTrackTint;
+            if(PublicUtils.liquidGlassEnabled) slider.maximumTrackTintColor = ThemeManager.liquidGlassSliderMaxTrackTint;
         }
         [self updateThemeForSliders:subview];
     }
@@ -3768,7 +3768,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self updateThemeForLabels:self.view];
     [self updateThemeForSelectors:self.view];
     [self updateThemeForSliders:self.view];
-    if(GenericUtils.liquidGlassEnabled) [self updateThemeForSwitches:self.view];
+    if(PublicUtils.liquidGlassEnabled) [self updateThemeForSwitches:self.view];
 }
 
 - (void) frameQueueSizeSliderMoved:(UISlider* )sender {
@@ -3952,7 +3952,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 */
 
 - (void)loadPencilSettings:(TemporarySettings*) tempSettings{
-    if([GenericUtils isIPad]){
+    if([PublicUtils isIPad]){
         self.pencilTickSelector.selectedSegmentIndex = tempSettings.pencilTickMode.intValue;
         [self.pencilTickSelector addTarget:self action:@selector(pencilTickModeChanged:) forControlEvents:UIControlEventValueChanged];
         [self pencilTickModeChanged:self.pencilTickSelector];
@@ -3975,7 +3975,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)populatePencilSettings:(Settings*)currentSettings{
-    if([GenericUtils isIPad]){
+    if([PublicUtils isIPad]){
         currentSettings.pencilTickMode = @(self.pencilTickSelector.selectedSegmentIndex);
         currentSettings.pencilTickIntervalUs = @(self.pencilTickIntervalSlider.value);
     }

@@ -46,7 +46,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
     private var horizontalConstraintsConfigured = false
 
     private func contentWidthMultiplier() -> CGFloat {
-        GenericUtils.viewIsLandscape(view) ? (GenericUtils.isIPhone() ? 0.8 : 0.65) : (GenericUtils.isIPhone() ? 0.83 : 0.85)
+        PublicUtils.viewIsLandscape(view) ? (PublicUtils.isIPhone ? 0.8 : 0.65) : (PublicUtils.isIPhone ? 0.83 : 0.85)
     }
 
     private func updateHorizontalLayoutConstraints() {
@@ -116,8 +116,8 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
         tableView.separatorStyle = .singleLine
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
 
-        if GenericUtils.liquidGlassEnabled {
-            tableView.separatorColor = UIColor.white.withAlphaComponent(GenericUtils.isIPhone() ? 0.28 : 0.165)
+        if PublicUtils.liquidGlassEnabled {
+            tableView.separatorColor = UIColor.white.withAlphaComponent(PublicUtils.isIPhone ? 0.28 : 0.165)
         } else {
             tableView.separatorColor = UIColor.white.withAlphaComponent(0.3)
         }
@@ -140,7 +140,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
         tap.delegate = self
         view.addGestureRecognizer(tap)
 
-        if GenericUtils.liquidGlassEnabled, #available(iOS 26.0, *) {
+        if PublicUtils.liquidGlassEnabled, #available(iOS 26.0, *) {
             profileTableViewNavigationItem.leftBarButtonItems?.forEach { $0.hidesSharedBackground = true }
             profileTableViewNavigationItem.rightBarButtonItems?.forEach { $0.hidesSharedBackground = true }
         }

@@ -34,9 +34,14 @@
 		18D43D7F2F050240008C326F /* PressureCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D43D7E2F050240008C326F /* PressureCurve.swift */; };
 		18E4BCEA2E891895000A8657 /* MotionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E4BCE92E891895000A8657 /* MotionHandler.swift */; };
 		18FCADAF2ECAC23200787A96 /* PencilHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCADAE2ECAC23200787A96 /* PencilHandler.swift */; };
+		2A263D4A2FF3B3F800154DEA /* PublicExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D492FF3B3F800154DEA /* PublicExtensions.swift */; };
+		2A263D4C2FF3B49600154DEA /* PublicExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D492FF3B3F800154DEA /* PublicExtensions.swift */; };
+		2A263D4F2FF3BA2800154DEA /* PublicUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */; };
+		2A263D502FF3BA2800154DEA /* PublicUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */; };
 		2A7113FD2F5A6C65001D852D /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7113FC2F5A6C65001D852D /* ThemeManager.swift */; };
 		2AAA4E822F7666C5001E20DC /* ControllerUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A765BC2ECD51FB004784AA /* ControllerUtil.swift */; };
 		2AAA4E842F7666EE001E20DC /* LocalizationHelperExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1CDF92C4FE83400547904 /* LocalizationHelperExtension.swift */; };
+		2AAA4E872F985F12001E20DC /* LocalizationHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FD0B502C31338D006B5BE5 /* LocalizationHelper.m */; };
 		2AC1E3832F507D80004F76C0 /* GenericUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1E3822F507D80004F76C0 /* GenericUtils.swift */; };
 		2AC1EAFB2F92260F004EDA80 /* UIStackExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */; };
 		2AC1EAFC2F922889004EDA80 /* UIStackExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */; };
@@ -205,6 +210,8 @@
 		18E4BCE92E891895000A8657 /* MotionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionHandler.swift; sourceTree = "<group>"; };
 		18FCADAE2ECAC23200787A96 /* PencilHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilHandler.swift; sourceTree = "<group>"; };
 		2A039E562F72892B00546768 /* VoidLinkPreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoidLinkPreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A263D492FF3B3F800154DEA /* PublicExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicExtensions.swift; sourceTree = "<group>"; };
+		2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicUtils.swift; sourceTree = "<group>"; };
 		2A7113FC2F5A6C65001D852D /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		2AC1E3822F507D80004F76C0 /* GenericUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericUtils.swift; sourceTree = "<group>"; };
 		2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackExtension.swift; sourceTree = "<group>"; };
@@ -218,7 +225,6 @@
 		84351B072C29ACCA00A77989 /* LayoutOnScreenControls.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LayoutOnScreenControls.m; sourceTree = "<group>"; };
 		84351B092C29ACCA00A77989 /* OnScreenButtonState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OnScreenButtonState.m; sourceTree = "<group>"; };
 		84351B0A2C29ACCA00A77989 /* OSCProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSCProfile.m; sourceTree = "<group>"; };
-		A1D4E0A22FBBBBCC00112233 /* OSCProfilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCProfilesManager.swift; sourceTree = "<group>"; };
 		84351B0C2C29ACCB00A77989 /* LayoutOnScreenControls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LayoutOnScreenControls.h; sourceTree = "<group>"; };
 		84351B0D2C29ACCB00A77989 /* OSCProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSCProfile.h; sourceTree = "<group>"; };
 		84351B292C29AD6000A77989 /* ToolBarContainerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ToolBarContainerView.m; sourceTree = "<group>"; };
@@ -320,6 +326,7 @@
 		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
 		A1900E002F9A100100BA853A /* InputAccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputAccessoryBar.swift; sourceTree = "<group>"; };
 		A1B2C3D32F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractGamepadOverlayWidgetView.swift; sourceTree = "<group>"; };
+		A1D4E0A22FBBBBCC00112233 /* OSCProfilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCProfilesManager.swift; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
 		FB1A674B2131E65900507771 /* KeyboardSupport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardSupport.h; sourceTree = "<group>"; };
@@ -430,6 +437,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AbstractGamepadView.swift,
+				RadialMenuView.swift,
 				VirtualKeyboardView.swift,
 				WidgetPickerView.swift,
 				WidgetPickerViewController.swift,
@@ -819,6 +827,8 @@
 			children = (
 				18729EDD2E8BD68800101194 /* UUIDHelper.swift */,
 				2AC1E3822F507D80004F76C0 /* GenericUtils.swift */,
+				2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */,
+				2A263D492FF3B3F800154DEA /* PublicExtensions.swift */,
 				18A0EE2B2EFBCCFD00BA853A /* GraphicUtils.swift */,
 				18780CC92F10D6CC00B90483 /* IAPManager.swift */,
 				97E20DD42E2164A9000D5DCA /* BandwidthTracker.h */,
@@ -1113,8 +1123,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				2AAA4E842F7666EE001E20DC /* LocalizationHelperExtension.swift in Sources */,
+				2AAA4E872F985F12001E20DC /* LocalizationHelper.m in Sources */,
 				2AAA4E822F7666C5001E20DC /* ControllerUtil.swift in Sources */,
+				2A263D4C2FF3B49600154DEA /* PublicExtensions.swift in Sources */,
 				2AC1EAFB2F92260F004EDA80 /* UIStackExtension.swift in Sources */,
+				2A263D502FF3BA2800154DEA /* PublicUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1137,6 +1150,7 @@
 				843CC7F62C1E7A1700BBC475 /* NativeTouchHandler.m in Sources */,
 				97E20DEE2E2165A5000D5DCA /* ImGuiPlots.mm in Sources */,
 				FB89463219F646E200339C8A /* VideoDecoderRenderer.m in Sources */,
+				2A263D4F2FF3BA2800154DEA /* PublicUtils.swift in Sources */,
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,
@@ -1147,6 +1161,7 @@
 				FB4678FF1A565DAC00377732 /* WakeOnLanManager.m in Sources */,
 				97E21BBF2E21882D000D5DCA /* imgui_tables.cpp in Sources */,
 				97E21BC02E21882D000D5DCA /* imgui_demo.cpp in Sources */,
+				2A263D4A2FF3B3F800154DEA /* PublicExtensions.swift in Sources */,
 				97E21BC12E21882D000D5DCA /* imgui_widgets.cpp in Sources */,
 				97E21BC22E21882D000D5DCA /* imgui.cpp in Sources */,
 				97E21BC32E21882D000D5DCA /* imgui_draw.cpp in Sources */,
@@ -1324,6 +1339,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VoidLinkPreview/VoidLinkPreview-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -1373,6 +1389,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "VoidLinkPreview/VoidLinkPreview-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

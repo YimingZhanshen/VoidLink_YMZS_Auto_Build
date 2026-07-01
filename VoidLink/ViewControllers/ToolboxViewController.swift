@@ -87,7 +87,7 @@ import UIKit
         super.viewWillTransition(to: size, with: coordinator)
         
         DispatchQueue.main.asyncAfter(deadline: .now()+0.2) {
-            self.pinButton.isHidden = !GenericUtils.viewIsLandscape(self.view) && GenericUtils.isIPhone()
+            self.pinButton.isHidden = !PublicUtils.viewIsLandscape(self.view) && PublicUtils.isIPhone
         }
         
         view.setNeedsUpdateConstraints()
@@ -108,15 +108,15 @@ import UIKit
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)  // Adjust font size as needed
         titleLabel.textColor = UIColor.white  // Adjust color as needed
         titleLabel.textAlignment = .center
-        if !GenericUtils.isIPhone() {contentView.addSubview(titleLabel)}
+        if !PublicUtils.isIPhone {contentView.addSubview(titleLabel)}
         
         contentView.backgroundColor = viewBackgroundColor
         tableView.backgroundColor = .clear
         tableView.rowHeight = isIPhone() ? 49.9 : 60
         tableView.separatorColor = .white.withAlphaComponent(0.33)
         
-        if GenericUtils.liquidGlassEnabled {
-            tableView.separatorColor = .white.withAlphaComponent(GenericUtils.isIPhone() ? 0.185 : 0.13)
+        if PublicUtils.liquidGlassEnabled {
+            tableView.separatorColor = .white.withAlphaComponent(PublicUtils.isIPhone ? 0.185 : 0.13)
         }
         else{
             tableView.separatorColor = .white.withAlphaComponent(0.3)
@@ -142,7 +142,7 @@ import UIKit
         contentView.addSubview(editButton)
         // contentView.addSubview(exitButton)
         contentView.addSubview(pinButton)
-        pinButton.isHidden = !GenericUtils.isLandscape()
+        pinButton.isHidden = !PublicUtils.isLandscape()
         
         self.view.addSubview(contentView)
         
@@ -166,13 +166,13 @@ import UIKit
 
     private func contentWidthMultiplier() -> CGFloat {
         /*
-        if isIPhone() && GenericUtils.viewIsLandscape(self.view) {
+        if isIPhone() && PublicUtils.viewIsLandscape(self.view) {
             return 0.85
         }*/
 
         return isIPhone()
-                ? (GenericUtils.viewIsLandscape(self.view) ?  0.6 : 0.85)
-                : (GenericUtils.viewIsLandscape(self.view) ?  0.6 : 0.85)
+                ? (PublicUtils.viewIsLandscape(self.view) ?  0.6 : 0.85)
+                : (PublicUtils.viewIsLandscape(self.view) ?  0.6 : 0.85)
     }
     
     
@@ -206,7 +206,7 @@ import UIKit
             // TableView constraints
             tableView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),
             tableView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -10),
-            tableView.topAnchor.constraint(equalTo: contentView.topAnchor, constant:GenericUtils.isIPhone() ? 6 : 50),
+            tableView.topAnchor.constraint(equalTo: contentView.topAnchor, constant:PublicUtils.isIPhone ? 6 : 50),
             tableView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -60),
             
             // ExitButton constraints
@@ -231,7 +231,7 @@ import UIKit
         ])
         
         // ViewTitle constrains
-        if !GenericUtils.isIPhone() {
+        if !PublicUtils.isIPhone {
             NSLayoutConstraint.activate([
                 titleLabel.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: 13.5),
                 titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 10),

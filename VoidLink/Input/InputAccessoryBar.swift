@@ -23,12 +23,12 @@ private enum InputAccessoryBarMetrics {
     static let horizontalInset: CGFloat = 12
     static let safeAreaExtraInset: CGFloat = 0
     static let interSectionSpacing: CGFloat = 10
-    static let itemSpacing: CGFloat = GenericUtils.isIPhone() ? 5 : 9
+    static let itemSpacing: CGFloat = PublicUtils.isIPhone ? 5 : 9
     static let edgeFadeWidth: CGFloat = 14
-    static let sideButtonSize: CGFloat = GenericUtils.isIPhone() ? 38 : 46
-    static let pillHeight: CGFloat = GenericUtils.isIPhone() ? 38 : 46
+    static let sideButtonSize: CGFloat = PublicUtils.isIPhone ? 38 : 46
+    static let pillHeight: CGFloat = PublicUtils.isIPhone ? 38 : 46
     static let pillHorizontalPadding: CGFloat = 10
-    static let pillMinWidth: CGFloat = GenericUtils.isIPhone() ? 38 : 46
+    static let pillMinWidth: CGFloat = PublicUtils.isIPhone ? 38 : 46
     static let borderWidth: CGFloat = 1
     static let highlightedBorderWidth: CGFloat = 1.6
     static let highlightedScale: CGFloat = 0.86

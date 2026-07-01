@@ -215,7 +215,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
         if currentSettings?.unlockDisplayOrientation == true {
             return .all
         } else {
-            return GenericUtils.isIPhone() ? .landscape : getCurrentOrientation()
+            return PublicUtils.isIPhone ? .landscape : getCurrentOrientation()
         }
     }
 
@@ -622,7 +622,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
         buttonModeStack.isHidden = !hidden || (selectedWidget?.widgetType != .button)
         collectedWidgetsStack.isHidden = selectedWidget?.isFolder != true
         
-        if GenericUtils.isIPhone() {
+        if PublicUtils.isIPhone {
             vibrationStyleStack.isHidden = false
         }
         
@@ -1070,7 +1070,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
             countdown: 5,
             completion: {
                 if AlertControllerUtil.actionCancelled {
-                    GenericUtils.openUrl(LocalizationHelper.localizedString(forKey: "folderTutorialUrl"))
+                    PublicUtils.openUrl(LocalizationHelper.localizedString(forKey: "folderTutorialUrl"))
                 }
                 else {return}
             }

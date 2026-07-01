@@ -1,0 +1,146 @@
+//
+//  PublicUtils.swift
+//  VoidLink
+//
+//  Created by True砖家 on 2026/2/26.
+//  Copyright © 2026 True砖家@Bilibili. All rights reserved.
+//
+
+
+import Foundation
+import ObjectiveC
+import UIKit
+
+@objc public class PublicUtils: NSObject {
+    
+    @objc public static var isIPhone: Bool = {
+        return UIDevice.current.userInterfaceIdiom == .phone
+    }()
+
+    @objc public static var isIPad: Bool = {
+        return UIDevice.current.userInterfaceIdiom == .pad
+    }()
+    
+    @objc public static var isRunningOnMacAsiPadApp: Bool = {
+        if #available(iOS 14.0, *) {
+            return ProcessInfo.processInfo.isiOSAppOnMac
+        }
+        return false
+    }()
+    
+    @objc public static let iOS26Available: Bool = {
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            return true
+        } else {
+            return false
+        }
+    }()
+        
+    @objc public static let liquidGlassEnabled: Bool = {
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            let useLegacyUI = Bundle.main.object(forInfoDictionaryKey: "UIDesignRequiresCompatibility") as? Bool
+            return useLegacyUI != true
+        } else {
+            return false
+        }
+    }()
+    
+    @objc public static var iOS18Available: Bool = {
+        if #available(iOS 18.0, *) {return true}
+        else {return false}
+    }()
+    
+    @objc public static let isGUIWidgetPickerAvailable: Bool = {
+        if #available(iOS 13.0, tvOS 13.0, *) {
+            return true
+        } else {
+            return false
+        }
+    }()
+    
+    @objc public static func isLandscape() -> Bool {
+        if #available(iOS 13.0, *) {
+            guard let windowScene = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .first(where: { $0.activationState == .foregroundActive })
+            else {return false}
+            return windowScene.interfaceOrientation.isLandscape
+        }
+        else {return PublicUtils.screenWidth > PublicUtils.screenHeight}
+    }
+    
+    @objc public static func toCGFloat(_ str: String) -> CGFloat {
+        return CGFloat(Double(str) ?? 0)
+    }
+        
+    @objc public static func viewIsLandscape(_ view: UIView?) -> Bool {
+        guard let view else {return false}
+        return view.bounds.width > view.bounds.height
+    }
+    
+    @objc public static var screenWidth: CGFloat {
+        return UIScreen.main.bounds.width
+    }
+    
+    @objc public static var screenHeight: CGFloat {
+        return UIScreen.main.bounds.height
+    }
+        
+    @objc(parentViewControllerForView:)
+    static func parentViewController(for view: UIView?) -> UIViewController? {
+        var responder: UIResponder? = view
+        while let currentResponder = responder {
+            if let viewController = currentResponder as? UIViewController {
+                return viewController
+            }
+            responder = currentResponder.next
+        }
+        return nil
+    }
+
+    @objc public static func rootViewController() -> UIViewController? {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first { $0.activationState == .foregroundActive }?
+                .windows
+                .first { $0.isKeyWindow }?
+                .rootViewController
+        } else {
+            return UIApplication.shared.keyWindow?.rootViewController
+        }
+    }
+
+    @objc public static func topViewController() -> UIViewController? {
+        return topViewController(from: rootViewController())
+    }
+
+    private static func topViewController(from rootViewController: UIViewController?) -> UIViewController? {
+        if let navigationController = rootViewController as? UINavigationController {
+            return topViewController(from: navigationController.visibleViewController)
+        }
+
+        if let tabBarController = rootViewController as? UITabBarController {
+            return topViewController(from: tabBarController.selectedViewController)
+        }
+
+        if let splitViewController = rootViewController as? UISplitViewController,
+           let lastViewController = splitViewController.viewControllers.last {
+            return topViewController(from: lastViewController)
+        }
+
+        if let presentedViewController = rootViewController?.presentedViewController {
+            return topViewController(from: presentedViewController)
+        }
+
+        return rootViewController
+    }
+    
+    
+    @objc(openUrl:)
+    static func openUrl(_ urlString: String) {
+        guard let url = URL(string: urlString),
+              UIApplication.shared.canOpenURL(url) else { return }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
+}

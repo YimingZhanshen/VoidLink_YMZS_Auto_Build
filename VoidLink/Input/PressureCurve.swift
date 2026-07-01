@@ -661,7 +661,7 @@ class PressureCurveViewController: UIViewController, UIGestureRecognizerDelegate
         
         hookFilterLabel.font = UIFont.systemFont(ofSize: 14)
         hookFilterLabel.textColor = .black
-        if GenericUtils.liquidGlassEnabled {
+        if PublicUtils.liquidGlassEnabled {
             if #available(iOS 13.0, *) {hookFilterSlider.maximumTrackTintColor = .tertiarySystemFill.resolvedColor(with: traits)}
         }
         hookFilterSlider.minimumValue = 1
@@ -670,7 +670,7 @@ class PressureCurveViewController: UIViewController, UIGestureRecognizerDelegate
         
         strokeEqualizationDepthLabel.font = UIFont.systemFont(ofSize: 14)
         strokeEqualizationDepthLabel.textColor = .black
-        if GenericUtils.liquidGlassEnabled {
+        if PublicUtils.liquidGlassEnabled {
             if #available(iOS 13.0, *) {strokeEqualizationDepthSlider.maximumTrackTintColor = .tertiarySystemFill.resolvedColor(with: traits)}
         }
         strokeEqualizationDepthSlider.minimumValue = 1
@@ -679,7 +679,7 @@ class PressureCurveViewController: UIViewController, UIGestureRecognizerDelegate
         
         strokeEqualizationStrengthLabel.font = UIFont.systemFont(ofSize: 14)
         strokeEqualizationStrengthLabel.textColor = .black
-        if GenericUtils.liquidGlassEnabled {
+        if PublicUtils.liquidGlassEnabled {
             if #available(iOS 13.0, *) {strokeEqualizationStrengthSlider.maximumTrackTintColor = .tertiarySystemFill.resolvedColor(with: traits)}
         }
         strokeEqualizationStrengthSlider.minimumValue = 0.1

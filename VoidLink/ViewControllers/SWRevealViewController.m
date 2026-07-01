@@ -1008,12 +1008,12 @@ const int FrontViewPositionNone = 0xff;
     [backButton setAction:@selector(foldRearView)];
     if (@available(iOS 13.0, *)) {
         [backButton setTitle:nil];
-        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:GenericUtils.liquidGlassEnabled ? 18 : 23 weight:UIImageSymbolWeightMedium];
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 18 : 23 weight:UIImageSymbolWeightMedium];
 
         UIImage *image = [[UIImage systemImageNamed:@"sidebar.left" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [backButton setImage:image];
-        backButton.imageInsets = GenericUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(20, 10, 0, 0);
-        if(GenericUtils.liquidGlassEnabled){
+        backButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(20, 10, 0, 0);
+        if(PublicUtils.liquidGlassEnabled){
             // if(@available(iOS 26.0, *)) backButton.hidesSharedBackground = YES;
             backButton.tintColor = ThemeManager.appPrimaryColor;
         }
@@ -1033,14 +1033,14 @@ const int FrontViewPositionNone = 0xff;
         [_disconnectButton setTitle:nil];
         UIImage *image;
         
-        if(GenericUtils.liquidGlassEnabled){
+        if(PublicUtils.liquidGlassEnabled){
             UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:16 weight:UIImageSymbolWeightSemibold];
             image = [[UIImage systemImageNamed:@"rectangle.portrait.and.arrow.right" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         }
         else image = [[UIImage imageNamed:@"disconnect.svg" ]  imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
 
         [_disconnectButton setImage:image];
-        if(GenericUtils.liquidGlassEnabled) _disconnectButton.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+        if(PublicUtils.liquidGlassEnabled) _disconnectButton.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5);
         
         _disconnectButton.tintColor = ThemeManager.appPrimaryColor;
     } else {
@@ -1061,12 +1061,12 @@ const int FrontViewPositionNone = 0xff;
     //[moreButton setAction:@selector(moreButtonTapped:)];
     if (@available(iOS 13.0, *)) {
         [_moreButton setTitle:nil];
-        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:GenericUtils.liquidGlassEnabled ? 18 : 23
-                                weight:GenericUtils.liquidGlassEnabled ? UIImageSymbolWeightMedium : UIImageSymbolWeightMedium];
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 18 : 23
+                                weight:PublicUtils.liquidGlassEnabled ? UIImageSymbolWeightMedium : UIImageSymbolWeightMedium];
         UIImage *image = [[UIImage systemImageNamed:@"ellipsis.circle" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_moreButton setImage:image];
-        _moreButton.imageInsets = GenericUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.75) : UIEdgeInsetsMake(20, 0, 0, -10);
-        if(GenericUtils.liquidGlassEnabled) _moreButton.tintColor = ThemeManager.appPrimaryColor;
+        _moreButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.75) : UIEdgeInsetsMake(20, 0, 0, -10);
+        if(PublicUtils.liquidGlassEnabled) _moreButton.tintColor = ThemeManager.appPrimaryColor;
     } else {
         [_moreButton setTitle:[LocalizationHelper localizedStringForKey:@"Options"]];
     }

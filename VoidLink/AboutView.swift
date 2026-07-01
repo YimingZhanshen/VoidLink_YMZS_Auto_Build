@@ -80,19 +80,19 @@ public struct AboutView: View {
                             Link(LocalizationHelper.localizedString(forKey: "加入QQ群"), destination: URL(string: LocalizationHelper.localizedString(forKey: "https://qm.qq.com/q/uM51CYWLS2"))!)
                         }
                     }
-                    if GenericUtils.isIPhone() {
+                    if PublicUtils.isIPhone {
                         Link(LocalizationHelper.localizedString(forKey: "joinCommunity"), destination: URL(string: LocalizationHelper.localizedString(forKey: "communityLink"))!)
                     }
                 }
                 .padding(.top, 10)
                 
-                if !GenericUtils.isIPhone() {
+                if !PublicUtils.isIPhone {
                     Link(LocalizationHelper.localizedString(forKey: "joinCommunity"), destination: URL(string: LocalizationHelper.localizedString(forKey: "communityLink"))!)
                 }
 
                 HStack(spacing: 15) {
                     if #available(iOS 15.0, *) {
-                        if GenericUtils.isIPad() {
+                        if PublicUtils.isIPad {
                             Button(LocalizationHelper.localizedString(forKey: "I'm an artist")) {
                                 IAPManager.checkPurchaseInfo(.PencilProPack) { info in
                                     if !info.valid {

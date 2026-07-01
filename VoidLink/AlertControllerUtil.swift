@@ -157,7 +157,7 @@ import UIKit
                     return
                 }
 
-                if GenericUtils.isRunningOnMacAsiPadApp && buttonTitle != "" {
+                if PublicUtils.isRunningOnMacAsiPadApp && buttonTitle != "" {
                     alertController.dismiss(animated: false) {
                         showAlert(
                             in: viewController,

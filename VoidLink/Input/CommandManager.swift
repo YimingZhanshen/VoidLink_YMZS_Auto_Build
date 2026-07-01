@@ -542,7 +542,7 @@ import UIKit
     @objc public func extractCmdStrings(from input: String) -> [String]? {
         var validCmdStrings: [String] = []
 
-        if GenericUtils.isGUIWidgetPickerAvailable {
+        if PublicUtils.isGUIWidgetPickerAvailable {
             let cmdStrings = input
                 .split(separator: "-")
                 .map { String($0) }

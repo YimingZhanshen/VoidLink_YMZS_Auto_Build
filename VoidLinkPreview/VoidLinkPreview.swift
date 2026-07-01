@@ -5,7 +5,7 @@ import SwiftUI
 struct VoidLinkPreview: App {
     var body: some Scene {
         WindowGroup {
-            WidgetPickerView()
+            RadialMenuDemoView()
         }
     }
 }

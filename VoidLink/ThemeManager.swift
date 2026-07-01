@@ -148,7 +148,7 @@ class ThemeManager: NSObject {
         case .light:
             if #available(iOS 13.0, *) {
                 let lightTraits = UITraitCollection(userInterfaceStyle: .light)
-                return GenericUtils.liquidGlassEnabled ? legacySepratorColor : UIColor.separator.resolvedColor(with: lightTraits)
+                return PublicUtils.liquidGlassEnabled ? legacySepratorColor : UIColor.separator.resolvedColor(with: lightTraits)
             } else {
                 return UIColor(
                     red: 214.0/255.0,
@@ -160,7 +160,7 @@ class ThemeManager: NSObject {
         default:
             if #available(iOS 13.0, *) {
                 let darkTraits = UITraitCollection(userInterfaceStyle: .dark)
-                return GenericUtils.liquidGlassEnabled ? legacySepratorColor : UIColor.separator.resolvedColor(with: darkTraits)
+                return PublicUtils.liquidGlassEnabled ? legacySepratorColor : UIColor.separator.resolvedColor(with: darkTraits)
             } else {return UIColor(white: 0.28, alpha: 1)}
         }
     }

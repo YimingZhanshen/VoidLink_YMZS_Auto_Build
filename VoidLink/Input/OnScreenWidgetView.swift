@@ -591,8 +591,8 @@ import ObjectiveC.runtime
         }
         if self.widgetType == .button {
             if self.isFolder || self.isFunctionalButton {
-                self.widthFactor = GenericUtils.isIPhone() ? 0.88 : 1.17
-                self.heightFactor = GenericUtils.isIPhone() ? 0.56 : 0.77
+                self.widthFactor = PublicUtils.isIPhone ? 0.88 : 1.17
+                self.heightFactor = PublicUtils.isIPhone ? 0.56 : 0.77
             }
         }
                 
@@ -2965,7 +2965,7 @@ import ObjectiveC.runtime
             if ["com.voidlink.iOS"
                 , "com.voidlinkextreme.iOS"
                 , "com.voidlink.tf.debug10.iOS"
-            ].contains(Bundle.main.bundleIdentifier) && GenericUtils.isIPad() {
+            ].contains(Bundle.main.bundleIdentifier) && PublicUtils.isIPad {
                 self.functionalWidgetDelegate?.presentPressureCurveVC()
             }
         case "DISABLETOUCH":
@@ -3423,7 +3423,7 @@ import ObjectiveC.runtime
     }
         
     // MARK: - Auto Dock
-    private static let autoDockExposedEdgeLength: CGFloat = GenericUtils.isIPhone() ? 70 : 90
+    private static let autoDockExposedEdgeLength: CGFloat = PublicUtils.isIPhone ? 70 : 90
     private static let autoDockExposedThickness: CGFloat = 17
     private static let autoDockVerticalInset: CGFloat = 12
     @objc var autoDockIdleDuration: TimeInterval = 0
@@ -3665,7 +3665,7 @@ import ObjectiveC.runtime
             self.frame = targetFrame
             self.transform = CGAffineTransform(scaleX: 0.985, y: 0.985)
             
-            if ControllerUtil.activeGCControllers.count > 0, !GenericUtils.iOS26Available {
+            if ControllerUtil.activeGCControllers.count > 0, !PublicUtils.iOS26Available {
                 self.parentViewController?.setNeedsUpdateOfHomeIndicatorAutoHidden()
             }
             

@@ -166,7 +166,7 @@ final class AbstractGamepadOverlayView: UIView {
     private var hideCloseButtonWorkItem: DispatchWorkItem?
     private let minWidth: CGFloat = 70
     private let maxWidth: CGFloat = 520
-    private let doubleTapWidths: [CGFloat] = [GenericUtils.isIPhone() ? 90 : 130, GenericUtils.isIPhone() ? 165 : 200]
+    private let doubleTapWidths: [CGFloat] = [PublicUtils.isIPhone ? 90 : 130, PublicUtils.isIPhone ? 165 : 200]
     private lazy var closeButton: UIButton = makeCloseButton()
     @objc weak var closeButtonDelegate: AbstractGamepadOverlayCloseButtonDelegate?
 

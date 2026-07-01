@@ -93,7 +93,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             streamConfig:(StreamConfiguration*)streamConfig
              gameProfile:(OSCProfile* )profile
  streamFrameTopLayerView:(UIView* )topLayerView{
-    if(!self.streamFrameVC) self.streamFrameVC = (StreamFrameViewController* )[GenericUtils parentViewControllerForView:self];
+    if(!self.streamFrameVC) self.streamFrameVC = (StreamFrameViewController* )[PublicUtils parentViewControllerForView:self];
     
     self->comboKeyModifierFlags = (UIKeyModifierControl|UIKeyModifierAlternate|UIKeyModifierShift);
 
@@ -129,7 +129,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     keyboardToggleTip.layer.cornerRadius = 10;
     keyboardToggleTip.clipsToBounds = true;
     
-    designatedSoftKeyboardHeight = settings.softKeyboardHeight * GenericUtils.screenHeight;
+    designatedSoftKeyboardHeight = settings.softKeyboardHeight * PublicUtils.screenHeight;
     keyboardHeightDesignatedForLandscape = designatedSoftKeyboardHeight != 0;
     
     // if(touchMode == NativeTouchOnly) [self addGestureRecognizer:keyboardToggleRecognizer]; //keep legacy approach in pure native mode
@@ -279,7 +279,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         NSDictionary *userInfo = notification.userInfo;
         // Get the keyboard size from the notification
         CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-        CGFloat screenHeight = GenericUtils.screenHeight;
+        CGFloat screenHeight = PublicUtils.screenHeight;
         CGFloat totalKeyboardHeight = keyboardFrame.size.height;
         CGFloat toolbarHeight = settings.showKeyboardToolbar ? GenericUtils.inputAccessoryBarHeight : 0;
         
@@ -299,7 +299,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         
         bool useDesignatedKeyboardHeight = false;
         if (@available(iOS 13.0, *)) {
-            useDesignatedKeyboardHeight = GenericUtils.isLandscape && keyboardHeightDesignatedForLandscape;
+            useDesignatedKeyboardHeight = PublicUtils.isLandscape && keyboardHeightDesignatedForLandscape;
             totalKeyboardHeight = useDesignatedKeyboardHeight ? designatedSoftKeyboardHeight+toolbarHeight : totalKeyboardHeight;
         }
         else {
@@ -307,7 +307,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             totalKeyboardHeight = useDesignatedKeyboardHeight ? designatedSoftKeyboardHeight+toolbarHeight : totalKeyboardHeight;
         }
         
-        HeightViewLiftedTo = totalKeyboardHeight - keyboardToggleRecognizer.lowestTouchPointHeight + GenericUtils.screenHeight * (useDesignatedKeyboardHeight ? 0.1 : 0.15); // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
+        HeightViewLiftedTo = totalKeyboardHeight - keyboardToggleRecognizer.lowestTouchPointHeight + PublicUtils.screenHeight * (useDesignatedKeyboardHeight ? 0.1 : 0.15); // lift the StreamView to the height of lowest touch point of multi-finger tap gesture, while reserving the view of 1/10 screen height for remote typing.
         if(HeightViewLiftedTo < 0) HeightViewLiftedTo = 0;  // set HeightViewLiftedTo to 0 if it is high enough and not going to be covered by keyboard.
         CGRect liftedStreamFrame = self.frame;
         liftedStreamFrame.origin.y -= HeightViewLiftedTo;
@@ -479,7 +479,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             UIBarButtonItem *deleteBarButton = [self createButtonWithImageNamed:@"DeleteIcon.png" backgroundColor:[UIColor blackColor] target:self action:@selector(toolbarButtonClicked:) keyCode:0x2E isToggleable:NO isDoneButton:false];
             UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
             [customToolbarView setItems:[NSArray arrayWithObjects:doneBarButton, windowsBarButton, escapeBarButton, tabBarButton, shiftBarButton, controlBarButton, altBarButton, deleteBarButton, flexibleSpace, nil]];
-            if (GenericUtils.liquidGlassEnabled) {
+            if (PublicUtils.liquidGlassEnabled) {
                 if (@available(iOS 26.0, *)) {
                     for(UIBarButtonItem *button in customToolbarView.items){
                         button.hidesSharedBackground = true;
@@ -695,7 +695,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         MotionHandler* motionHandler = [MotionHandler sharedWithProfile:profile];
         
         // get streamFrameVC
-        if(!self.streamFrameVC) self.streamFrameVC = (StreamFrameViewController* )[GenericUtils parentViewControllerForView:self];
+        if(!self.streamFrameVC) self.streamFrameVC = (StreamFrameViewController* )[PublicUtils parentViewControllerForView:self];
         
         /*
         if (@available(iOS 13.0, *)) {
@@ -1092,11 +1092,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     // [button setTitle:@"666" forState:UIControlStateNormal];
     [button setImage:image forState:UIControlStateNormal];
 
-    button.frame = GenericUtils.liquidGlassEnabled ? CGRectMake(0, 0, 30, 30) : CGRectMake(0, 0, 30, 30);
+    button.frame = PublicUtils.liquidGlassEnabled ? CGRectMake(0, 0, 30, 30) : CGRectMake(0, 0, 30, 30);
     button.imageView.contentMode = UIViewContentModeScaleAspectFit;
     button.imageView.backgroundColor = backgroundColor;
     button.imageView.layer.cornerRadius = 10.0;
-    button.imageEdgeInsets = (GenericUtils.liquidGlassEnabled
+    button.imageEdgeInsets = (PublicUtils.liquidGlassEnabled
                               ? (isDoneButton ? UIEdgeInsetsMake(16, 16, 16, 16) : UIEdgeInsetsMake(27.5, 27.5, 27.5, 27.5))
                               : UIEdgeInsetsMake(6, 6, 6, 6));
     [button addTarget:target action:action forControlEvents:UIControlEventTouchUpInside];
@@ -1114,7 +1114,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         isOn = !isOn;
         // Update the button's appearance based on its new state
         if (isOn) {
-            sender.imageView.backgroundColor = GenericUtils.liquidGlassEnabled ? [UIColor.systemGrayColor colorWithAlphaComponent:0.5] : [UIColor lightGrayColor];
+            sender.imageView.backgroundColor = PublicUtils.liquidGlassEnabled ? [UIColor.systemGrayColor colorWithAlphaComponent:0.5] : [UIColor lightGrayColor];
         } else {
             sender.imageView.backgroundColor = [UIColor blackColor];
         }

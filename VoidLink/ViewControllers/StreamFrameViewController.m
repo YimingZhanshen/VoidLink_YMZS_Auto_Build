@@ -802,7 +802,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     NSString* cmdToolEdgeSide = _settings.slideToSettingsScreenEdge.intValue == UIRectEdgeLeft ? [LocalizationHelper localizedStringForKey:@"right"] : [LocalizationHelper localizedStringForKey:@"left"];
     uint8_t slideDist = (uint8_t)(_settings.slideToSettingsDistance.floatValue * 100);
     // 创建弹窗
-    NSString* tipText = (GenericUtils.isRunningOnMacAsiPadApp
+    NSString* tipText = (PublicUtils.isRunningOnMacAsiPadApp
     ? [LocalizationHelper localizedStringForKey:@"keyboard&MouseStreamingTip"]
     : [LocalizationHelper localizedStringForKey:@"firstLaunchTip", settingsEdgeSide, slideDist, cmdToolEdgeSide, slideDist]);
     
@@ -814,7 +814,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
                                 countdown:16
                                    action:^{}
                                completion:^{
-        if(!GenericUtils.isRunningOnMacAsiPadApp && GenericUtils.isHardwareKeyboardConnected) [self popKeyboardAndMouseStreamingTip];
+        if(!PublicUtils.isRunningOnMacAsiPadApp && GenericUtils.isHardwareKeyboardConnected) [self popKeyboardAndMouseStreamingTip];
     }];
     
     return;
@@ -1476,7 +1476,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
-    if(!GenericUtils.isIPhone){
+    if(!PublicUtils.isIPhone){
         for(OnScreenWidgetView* widget in OnScreenWidgetView.mapping.allValues){
             if(widget.parentSequence != -1 && !widget.autoDockEnabled) continue;
             if(widget.autoDockEnabled){
@@ -2237,7 +2237,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
         // CGFloat maxWidth = MIN(CGRectGetWidth(self.view.bounds) * 0.72, 620);
         // CGFloat standardWidth = MAX(420, maxWidth);
         
-        CGFloat standardWidth = GenericUtils.isIPhone ? 165 : 200;
+        CGFloat standardWidth = PublicUtils.isIPhone ? 165 : 200;
         
         CGFloat standardhHeight = standardWidth / 1.82;
         CGRect overlayFrame = CGRectMake(0, 0, standardWidth, standardhHeight);

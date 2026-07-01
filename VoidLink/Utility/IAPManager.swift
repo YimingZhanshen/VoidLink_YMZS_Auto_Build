@@ -207,7 +207,7 @@ import UIKit
     private func purchaseStoreKit2(_ product: AddOnProduct) async {
         guard IAPManager.canPurchase(product) else {
             AlertControllerUtil.showAlert(
-                in: GenericUtils.topViewController(),
+                in: PublicUtils.topViewController(),
                 title: "In-app-purchase not available".localized,
                 message: "In-app-purchase not available on this device.".localized,
                 withCancel: false,
@@ -241,7 +241,7 @@ import UIKit
     private static func canPurchase(_ product: AddOnProduct) -> Bool {
         switch product {
         case .PencilProPack:
-            return GenericUtils.isIPad()
+            return PublicUtils.isIPad
         default:
             return true
         }
@@ -275,7 +275,7 @@ import UIKit
     @objc static func handlePurchaseSuccess(_ product: AddOnProduct) {
         switch product {
         case .PencilProPack:
-            if !GenericUtils.isIPad() {return}
+            if !PublicUtils.isIPad {return}
             let dataMan = DataManager()
             let settings = dataMan.retrieveSettings()
             settings?.onscreenControls = 1
@@ -450,7 +450,7 @@ import UIKit
         
         let learnMoreAction = UIAlertAction(title: LocalizationHelper.localizedString(forKey: "Learn More"), style: .default) { _ in
             NotificationCenter.default.post(name: product.purchaseAbortedNotification(), object: PurchaseInterruption.learnMore, userInfo:["interruption": PurchaseInterruption.learnMore.rawValue])
-            GenericUtils.openUrl(product.productURL())
+            PublicUtils.openUrl(product.productURL())
             return
         }
 

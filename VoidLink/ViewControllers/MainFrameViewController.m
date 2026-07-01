@@ -724,7 +724,7 @@ static NSMutableSet* hostList;
 
 - (void) addHostTapped {
     Log(LOG_D, @"Tapped add host");
-    GenericUtils.autoPopSoftKeyboard = !GenericUtils.isIPhone;
+    GenericUtils.autoPopSoftKeyboard = !PublicUtils.isIPhone;
     UIAlertController* alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey:@"Add Host Manually"]
                                                                              message:[LocalizationHelper localizedStringForKey:@"Enter IP address to add host manually"]
                                                                       preferredStyle:UIAlertControllerStyleAlert];
@@ -1456,7 +1456,7 @@ static NSMutableSet* hostList;
 - (UIBarButtonItem *)createAddHostButton{
     // 创建按钮
     
-    bool liquidGlassEnabled = GenericUtils.liquidGlassEnabled;
+    bool liquidGlassEnabled = PublicUtils.liquidGlassEnabled;
     // bool liquidGlassEnabled = false;
 
     CGFloat buttonHeight = 30;
@@ -1519,7 +1519,7 @@ static NSMutableSet* hostList;
     // 设置图标（SF Symbol）
     if (@available(iOS 13.0, *)) {
         UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:
-                                             GenericUtils.liquidGlassEnabled ? buttonHeight*0.73 : buttonHeight*0.85
+                                             PublicUtils.liquidGlassEnabled ? buttonHeight*0.73 : buttonHeight*0.85
                                             weight:UIImageSymbolWeightRegular];
         UIImage *image = [UIImage systemImageNamed:@"questionmark.circle" withConfiguration:config];
         [button setImage:image forState:UIControlStateNormal];
@@ -1585,7 +1585,7 @@ static NSMutableSet* hostList;
 
     self->_addHostButton = [self createAddHostButton];
     self->_helpButton = [self createHelpButton];
-    if (GenericUtils.liquidGlassEnabled) {
+    if (PublicUtils.liquidGlassEnabled) {
         if (@available(iOS 26.0, *)) {
             // _addHostButton.hidesSharedBackground = true;
             // _helpButton.hidesSharedBackground = true;
@@ -1603,11 +1603,11 @@ static NSMutableSet* hostList;
     [_settingsButton setAction:@selector(revealToggle:)];
     if (@available(iOS 13.0, *)) {
         [_settingsButton setTitle:nil];
-        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:GenericUtils.liquidGlassEnabled ? 18 : 23 weight:UIImageSymbolWeightMedium ];
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 18 : 23 weight:UIImageSymbolWeightMedium ];
         UIImage *image = [[UIImage systemImageNamed:@"sidebar.left" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_settingsButton setImage:image];
-        _settingsButton.imageInsets = GenericUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(10, 10, 0, 0);
-        if(GenericUtils.liquidGlassEnabled){
+        _settingsButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(10, 10, 0, 0);
+        if(PublicUtils.liquidGlassEnabled){
             // if(@available(iOS 26.0, *)) _settingsButton.hidesSharedBackground = YES;
             _settingsButton.tintColor = ThemeManager.appPrimaryColor;
         }
@@ -1622,12 +1622,12 @@ static NSMutableSet* hostList;
         
         UIImageSymbolConfiguration *config;
         UIImage *image;
-        if(GenericUtils.iOS18Available){
-            config = [UIImageSymbolConfiguration configurationWithPointSize:GenericUtils.liquidGlassEnabled ? 20.5 : 23 weight:UIImageSymbolWeightRegular ];
+        if(PublicUtils.iOS18Available){
+            config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 20.5 : 23 weight:UIImageSymbolWeightRegular ];
             image = [[UIImage systemImageNamed: @"gamecontroller.circle" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             [_profilesButton setImage:image];
-            _profilesButton.imageInsets = GenericUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(10, 10, 0, 0);
-            if(GenericUtils.liquidGlassEnabled){
+            _profilesButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(10, 10, 0, 0);
+            if(PublicUtils.liquidGlassEnabled){
                 _profilesButton.tintColor = ThemeManager.appPrimaryColor;
             }
         }
@@ -1656,10 +1656,10 @@ static NSMutableSet* hostList;
     
     if (@available(iOS 13.0, *)) {
         [_upButton setTitle:@""];
-        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:GenericUtils.liquidGlassEnabled ? 16 : 21.5 weight:UIImageSymbolWeightMedium];
-        UIImage *image = [[UIImage systemImageNamed:GenericUtils.liquidGlassEnabled ? @"macwindow.on.rectangle" : @"tv" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 16 : 21.5 weight:UIImageSymbolWeightMedium];
+        UIImage *image = [[UIImage systemImageNamed:PublicUtils.liquidGlassEnabled ? @"macwindow.on.rectangle" : @"tv" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_upButton setImage:image];
-        _upButton.imageInsets = GenericUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 1) : UIEdgeInsetsMake(25, 20, 0, 15);
+        _upButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 1) : UIEdgeInsetsMake(25, 20, 0, 15);
     } else {
         [_upButton setTitle:[LocalizationHelper localizedStringForKey:@"Select New Host"]];
     }
@@ -1686,7 +1686,7 @@ static NSMutableSet* hostList;
     
     _settingsButton.tintColor = ThemeManager.appPrimaryColor;
     _upButton.tintColor = ThemeManager.appPrimaryColor;
-    ((UIButton*)_addHostButton.customView).backgroundColor = GenericUtils.liquidGlassEnabled ? UIColor.clearColor : ThemeManager.appPrimaryColor;
+    ((UIButton*)_addHostButton.customView).backgroundColor = PublicUtils.liquidGlassEnabled ? UIColor.clearColor : ThemeManager.appPrimaryColor;
     ((UIButton*)_helpButton.customView).tintColor = ThemeManager.appPrimaryColor;
 
     [self applyNavBarAppearance];

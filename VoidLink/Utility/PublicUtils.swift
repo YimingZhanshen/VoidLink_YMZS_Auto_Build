@@ -58,6 +58,11 @@ import UIKit
         }
     }()
     
+    @objc public static let isIAPAddonAvailable: Bool = {
+        let availableBundleIds = ["com.voidlink.iOS", "com.voidlinkextreme.iOS", "com.voidlink.tf.debug10.iOS"]
+        return availableBundleIds.contains(Bundle.main.bundleIdentifier ?? "")
+    }()
+    
     @objc public static func isLandscape() -> Bool {
         if #available(iOS 13.0, *) {
             guard let windowScene = UIApplication.shared.connectedScenes

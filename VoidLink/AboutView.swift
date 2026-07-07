@@ -92,7 +92,7 @@ public struct AboutView: View {
 
                 HStack(spacing: 15) {
                     if #available(iOS 15.0, *) {
-                        if PublicUtils.isIPad {
+                        if PublicUtils.isIPad, PublicUtils.isIAPAddonAvailable {
                             Button(LocalizationHelper.localizedString(forKey: "I'm an artist")) {
                                 IAPManager.checkPurchaseInfo(.PencilProPack) { info in
                                     if !info.valid {

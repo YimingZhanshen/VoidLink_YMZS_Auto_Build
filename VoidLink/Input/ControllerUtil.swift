@@ -166,7 +166,7 @@ import Foundation
         return result
     }
     
-    @objc static var activeGCControllers:NSMutableSet = NSMutableSet()
+    @objc static var activeStreamingGCControllers:NSMutableSet = NSMutableSet()
     
     @objc static func string(for button: ControllerButton) -> String {
         switch button {

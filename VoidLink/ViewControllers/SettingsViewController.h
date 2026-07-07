@@ -13,7 +13,7 @@
 #import "AppDelegate.h"
 #import "MainFrameViewController.h"
 #import "CustomEdgeSlideGestureRecognizer.h"
-#import "MenuSectionView.h"
+#import "VoidLink-Swift.h"
 
 @class LayoutOnScreenControlsViewController;
 @class MicHandler;
@@ -102,7 +102,7 @@
 @property (strong, nonatomic) IBOutlet UISlider *mousePointerVelocityFactorSlider;
 @property (strong, nonatomic) IBOutlet UILabel *mousePointerVelocityFactorUILabel;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *unlockDisplayOrientationSelector;
-@property (strong, nonatomic) LayoutOnScreenControlsViewController *layoutOnScreenControlsVC;
+@property (weak, nonatomic) LayoutOnScreenControlsViewController *layoutOnScreenControlsVC;
 @property (nonatomic, strong) MainFrameViewController *mainFrameViewController;
 
 @property (strong, nonatomic) IBOutlet UISegmentedControl *externalDisplayModeSelector;
@@ -319,6 +319,6 @@
 - (void)hideDynamicLabelsWhenOverlapped:(UIView* )view;
 - (void)setHidden:(BOOL)hidden forStack:(UIStackView* )stack;
 - (void)updateCodecDependentSwitches;
-- (void)mainFrameGameProfileButtonTapped;
+- (void)mainFrameGameProfileButtonTapped:(bool)animated;
 
 @end

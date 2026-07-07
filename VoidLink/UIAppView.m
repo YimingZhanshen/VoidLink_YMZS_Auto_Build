@@ -34,6 +34,7 @@ static UIImage* noImage;
     _artCache = cache;
     
     self.layer.cornerRadius = 16;
+    if (@available(iOS 13.0, *)) self.layer.cornerCurve = kCACornerCurveContinuous;
     self.clipsToBounds = YES;
     
     // Cache the NoAppImage ourselves to avoid

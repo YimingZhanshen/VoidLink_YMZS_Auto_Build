@@ -25,7 +25,7 @@
 		1888C1932E24C41000108730 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1888C1902E24C2C800108730 /* AboutView.swift */; };
 		188973D32E386A670025E48C /* widgetTemplatesIPhone.bin in Resources */ = {isa = PBXBuildFile; fileRef = 188973D22E386A670025E48C /* widgetTemplatesIPhone.bin */; };
 		18951D1D2EBB6D2300A86E12 /* TouchPadGestureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18951D1C2EBB6D2300A86E12 /* TouchPadGestureHandler.swift */; };
-		189AD29A2DE7446000E24B88 /* HostCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 189AD2992DE7446000E24B88 /* HostCollectionViewController.m */; };
+		189AD29A2DE7446000E24B88 /* HostCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 189AD2992DE7446000E24B88 /* HostCollectionViewController.swift */; };
 		18A0EE252EFB9B5A00BA853A /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = 18A0EE242EFB9B5A00BA853A /* SVGKit */; };
 		18A0EE272EFB9B5A00BA853A /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 18A0EE262EFB9B5A00BA853A /* SVGKitSwift */; };
 		18A0EE2C2EFBCCFD00BA853A /* GraphicUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A0EE2B2EFBCCFD00BA853A /* GraphicUtils.swift */; };
@@ -63,8 +63,8 @@
 		8454AC662C31907F00F0A302 /* iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8454AC682C31907F00F0A302 /* iPad.storyboard */; };
 		8454AC6A2C319BDA00F0A302 /* iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8454AC6C2C319BDA00F0A302 /* iPhone.storyboard */; };
 		84591A512BE1625E006AAB10 /* CustomEdgeSlideGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 84591A502BE1625E006AAB10 /* CustomEdgeSlideGestureRecognizer.m */; };
-		847D2FDB2DDA015F00937A62 /* MenuSectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 847D2FDA2DDA015F00937A62 /* MenuSectionView.m */; };
-		848F456A2DDCD12500581E36 /* HostCardView.m in Sources */ = {isa = PBXBuildFile; fileRef = 848F45692DDCD12500581E36 /* HostCardView.m */; };
+		847D2FDB2DDA015F00937A62 /* MenuSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D2FDA2DDA015F00937A62 /* MenuSectionView.swift */; };
+		848F456A2DDCD12500581E36 /* HostCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848F45692DDCD12500581E36 /* HostCardView.swift */; };
 		84E1CDEC2C4F67D300547904 /* CommandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1CDEB2C4F67D300547904 /* CommandManager.swift */; };
 		84E1CDEF2C4F688E00547904 /* ToolboxViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1CDEE2C4F688E00547904 /* ToolboxViewController.swift */; };
 		84E1CDFA2C4FE83400547904 /* LocalizationHelperExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1CDF92C4FE83400547904 /* LocalizationHelperExtension.swift */; };
@@ -107,6 +107,8 @@
 		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
 		A1900E012F9A100100BA853A /* InputAccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1900E002F9A100100BA853A /* InputAccessoryBar.swift */; };
 		A1B2C3D42F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D32F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift */; };
+		A1C0DE012FBC000100000001 /* ControllerNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE002FBC000100000001 /* ControllerNavigator.swift */; };
+		A1C0DE032FBC000100000001 /* RadialMenuOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE022FBC000100000001 /* RadialMenuOverlayView.swift */; };
 		DC1F5A07206436B20037755F /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
 		F74BEF9C2C1A705600224667 /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEF9B2C1A705600224667 /* OpenSSL */; };
 		FB1A674D2131E65900507771 /* KeyboardSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = FB1A674C2131E65900507771 /* KeyboardSupport.m */; };
@@ -200,8 +202,7 @@
 		1888C1912E24C33100108730 /* AboutViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		188973D22E386A670025E48C /* widgetTemplatesIPhone.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; name = widgetTemplatesIPhone.bin; path = PresetConfigs/widgetTemplatesIPhone.bin; sourceTree = "<group>"; };
 		18951D1C2EBB6D2300A86E12 /* TouchPadGestureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchPadGestureHandler.swift; sourceTree = "<group>"; };
-		189AD2962DE743B700E24B88 /* HostCollectionViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HostCollectionViewController.h; sourceTree = "<group>"; };
-		189AD2992DE7446000E24B88 /* HostCollectionViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostCollectionViewController.m; sourceTree = "<group>"; };
+		189AD2992DE7446000E24B88 /* HostCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCollectionViewController.swift; sourceTree = "<group>"; };
 		18A0EE2B2EFBCCFD00BA853A /* GraphicUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicUtils.swift; sourceTree = "<group>"; };
 		18A765BC2ECD51FB004784AA /* ControllerUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerUtil.swift; sourceTree = "<group>"; };
 		18B317022EE67A39009B62C2 /* InertialScroller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InertialScroller.swift; sourceTree = "<group>"; };
@@ -244,10 +245,8 @@
 		8454AC6D2C319BDA00F0A302 /* mul */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = mul; path = mul.lproj/iPhone.xcstrings; sourceTree = "<group>"; };
 		84591A4F2BE16240006AAB10 /* CustomEdgeSlideGestureRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomEdgeSlideGestureRecognizer.h; sourceTree = "<group>"; };
 		84591A502BE1625E006AAB10 /* CustomEdgeSlideGestureRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomEdgeSlideGestureRecognizer.m; sourceTree = "<group>"; };
-		847D2FD82DDA00C800937A62 /* MenuSectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MenuSectionView.h; sourceTree = "<group>"; };
-		847D2FDA2DDA015F00937A62 /* MenuSectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MenuSectionView.m; sourceTree = "<group>"; };
-		848F45682DDCD0D600581E36 /* HostCardView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HostCardView.h; sourceTree = "<group>"; };
-		848F45692DDCD12500581E36 /* HostCardView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostCardView.m; sourceTree = "<group>"; };
+		847D2FDA2DDA015F00937A62 /* MenuSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuSectionView.swift; sourceTree = "<group>"; };
+		848F45692DDCD12500581E36 /* HostCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCardView.swift; sourceTree = "<group>"; };
 		84D8EB932C5146AD00FC10A9 /* VoidLink-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "VoidLink-Bridging-Header.h"; sourceTree = "<group>"; };
 		84E1CDEB2C4F67D300547904 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; };
 		84E1CDEE2C4F688E00547904 /* ToolboxViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolboxViewController.swift; sourceTree = "<group>"; };
@@ -326,6 +325,8 @@
 		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
 		A1900E002F9A100100BA853A /* InputAccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputAccessoryBar.swift; sourceTree = "<group>"; };
 		A1B2C3D32F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractGamepadOverlayWidgetView.swift; sourceTree = "<group>"; };
+		A1C0DE002FBC000100000001 /* ControllerNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerNavigator.swift; sourceTree = "<group>"; };
+		A1C0DE022FBC000100000001 /* RadialMenuOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialMenuOverlayView.swift; sourceTree = "<group>"; };
 		A1D4E0A22FBBBBCC00112233 /* OSCProfilesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCProfilesManager.swift; sourceTree = "<group>"; };
 		DC1F5A05206436B10037755F /* ConnectionHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionHelper.h; sourceTree = "<group>"; };
 		DC1F5A06206436B20037755F /* ConnectionHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionHelper.m; sourceTree = "<group>"; };
@@ -695,11 +696,9 @@
 				18341A022DEB65AB0094E5F2 /* FixedTintImageView.h */,
 				18341A032DEB662C0094E5F2 /* FixedTintImageView.m */,
 				FB290D0319B2C406004C83CF /* AppDelegate.m */,
-				848F45682DDCD0D600581E36 /* HostCardView.h */,
-				848F45692DDCD12500581E36 /* HostCardView.m */,
+				848F45692DDCD12500581E36 /* HostCardView.swift */,
 				2A7113FC2F5A6C65001D852D /* ThemeManager.swift */,
-				847D2FD82DDA00C800937A62 /* MenuSectionView.h */,
-				847D2FDA2DDA015F00937A62 /* MenuSectionView.m */,
+				847D2FDA2DDA015F00937A62 /* MenuSectionView.swift */,
 				FBDE86E419F82297001C18A8 /* UIAppView.h */,
 				FBDE86E519F82297001C18A8 /* UIAppView.m */,
 				180E6E362E93BFDB0067C73A /* AlertControllerUtil.swift */,
@@ -779,6 +778,8 @@
 				18B317022EE67A39009B62C2 /* InertialScroller.swift */,
 				18951D1C2EBB6D2300A86E12 /* TouchPadGestureHandler.swift */,
 				18A765BC2ECD51FB004784AA /* ControllerUtil.swift */,
+				A1C0DE002FBC000100000001 /* ControllerNavigator.swift */,
+				A1C0DE022FBC000100000001 /* RadialMenuOverlayView.swift */,
 				1850C8292E667E4000845308 /* MicHandler.swift */,
 				18E4BCE92E891895000A8657 /* MotionHandler.swift */,
 				84E1CDEB2C4F67D300547904 /* CommandManager.swift */,
@@ -860,8 +861,7 @@
 				FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */,
 				FB89462419F646E200339C8A /* MainFrameViewController.h */,
 				FB89462519F646E200339C8A /* MainFrameViewController.m */,
-				189AD2962DE743B700E24B88 /* HostCollectionViewController.h */,
-				189AD2992DE7446000E24B88 /* HostCollectionViewController.m */,
+				189AD2992DE7446000E24B88 /* HostCollectionViewController.swift */,
 				FB89462619F646E200339C8A /* StreamFrameViewController.h */,
 				FB89462719F646E200339C8A /* StreamFrameViewController.m */,
 				FBD3494E19FF2174002D2A60 /* SettingsViewController.h */,
@@ -1166,11 +1166,13 @@
 				97E21BC22E21882D000D5DCA /* imgui.cpp in Sources */,
 				97E21BC32E21882D000D5DCA /* imgui_draw.cpp in Sources */,
 				18A765BD2ECD51FB004784AA /* ControllerUtil.swift in Sources */,
+				A1C0DE012FBC000100000001 /* ControllerNavigator.swift in Sources */,
+				A1C0DE032FBC000100000001 /* RadialMenuOverlayView.swift in Sources */,
 				84E1CDEC2C4F67D300547904 /* CommandManager.swift in Sources */,
-				847D2FDB2DDA015F00937A62 /* MenuSectionView.m in Sources */,
+				847D2FDB2DDA015F00937A62 /* MenuSectionView.swift in Sources */,
 				18A0EE2C2EFBCCFD00BA853A /* GraphicUtils.swift in Sources */,
 				FB53E1431BE5DC4400CD6ECE /* IdManager.m in Sources */,
-				189AD29A2DE7446000E24B88 /* HostCollectionViewController.m in Sources */,
+				189AD29A2DE7446000E24B88 /* HostCollectionViewController.swift in Sources */,
 				9897B6A1221260EF00966419 /* VoidController.m in Sources */,
 				84351B112C29ACCB00A77989 /* OSCProfilesManager.swift in Sources */,
 				FB89462919F646E200339C8A /* mkcert.c in Sources */,
@@ -1203,7 +1205,7 @@
 				FB89463519F646E200339C8A /* MainFrameViewController.m in Sources */,
 				FBD1C8E21A8AD71400C6703C /* Logger.m in Sources */,
 				FB1D599A1BBCCD7E00F482CA /* AppCollectionView.m in Sources */,
-				848F456A2DDCD12500581E36 /* HostCardView.m in Sources */,
+				848F456A2DDCD12500581E36 /* HostCardView.swift in Sources */,
 				FB89463619F646E200339C8A /* StreamFrameViewController.m in Sources */,
 				9827E7A32514366900F25707 /* HapticContext.m in Sources */,
 				9832D1361BBCD5C50036EF48 /* TemporaryApp.m in Sources */,

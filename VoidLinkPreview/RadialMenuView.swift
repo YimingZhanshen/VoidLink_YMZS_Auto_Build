@@ -10,17 +10,26 @@ import SwiftUI
 import Combine
 import UIKit
 
+public enum RadialMenuItem {
+    case settings
+    case hostView
+    case gameProfiles
+    case exit
+}
+
 @available(iOS 13.0, *)
-struct RadialMenuItem: Identifiable, Equatable {
+struct RadialMenuSector: Identifiable, Equatable {
     let id = UUID()
     let title: String
     let subtitle: String
     let systemImageName: String
+    let item: RadialMenuItem
 
-    init(title: String, subtitle: String, systemImageName: String) {
+    init(title: String, subtitle: String, systemImageName: String, item: RadialMenuItem) {
         self.title = title
         self.subtitle = subtitle
         self.systemImageName = systemImageName
+        self.item = item
     }
 }
 
@@ -85,9 +94,9 @@ final class RadialMenuSelectionState: ObservableObject {
             return nil
         }
 
-        let clockwiseDegreesFromTop = positiveRemainder(atan2(Double(x), Double(y)) * 180 / .pi, 360)
+        let clockwiseDegreesFromWest = positiveRemainder(atan2(Double(y), -Double(x)) * 180 / .pi, 360)
         let segmentDegrees = 360 / Double(itemCount)
-        let centeredDegrees = positiveRemainder(clockwiseDegreesFromTop + segmentDegrees / 2, 360)
+        let centeredDegrees = positiveRemainder(clockwiseDegreesFromWest + segmentDegrees / 2, 360)
         return min(Int(centeredDegrees / segmentDegrees), itemCount - 1)
     }
 
@@ -99,7 +108,7 @@ final class RadialMenuSelectionState: ObservableObject {
 
 @available(iOS 13.0, *)
 struct RadialMenuView: View {
-    let items: [RadialMenuItem]
+    let sectors: [RadialMenuSector]
     var selectedIndex: Int?
     var isTouchSelectionEnabled: Bool
     var style: RadialMenuStyle
@@ -119,31 +128,31 @@ struct RadialMenuView: View {
         return selectedIndex
     }
 
-    private var selectedItem: RadialMenuItem? {
+    private var selectedItem: RadialMenuSector? {
         guard let selectedIndex = effectiveSelectedIndex,
-              items.indices.contains(selectedIndex) else {
-            return items.first
+              sectors.indices.contains(selectedIndex) else {
+            return sectors.first
         }
-        return items[selectedIndex]
+        return sectors[selectedIndex]
     }
 
     init(
-        items: [RadialMenuItem],
+        sectors: [RadialMenuSector],
         selectedIndex: Int? = nil,
         isTouchSelectionEnabled: Bool = true,
         style: RadialMenuStyle = RadialMenuStyle(),
         selectionState: RadialMenuSelectionState = RadialMenuSelectionState()
     ) {
-        self.items = items
+        self.sectors = sectors
         self.selectedIndex = selectedIndex
         self.isTouchSelectionEnabled = isTouchSelectionEnabled
         self.style = style
         self.joystickSelectionState = selectionState
-        self.joystickSelectionState.configureItemCount(items.count)
+        self.joystickSelectionState.configureItemCount(sectors.count)
     }
 
     func updateSelection(xOffset: Float, yOffset: Float) {
-        joystickSelectionState.configureItemCount(items.count)
+        joystickSelectionState.configureItemCount(sectors.count)
         joystickSelectionState.updateSelection(xOffset: xOffset, yOffset: yOffset)
     }
 
@@ -155,10 +164,10 @@ struct RadialMenuView: View {
             let innerRadius = outerRadius * (1 - style.ringWidthRatio)
 
             ZStack {
-                ForEach(items.indices, id: \.self) { index in
+                ForEach(sectors.indices, id: \.self) { index in
                     RadialMenuSegmentShape(
                         index: index,
-                        count: items.count,
+                        count: sectors.count,
                         innerRadiusRatio: 1 - style.ringWidthRatio,
                         gapWidth: style.segmentGapWidth
                     )
@@ -166,7 +175,7 @@ struct RadialMenuView: View {
                     .overlay(
                         RadialMenuSegmentShape(
                             index: index,
-                            count: items.count,
+                            count: sectors.count,
                             innerRadiusRatio: 1 - style.ringWidthRatio,
                             gapWidth: style.segmentGapWidth
                         )
@@ -181,13 +190,13 @@ struct RadialMenuView: View {
                     .frame(width: innerRadius * 2, height: innerRadius * 2)
                     .shadow(color: style.shadowColor, radius: 10, x: 0, y: 3)
 
-                ForEach(items.indices, id: \.self) { index in
-                    let item = items[index]
+                ForEach(sectors.indices, id: \.self) { index in
+                    let item = sectors[index]
                     Image(systemName: item.systemImageName)
                         .font(.system(size: max(diameter * style.segmentIconScale, 18), weight: .medium))
                         .foregroundColor(index == effectiveSelectedIndex ? style.selectedIconColor : style.iconColor)
                         .scaleEffect(index == effectiveSelectedIndex ? 1.18 : 1)
-                        .position(iconPosition(index: index, count: items.count, center: center, radius: (outerRadius + innerRadius) / 2))
+                        .position(iconPosition(index: index, count: sectors.count, center: center, radius: (outerRadius + innerRadius) / 2))
                         .animation(.spring(response: 0.24, dampingFraction: 0.72), value: effectiveSelectedIndex)
                 }
 
@@ -218,7 +227,7 @@ struct RadialMenuView: View {
     }
 
     private func index(for location: CGPoint, center: CGPoint, innerRadius: CGFloat, outerRadius: CGFloat) -> Int? {
-        guard !items.isEmpty else { return nil }
+        guard !sectors.isEmpty else { return nil }
 
         let dx = location.x - center.x
         let dy = location.y - center.y
@@ -227,17 +236,16 @@ struct RadialMenuView: View {
             return nil
         }
 
-        let rawDegrees = atan2(dy, dx) * 180 / .pi
-        let clockwiseDegreesFromTop = positiveRemainder(rawDegrees + 450, 360)
-        let segmentDegrees = 360 / Double(items.count)
-        let centeredDegrees = positiveRemainder(clockwiseDegreesFromTop + segmentDegrees / 2, 360)
-        return min(Int(centeredDegrees / segmentDegrees), items.count - 1)
+        let clockwiseDegreesFromWest = positiveRemainder(atan2(Double(-dy), Double(-dx)) * 180 / Double.pi, 360)
+        let segmentDegrees = 360 / Double(sectors.count)
+        let centeredDegrees = positiveRemainder(clockwiseDegreesFromWest + segmentDegrees / 2, 360)
+        return min(Int(centeredDegrees / segmentDegrees), sectors.count - 1)
     }
 
     private func iconPosition(index: Int, count: Int, center: CGPoint, radius: CGFloat) -> CGPoint {
         guard count > 0 else { return center }
         let segmentDegrees = 360 / Double(count)
-        let angleDegrees = -90 + Double(index) * segmentDegrees
+        let angleDegrees = 180 + Double(index) * segmentDegrees
         let radians = angleDegrees * .pi / 180
         return CGPoint(
             x: center.x + CGFloat(cos(radians)) * radius,
@@ -253,7 +261,7 @@ struct RadialMenuView: View {
 
 @available(iOS 13.0, *)
 private struct RadialMenuCenterView: View {
-    let item: RadialMenuItem?
+    let item: RadialMenuSector?
     let style: RadialMenuStyle
     let diameter: CGFloat
 
@@ -298,7 +306,7 @@ private struct RadialMenuSegmentShape: Shape {
         let outerRadius = min(rect.width, rect.height) / 2
         let innerRadius = outerRadius * innerRadiusRatio
         let segmentDegrees = 360 / Double(count)
-        let centerDegrees = -90 + Double(index) * segmentDegrees
+        let centerDegrees = 180 + Double(index) * segmentDegrees
         let startBoundaryDegrees = centerDegrees - segmentDegrees / 2
         let endBoundaryDegrees = centerDegrees + segmentDegrees / 2
         let halfGap = min(gapWidth / 2, max(innerRadius - 1, 0))
@@ -379,19 +387,20 @@ struct RadialMenuDemoView: View {
     @SwiftUI.State private var isTouchSelectionEnabled = true
 
     static let menuItems = [
-        RadialMenuItem(title: "Settings Menu".localized, subtitle: "", systemImageName: "sidebar.left"),
-        RadialMenuItem(title: "Host View".localized, subtitle: "", systemImageName: PublicUtils.liquidGlassEnabled ? "macwindow.on.rectangle" : "tv"),
-        RadialMenuItem(title: "Game Profiles".localized, subtitle: "", systemImageName: "gamecontroller.circle"),
+        RadialMenuSector(title: "Settings Menu".localized, subtitle: "", systemImageName: "sidebar.left", item: .settings),
+        RadialMenuSector(title: "Host View".localized, subtitle: "", systemImageName: PublicUtils.liquidGlassEnabled ? "macwindow.on.rectangle" : "tv", item: .hostView),
+        RadialMenuSector(title: "Game Profiles".localized, subtitle: "", systemImageName: "gamecontroller.circle", item: .gameProfiles),
+        RadialMenuSector(title: "Exit/Disconnect".localized, subtitle: "", systemImageName: "personalhotspot.slash", item: .gameProfiles),
     ]
 
-    private var visibleItems: [RadialMenuItem] {
+    private var visibleItems: [RadialMenuSector] {
         Array(Self.menuItems.prefix(itemCount))
     }
 
     var body: some View {
         VStack(spacing: 28) {
             RadialMenuView(
-                items: visibleItems,
+                sectors: visibleItems,
                 selectedIndex: isTouchSelectionEnabled ? nil : 2,
                 isTouchSelectionEnabled: isTouchSelectionEnabled
             )
@@ -421,7 +430,7 @@ struct RadialMenuView_Previews: PreviewProvider {
                 .previewLayout(.sizeThatFits)
 
             RadialMenuView(
-                items: Array(RadialMenuDemoView.menuItems.prefix(6)),
+                sectors: Array(RadialMenuDemoView.menuItems.prefix(6)),
                 selectedIndex: 1,
                 isTouchSelectionEnabled: false
             )

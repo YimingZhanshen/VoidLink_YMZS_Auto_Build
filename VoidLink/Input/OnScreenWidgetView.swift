@@ -65,6 +65,7 @@ import ObjectiveC.runtime
         func setAllowSingleTouchEnabled(_ enabled:Bool)
         func replaceBrush(shortcut:String)
         func replaceEraser(shortcut:String)
+        func setPencilTilt(disabled:Bool)
         func presentPressureCurveVC()
         func toggleTouch(disabled:Bool)
         func toggleGamepadOverlay(overlayEnabled:Bool)
@@ -491,9 +492,9 @@ import ObjectiveC.runtime
 
         // print("widgetType: \(self.widgetType)")
         // print("touchPadString: \(self.touchPadString)")
-        for comboButtonString in comboButtonStrings {
+        // for comboButtonString in comboButtonStrings {
             // print("comboButtonString: \(comboButtonString)")
-        }
+        // }
         
         self.widgetLabel = buttonLabel
         self.shape = shape
@@ -670,7 +671,8 @@ import ObjectiveC.runtime
          && (buttonMode == .slideAndHold || buttonMode == .slideToToggle)))*/
         self.hasTrackPoint = true
         self.hasNonEditableLabel = (self.cmdString == "DISABLETOUCH"
-                                    || self.cmdString == "GAMEPADOVERLAY")
+                                    || self.cmdString == "GAMEPADOVERLAY"
+                                    || self.cmdString == "DISABLETILT")
         self.hasTemporaryLabel = CommandManager.velocityBasedTouchPads.contains(self.touchPadString) && (self.isMotionControlButton || self.buttonString == "NULL")
         || self.cmdString == "RSVPAD"
         || self.cmdString == "LSVPAD"
@@ -1055,6 +1057,11 @@ import ObjectiveC.runtime
                 self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: touchDisabledFLag ? "=EnableTouch" : "=DisableTouch" )
             case "GAMEPADOVERLAY":
                 self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: OnScreenWidgetView.gamepadOverlayFLag ? "=GamepadOverlayOn" : "=GamepadOverlayOff" )
+            case "DISABLETILT":
+                if let pencilHandler = PencilHandler.shared {
+                    self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: pencilHandler.disableTilt ? "=enableTilt" : "=disableTilt" )
+                }
+                else {self.nonEditableWidgetLabel = "=disableTilt".localized}
             default:
                 nonEditableWidgetLabel = ""
             }
@@ -2945,6 +2952,10 @@ import ObjectiveC.runtime
             self.functionalWidgetDelegate?.bringUpSoftKeyboard()
         case "ABSTCHDRAG":
             self.functionalWidgetDelegate?.alterAbsTouchDragWith(mouseButton:BUTTON_LEFT)
+        case "DISABLETOUCH":
+            self.handleTouchDisableButtonUp()
+        case "GAMEPADOVERLAY":
+            self.gamepadOverlayButtonUp()
         case "PENCILHOVER":
             if !self.isPencilProEnabled() {break}
             self.functionalWidgetDelegate?.disablePencilHover()
@@ -2961,6 +2972,12 @@ import ObjectiveC.runtime
             var eraserShortcut = self.cmdString.replacingOccurrences(of: "ERASER+", with: "")
             eraserShortcut = eraserShortcut.replacingOccurrences(of: "ERASER", with: "")
             self.functionalWidgetDelegate?.replaceEraser(shortcut: eraserShortcut)
+        case "DISABLETILT":
+            if !self.isPencilProEnabled() {break}
+            if let pencilHandler = PencilHandler.shared {
+                pencilHandler.disableTilt = !pencilHandler.disableTilt
+                self.setupAtrributedText()
+            }
         case "PRESSURECURVE":
             if ["com.voidlink.iOS"
                 , "com.voidlinkextreme.iOS"
@@ -2968,10 +2985,6 @@ import ObjectiveC.runtime
             ].contains(Bundle.main.bundleIdentifier) && PublicUtils.isIPad {
                 self.functionalWidgetDelegate?.presentPressureCurveVC()
             }
-        case "DISABLETOUCH":
-            self.handleTouchDisableButtonUp()
-        case "GAMEPADOVERLAY":
-            self.gamepadOverlayButtonUp()
         default:
             break
         }
@@ -3665,7 +3678,7 @@ import ObjectiveC.runtime
             self.frame = targetFrame
             self.transform = CGAffineTransform(scaleX: 0.985, y: 0.985)
             
-            if ControllerUtil.activeGCControllers.count > 0, !PublicUtils.iOS26Available {
+            if ControllerUtil.activeStreamingGCControllers.count > 0, !PublicUtils.iOS26Available {
                 self.parentViewController?.setNeedsUpdateOfHomeIndicatorAutoHidden()
             }
             

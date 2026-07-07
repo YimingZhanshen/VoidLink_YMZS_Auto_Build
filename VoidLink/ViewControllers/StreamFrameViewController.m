@@ -1005,6 +1005,8 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     dispatch_after(delay, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         OnScreenWidgetView.enableFolderAnimation = true;
     });
+    
+    [ControllerNavigator stop];
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification{
@@ -1050,7 +1052,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     _layoutOnScreenControlsVC.toolbarRootView.hidden = true;
     OSCProfilesTableViewLoadingMode loadingMode = pickProfile ? OSCProfilesTableViewLoadingModePickProfile : OSCProfilesTableViewLoadingModeSelectProfileFromStreamView;
     [self presentViewController:_layoutOnScreenControlsVC animated:NO completion:^{
-        [self->_layoutOnScreenControlsVC presentProfilesTableViewWithLoadingMode:loadingMode];
+        [self->_layoutOnScreenControlsVC presentProfilesTableViewWithLoadingMode:loadingMode animated:false];
     }];
 }
 

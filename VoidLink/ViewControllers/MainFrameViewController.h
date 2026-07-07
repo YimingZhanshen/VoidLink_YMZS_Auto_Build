@@ -13,14 +13,13 @@
 #import "DiscoveryManager.h"
 #import "PairManager.h"
 #import "StreamConfiguration.h"
-#import "HostCardView.h"
 #import "UIAppView.h"
 #import "AppAssetManager.h"
 #import "SWRevealViewController.h"
-#import "HostCollectionViewController.h"
+#import "VoidLink-Swift.h"
 
 
-@interface MainFrameViewController : UICollectionViewController <DiscoveryCallback, PairCallback, AppCallback, AppAssetCallback, NSURLConnectionDelegate, SWRevealViewControllerDelegate, HostCardActionDelegate, AppViewUpdateLoopDelegate, UITextFieldDelegate>
+@interface MainFrameViewController : UICollectionViewController <DiscoveryCallback, PairCallback, AppCallback, AppAssetCallback, NSURLConnectionDelegate, SWRevealViewControllerDelegate, HostCardActionDelegate, AppViewUpdateLoopDelegate, UITextFieldDelegate, ControllerNavigatorRadialMenuDelegate>
 
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *settingsButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *profilesButton;

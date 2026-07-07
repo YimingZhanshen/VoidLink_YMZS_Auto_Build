@@ -31,7 +31,6 @@
 #import "Plot.h"
 #import "CustomEdgeSlideGestureRecognizer.h"
 #import "DataManager.h"
-#import "FixedTintImageView.h"
 #import "VoidLink-Swift.h"
 
 #if !TARGET_OS_TV
@@ -43,6 +42,11 @@
 #import <VideoToolbox/VideoToolbox.h>
 
 #include <Limelight.h>
+
+
+@interface MainFrameViewController()
+@property (weak, nonatomic) LayoutOnScreenControlsViewController* gameProfileSelectorVC;
+@end
 
 @implementation MainFrameViewController {
     UILabel* waterMark;
@@ -1184,15 +1188,15 @@ static NSMutableSet* hostList;
                                     countdown:6
                                        action:^{}
                                    completion:^{
-            [self openGameProfileSeletor];
+            [self openGameProfileSeletor:false];
         }];
     }
-    else [self openGameProfileSeletor];
+    else [self openGameProfileSeletor:false];
 }
 
-- (void)openGameProfileSeletor{
+- (void)openGameProfileSeletor:(bool)animated {
     if(settingsViewController){
-        [settingsViewController mainFrameGameProfileButtonTapped];
+        [settingsViewController mainFrameGameProfileButtonTapped:animated];
         return;
     }
     
@@ -1214,8 +1218,10 @@ static NSMutableSet* hostList;
     layoutToolVC.profileTableLoadingMode = OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame;
     layoutToolVC.toolbarStackView.hidden = true;
     layoutToolVC.toolbarRootView.hidden = true;
-    [self presentViewController:layoutToolVC animated:NO completion:^{
-        [layoutToolVC presentProfilesTableViewWithLoadingMode:OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame];
+    
+    self.gameProfileSelectorVC = layoutToolVC;
+    [self presentViewController:layoutToolVC animated:false completion:^{
+        [layoutToolVC presentProfilesTableViewWithLoadingMode:OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame animated:animated];
     }];
 }
 
@@ -1463,6 +1469,7 @@ static NSMutableSet* hostList;
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.backgroundColor = liquidGlassEnabled ? ThemeManager.appPrimaryColor : ThemeManager.appPrimaryColor; // #0A85FF
     button.layer.cornerRadius = buttonHeight/2;
+    if (@available(iOS 13.0, *)) button.layer.cornerCurve = kCACornerCurveContinuous;
     button.clipsToBounds = !liquidGlassEnabled;
 
     // 设置图标（SF Symbol）
@@ -1623,7 +1630,7 @@ static NSMutableSet* hostList;
         UIImageSymbolConfiguration *config;
         UIImage *image;
         if(PublicUtils.iOS18Available){
-            config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 20.5 : 23 weight:UIImageSymbolWeightRegular ];
+            config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 20.5 : 22.5 weight:PublicUtils.liquidGlassEnabled ? UIImageSymbolWeightRegular :  UIImageSymbolWeightRegular];
             image = [[UIImage systemImageNamed: @"gamecontroller.circle" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
             [_profilesButton setImage:image];
             _profilesButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.55) : UIEdgeInsetsMake(10, 10, 0, 0);
@@ -1882,7 +1889,7 @@ static NSMutableSet* hostList;
     
     [IAPManager.shared fetchProducts];
     [GenericUtils handleAddOnProductPurchaseIntentFor:AddOnProductPencilProPack];
-
+    
     /*
     if (@available(iOS 15.0, *)) {
         [IAPManager checkPurchaseInfo:AddOnProductPencilProPack completion:^(PurchaseInfo* info) {
@@ -2124,6 +2131,11 @@ static NSMutableSet* hostList;
     //[self simulateSettingsButtonPress];
     [self updateResolutionAccordingly];
     if([self needPopupAboutView])[self helpButtonTapped];
+    
+    if (@available(iOS 13.0, *)) {
+        [ControllerNavigator startWithSwapABXY:false];
+        [ControllerNavigator setRadialMenuDelegate:self];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
@@ -2605,4 +2617,27 @@ static NSMutableSet* hostList;
     }
 }
 
+
+- (void)controllerNavigatorDidSelectSettings {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[self revealViewController] revealToggleAnimated:YES];
+    });
+}
+
+- (void)controllerNavigatorDidSelectGameProfiles {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(!self.gameProfileSelectorVC && !self->settingsViewController.layoutOnScreenControlsVC) [self openGameProfileSeletor:true];
+        else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
+        else if (self->settingsViewController.layoutOnScreenControlsVC) [self->settingsViewController.layoutOnScreenControlsVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
+    });
+}
+
+- (void)controllerNavigatorDidSelectHostView {
+    [self switchToHostView];
+}
+
+- (void)controllerNavigatorDidSelectExit {
+}
+
 @end
+

@@ -1033,11 +1033,16 @@ const int FrontViewPositionNone = 0xff;
         [_disconnectButton setTitle:nil];
         UIImage *image;
         
+        /*
         if(PublicUtils.liquidGlassEnabled){
             UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:16 weight:UIImageSymbolWeightSemibold];
-            image = [[UIImage systemImageNamed:@"rectangle.portrait.and.arrow.right" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+            image = [[UIImage systemImageNamed:@"personalhotspot.slash" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         }
         else image = [[UIImage imageNamed:@"disconnect.svg" ]  imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        */
+        
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.disconnectSymbolSize weight:PublicUtils.disconnectSymbolWeight];
+        image = [[UIImage systemImageNamed:PublicUtils.disconnectSymbol withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
 
         [_disconnectButton setImage:image];
         if(PublicUtils.liquidGlassEnabled) _disconnectButton.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5);
@@ -1061,12 +1066,15 @@ const int FrontViewPositionNone = 0xff;
     //[moreButton setAction:@selector(moreButtonTapped:)];
     if (@available(iOS 13.0, *)) {
         [_moreButton setTitle:nil];
-        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 18 : 23
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:PublicUtils.liquidGlassEnabled ? 18 : 22
                                 weight:PublicUtils.liquidGlassEnabled ? UIImageSymbolWeightMedium : UIImageSymbolWeightMedium];
         UIImage *image = [[UIImage systemImageNamed:@"ellipsis.circle" withConfiguration:config] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_moreButton setImage:image];
         _moreButton.imageInsets = PublicUtils.liquidGlassEnabled ? UIEdgeInsetsMake(0, 0, 0, 0.75) : UIEdgeInsetsMake(20, 0, 0, -10);
-        if(PublicUtils.liquidGlassEnabled) _moreButton.tintColor = ThemeManager.appPrimaryColor;
+        if(PublicUtils.liquidGlassEnabled){
+            _moreButton.tintColor = ThemeManager.appPrimaryColor;
+            if(@available(iOS 26.0, *)) _moreButton.sharesBackground = false;
+        }
     } else {
         [_moreButton setTitle:[LocalizationHelper localizedStringForKey:@"Options"]];
     }

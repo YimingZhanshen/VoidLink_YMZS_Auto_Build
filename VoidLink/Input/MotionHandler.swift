@@ -189,7 +189,7 @@ import CoreMotion
             else {
                 if #available(iOS 14.0, *) {
                     if activeGCController == nil {
-                        if let controllers = ControllerUtil.activeGCControllers as? Set<GCController> {
+                        if let controllers = ControllerUtil.activeStreamingGCControllers as? Set<GCController> {
                             for controller in controllers {
                                 if controller.playerIndex == .index1 {
                                     activeGCController = controller

@@ -1922,7 +1922,7 @@
                                             <constraint firstAttribute="height" constant="31" id="MVP-k4-wjG"/>
                                         </constraints>
                                     </stackView>
-                                    <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="fPh-yy-10O" userLabel="substack2">
+                                    <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="fPh-yy-10O">
                                         <rect key="frame" x="0.0" y="36" width="336" height="31"/>
                                         <subviews>
                                             <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Roll → Left Stick" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.64999997615814209" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EFR-Ee-KiK" userLabel="uiLabel">

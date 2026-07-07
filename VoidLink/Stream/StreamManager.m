@@ -258,7 +258,7 @@
                      "Renderer: %@\n"
                      "Frames dropped by network/pacing jitter: %.1f%% / %.1f%%\n"
                      "Average network latency: %@\n"
-                     "Decode time: %.2f/%.2f/%.2f ms",
+                     "Decode time: %.2f/%.2f/%.2f ms %@",
                      _config.width,
                      _config.height,
                      fps,
@@ -270,7 +270,7 @@
                      (stats.networkDroppedFrames / stats.totalFrames) * 100.0,
                      stats.frameDropMetrics.nsamples > 0 ? (stats.frameDropMetrics.total / stats.frameDropMetrics.nsamples) * 100.0 : 0.0f,
                      latencyString,
-                     stats.decodeMetrics.min, stats.decodeMetrics.max, stats.decodeMetrics.avg];
+                     stats.decodeMetrics.min, stats.decodeMetrics.max, stats.decodeMetrics.avg, PublicUtils.onScreenRuntimeStats];
         }
     }
 }

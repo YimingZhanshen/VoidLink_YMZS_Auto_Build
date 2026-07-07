@@ -73,6 +73,7 @@ struct Key: Identifiable {
     let visualStyle: KeyVisualStyle
     let label: String
     let width: CGFloat
+    let labelInsets: EdgeInsets
     let sfSymbolName: String?
     let winCmdString: String?
     let macCmdString: String?
@@ -85,6 +86,7 @@ struct Key: Identifiable {
         identity: String? = nil,
         visualStyle: KeyVisualStyle = .standard,
         width: CGFloat,
+        labelInsets: EdgeInsets = EdgeInsets(top: 3, leading: 6, bottom: 3, trailing: 6),
         sfSymbolName: String? = nil,
         winCmdString: String? = nil,
         macCmdString: String? = nil,
@@ -94,6 +96,7 @@ struct Key: Identifiable {
         self.label = label
         self.identity = identity
         self.width = width
+        self.labelInsets = labelInsets
         self.visualStyle = visualStyle
         self.sfSymbolName = sfSymbolName
         self.winCmdString = winCmdString
@@ -1041,8 +1044,8 @@ struct VirtualKeyboardView: View {
                         Key(
                             label: LocalizationHelper.localizedString(forKey: "Wheel\nUp"),
                             width: unit,
-                            winCmdString: "WHEELDOWN",
-                            macCmdString: "WHEELDOWN",
+                            winCmdString: "WHEELUP",
+                            macCmdString: "WHEELUP",
                             winKeyCode: 0xFF,
                             macKeyCode: 0xFF
                         )
@@ -1052,8 +1055,8 @@ struct VirtualKeyboardView: View {
                         Key(
                             label: LocalizationHelper.localizedString(forKey: "Wheel\nDown"),
                             width: unit,
-                            winCmdString: "WHEELUP",
-                            macCmdString: "WHEELUP",
+                            winCmdString: "WHEELDOWN",
+                            macCmdString: "WHEELDOWN",
                             winKeyCode: 0xFF,
                             macKeyCode: 0xFF
                         )
@@ -1065,8 +1068,8 @@ struct VirtualKeyboardView: View {
                         Key(
                             label: LocalizationHelper.localizedString(forKey: "Wheel\nUp"),
                             width: unit,
-                            winCmdString: "WHEELDOWN",
-                            macCmdString: "WHEELDOWN",
+                            winCmdString: "WHEELUP",
+                            macCmdString: "WHEELUP",
                             winKeyCode: 0xFF,
                             macKeyCode: 0xFF
                         )
@@ -1076,8 +1079,8 @@ struct VirtualKeyboardView: View {
                         Key(
                             label: LocalizationHelper.localizedString(forKey: "Wheel\nDown"),
                             width: unit,
-                            winCmdString: "WHEELUP",
-                            macCmdString: "WHEELUP",
+                            winCmdString: "WHEELDOWN",
+                            macCmdString: "WHEELDOWN",
                             winKeyCode: 0xFF,
                             macKeyCode: 0xFF
                         )
@@ -1364,11 +1367,15 @@ struct KeyView: View {
         key.keyCode(for: keyboardType)
     }
 
+    private var keyCornerRadius: CGFloat {
+        11.0
+    }
+
     private var typingHighlightFill: LinearGradient {
         LinearGradient(
             gradient: Gradient(colors: [
-                Color(red: 0.78, green: 0.84, blue: 0.92).opacity(0.95),
-                Color(red: 0.66, green: 0.74, blue: 0.85).opacity(0.88)
+                Color(red: 0.92, green: 0.945, blue: 0.98),
+                Color(red: 0.76, green: 0.82, blue: 0.90)
             ]),
             startPoint: .topLeading,
             endPoint: .bottomTrailing
@@ -1376,29 +1383,62 @@ struct KeyView: View {
     }
 
     private var typingHighlightStroke: Color {
-        Color(red: 0.42, green: 0.52, blue: 0.66).opacity(0.78)
+        Color(red: 0.47, green: 0.58, blue: 0.73).opacity(0.62)
     }
 
-    private var keyFillColor: Color {
+    private var keyFillGradient: LinearGradient {
         switch key.visualStyle {
         case .standard:
-            return Color.gray.opacity(0.2)
+            return LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.990, green: 0.988, blue: 0.984),
+                    Color(red: 0.920, green: 0.920, blue: 0.910)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         case .directionPad:
-            return usesDirectionPadBaseStyle
-                ? Color(red: 0.16, green: 0.72, blue: 0.66).opacity(0.2)
-                : Color.gray.opacity(0.2)
+            if usesDirectionPadBaseStyle {
+                return LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.88, green: 0.98, blue: 0.96),
+                        Color(red: 0.73, green: 0.91, blue: 0.88)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+            return LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.990, green: 0.988, blue: 0.984),
+                    Color(red: 0.920, green: 0.920, blue: 0.910)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         }
     }
 
     private var keyStrokeColor: Color {
         switch key.visualStyle {
         case .standard:
-            return Color.gray.opacity(0.2)
+            return Color(red: 0.66, green: 0.66, blue: 0.64).opacity(0.36)
         case .directionPad:
             return usesDirectionPadBaseStyle
-                ? Color(red: 0.08, green: 0.49, blue: 0.45).opacity(0.55)
-                : Color.gray.opacity(0.2)
+                ? Color(red: 0.18, green: 0.56, blue: 0.52).opacity(0.52)
+                : Color(red: 0.66, green: 0.66, blue: 0.64).opacity(0.36)
         }
+    }
+
+    private var pressedFillGradient: LinearGradient {
+        LinearGradient(
+            gradient: Gradient(colors: [
+                Color(red: 0.84, green: 0.87, blue: 0.91),
+                Color(red: 0.72, green: 0.76, blue: 0.82)
+            ]),
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 
     private var foregroundColor: Color {
@@ -1427,56 +1467,54 @@ struct KeyView: View {
             Image(systemName: name)
                 .font(.system(size: fontSize))
                 .foregroundColor(.black)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             Text(key.label)
                 .font(.system(size: fontSize, weight: .regular, design: .rounded))
                 .foregroundColor(.black)
+                .lineLimit(key.label.contains("\n") ? 2 : 1)
+                .minimumScaleFactor(0.45)
+                .allowsTightening(true)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     
-    private var backgroundColor: Color {
-        if highlightStyle != .none {
-            return Color.clear
-        }
-
-        if isPressed || isActive {
-            return Color.gray.opacity(0.4)
-        }
-        return keyFillColor
-    }
-
     @ViewBuilder
     private var keyBackground: some View {
         if mode == .typing, (highlightStyle != .none || isPressed) {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
+            RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
                 .fill(typingHighlightFill)
+        } else if isPressed || isActive {
+            RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
+                .fill(pressedFillGradient)
         } else if highlightStyle == .pad {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
+            RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
                 .fill(
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 0.82, green: 0.84, blue: 1.00).opacity(0.92),
-                            Color(red: 0.56, green: 0.60, blue: 0.94).opacity(0.84)
+                            Color(red: 0.89, green: 0.90, blue: 1.00),
+                            Color(red: 0.64, green: 0.68, blue: 0.96)
                         ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
         } else if highlightStyle == .single {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
+            RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
                 .fill(
                     LinearGradient(
                         gradient: Gradient(colors: [
-                            Color(red: 1.00, green: 0.96, blue: 0.74),
-                            Color(red: 0.95, green: 0.78, blue: 0.32)
+                            Color(red: 1.00, green: 0.98, blue: 0.78),
+                            Color(red: 0.96, green: 0.80, blue: 0.36)
                         ]),
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
         } else {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(backgroundColor)
+            RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
+                .fill(keyFillGradient)
         }
     }
 
@@ -1493,15 +1531,33 @@ struct KeyView: View {
         return keyStrokeColor
     }
 
+    private var keyShadowColor: Color {
+        if isPressed || isActive {
+            return Color.black.opacity(0.08)
+        }
+        if highlightStyle != .none {
+            return Color.black.opacity(0.08)
+        }
+        return Color.black.opacity(PublicUtils.isIPhone ? 0.13 : 0.15)
+    }
+    
     var body: some View {
         keyContent
+            .padding(key.labelInsets)
             .foregroundColor(foregroundColor)
             .frame(width: key.width, height: height)
             .background(keyBackground)
             .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(borderColor, lineWidth: highlightStyle == .none ? (key.visualStyle == .standard ? 1 : 1.5) : 1.5)
+                RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
+                    .stroke(Color.white.opacity(isPressed || isActive ? 0.22 : 0.45), lineWidth: 0.76)
+                    .padding(1)
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: keyCornerRadius, style: .continuous)
+                    .stroke(borderColor, lineWidth: highlightStyle == .none ? (key.visualStyle == .standard ? (PublicUtils.isIPhone ? 1.15 : 0.7) : 1.1) : 1.25)
+                
+            )
+            .shadow(color: keyShadowColor, radius: isPressed || isActive ? 1 : 3, x: 0, y: isPressed || isActive ? 1 : 2)
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in

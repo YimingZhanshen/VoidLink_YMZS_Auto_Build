@@ -69,6 +69,41 @@ import UIKit
         else {return PublicUtils.screenWidth > PublicUtils.screenHeight}
     }
     
+    @objc public static func disconnectSymbol() -> String {
+        if #available(iOS 18.0, tvOS 18.0, *) {
+            return "personalhotspot.slash"
+        }
+        else if #available(iOS 14.0, tvOS 14.0, *) {
+            return "rectangle.slash"
+        }
+        else {
+            return "nosign"
+        }
+    }
+    
+    @objc public static func disconnectSymbolSize() -> CGFloat {
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            return 15
+        }
+        if #available(iOS 18.0, tvOS 18.0, *) {
+            return 19
+        }
+        else if #available(iOS 14.0, tvOS 14.0, *) {return 17.5}
+        else {return 20.7}
+    }
+    
+    @objc public static func disconnectSymbolWeight() -> Int {
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            return UIImage.SymbolWeight.bold.rawValue
+        }
+        if #available(iOS 18.0, tvOS 18.0, *) {
+            return UIImage.SymbolWeight.semibold.rawValue
+        }
+        else if #available(iOS 13.0, tvOS 13.0, *) {return UIImage.SymbolWeight.semibold.rawValue}
+        else {return 666}
+    }
+
+    
     @objc public static func toCGFloat(_ str: String) -> CGFloat {
         return CGFloat(Double(str) ?? 0)
     }
@@ -135,12 +170,13 @@ import UIKit
 
         return rootViewController
     }
-    
-    
+        
     @objc(openUrl:)
     static func openUrl(_ urlString: String) {
         guard let url = URL(string: urlString),
               UIApplication.shared.canOpenURL(url) else { return }
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
+    
+    @objc static var onScreenRuntimeStats: String = ""
 }

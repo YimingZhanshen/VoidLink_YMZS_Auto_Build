@@ -36,7 +36,7 @@
                 return NO;
         }
         
-        bool physicalGamepadConnected = ControllerUtil.activeGCControllers.count>0;
+        bool physicalGamepadConnected = ControllerUtil.activeStreamingGCControllers.count>0;
         // dispatch_after(dispatch_time(DISPATCH_TIME_NOW, physicalGamepadConnected ? 0.005*NSEC_PER_SEC : 0), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             if(!physicalGamepadConnected)
                 LiSendKeyboardEvent(0x8000 | keyCode,

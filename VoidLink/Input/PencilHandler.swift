@@ -32,6 +32,8 @@ import UIKit
     private var touchBeganForce: Float = 0
     @objc static private(set) var isDrawing: Bool = false
     @objc static private(set) var pencilPausesNativeTouch: Bool = false
+    
+    @objc var disableTilt: Bool = false
 
     // static private let oscProfileMan = OSCProfilesManager.sharedManager(CGRectZero)
     static private var selectedProfile:OSCProfile?
@@ -223,7 +225,7 @@ import UIKit
     
     func getTilt(fromAltitudeAngle altitudeAngle: Float) -> UInt8 {
         let altitudeDegs = abs(Int16(altitudeAngle * (180.0 / .pi)))
-        return UInt8(90 - min(90, Int(altitudeDegs)))
+        return disableTilt ? 0 : UInt8(90 - min(90, Int(altitudeDegs)))
     }
 
     var previousForce: Float = 0

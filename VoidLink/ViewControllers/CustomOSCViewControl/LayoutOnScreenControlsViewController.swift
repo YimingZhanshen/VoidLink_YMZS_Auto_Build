@@ -188,7 +188,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
     @IBOutlet private weak var toolbarTopConstraintiPhone: NSLayoutConstraint!
     @IBOutlet private weak var toolbarTopConstraintiPad: NSLayoutConstraint!
 
-    private var oscProfilesTableViewController: OSCProfilesTableViewController?
+    var oscProfilesTableViewController: OSCProfilesTableViewController?
     private var profilesManager: OSCProfilesManager!
     private var bulkEditEnabled: Bool = false
     private var selectedWidget: OnScreenWidgetView?
@@ -541,15 +541,16 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
     }
 
     @objc var profileTableLoadingMode: OSCProfilesTableViewLoadingMode = .selectProfile
-    @objc(presentProfilesTableViewWithLoadingMode:)
-    func presentProfilesTableView(with loadingMode: OSCProfilesTableViewLoadingMode) {
+    @objc(presentProfilesTableViewWithLoadingMode: animated:)
+    func presentProfilesTableView(with loadingMode: OSCProfilesTableViewLoadingMode, animated: Bool = false) {
         profileTableLoadingMode = loadingMode
-        presentProfilesTableView(with: loadingMode, pickedProfileDataHandler: nil)
+        presentProfilesTableView(with: loadingMode, pickedProfileDataHandler: nil, animated:animated)
     }
 
     private func presentProfilesTableView(
         with loadingMode: OSCProfilesTableViewLoadingMode,
-        pickedProfileDataHandler: ((OSCProfile) -> Void)? = nil
+        pickedProfileDataHandler: ((OSCProfile) -> Void)? = nil,
+        animated: Bool = false
     ) {
         hideStickIndicators()
         if loadingMode != .pickProfileData {selectedWidget = nil}
@@ -570,7 +571,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
         widgetPanelStack.isHidden = true
         oscProfilesTableViewController = controller
         if let controller {
-            present(controller, animated: false)
+            present(controller, animated: animated)
         }
     }
 

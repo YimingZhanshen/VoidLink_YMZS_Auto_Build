@@ -149,6 +149,7 @@ import UIKit
         "BRUSH",
         "ERASER",
         "NOSINGLETOUCH",
+        "DISABLETILT",
         "DISABLETOUCH",
         "GAMEPADOVERLAY",
     ]
@@ -161,7 +162,8 @@ import UIKit
         "PENCILHOVER",
         "BRUSH",
         "ERASER",
-        "NOSINGLETOUCH"
+        "NOSINGLETOUCH",
+        "DISABLETILT"
     ]
     @objc public static let motionControlButtonCmds: [String] = ["GYRO","GYROPAUSE","ACCEL","MOTION"]
 

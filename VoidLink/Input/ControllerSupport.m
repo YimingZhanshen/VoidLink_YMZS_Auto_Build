@@ -1161,7 +1161,7 @@ double rc_expo(double x, double expo) {
                             if(button.pressed){
                                 if(buttonFlagId.intValue == self->_controllerMouseSwitch){
                                     self->_mouseSwitchButtonPressed = true;
-                                    self->mouseSwitchDownTimestamp = CACurrentMediaTime();
+                                    if(self->mouseSwitchDownTimestamp == 0) self->mouseSwitchDownTimestamp = CACurrentMediaTime();
                                 }
                             }
                             else{
@@ -1620,7 +1620,7 @@ double rc_expo(double x, double expo) {
 -(VoidController* )assignController:(GCController*)controller {
     NSLog(@"run assignController");
 
-    bool newGCControllerArrival = ![ControllerUtil.activeGCControllers containsObject:controller];
+    bool newGCControllerArrival = ![ControllerUtil.activeStreamingGCControllers containsObject:controller];
     
     if(!newGCControllerArrival){
         VoidController* voidController = [_voidControllers objectForKey:@(controller.playerIndex)];
@@ -1642,7 +1642,7 @@ double rc_expo(double x, double expo) {
             VoidController* voidController = [[VoidController alloc] init];
 
 
-            [ControllerUtil.activeGCControllers addObject:controller];
+            [ControllerUtil.activeStreamingGCControllers addObject:controller];
             controller.playerIndex = i;
             voidController.playerIndex = i;
             [self updateVoidController:voidController withGCController:controller];
@@ -1722,7 +1722,7 @@ double rc_expo(double x, double expo) {
         NSLog(@"controller count: iterating");
         
         if ([ControllerSupport isSupportedGamepad:controller]) {
-            NSLog(@"controller count: is supported,is contained by dict: %d", [ControllerUtil.activeGCControllers containsObject:controller]);
+            NSLog(@"controller count: is supported,is contained by dict: %d", [ControllerUtil.activeStreamingGCControllers containsObject:controller]);
                 NSLog(@"controller obj +1 in dic");
                 [self assignController:controller];
                 NSLog(@"controller obj num in dict: %lu", (unsigned long)_voidControllers.allValues.count);
@@ -1839,7 +1839,7 @@ double rc_expo(double x, double expo) {
     _delegate = delegate;
     _controllerStreamLock = [[NSLock alloc] init];
     _voidControllers = [[NSMutableDictionary alloc] init];
-    [ControllerUtil.activeGCControllers removeAllObjects];
+    [ControllerUtil.activeStreamingGCControllers removeAllObjects];
     _controllerNumbers = 0;
     
     _captureMouse = (streamConfig.localMousePointerMode == 0);
@@ -1892,8 +1892,8 @@ double rc_expo(double x, double expo) {
         
         [self unregisterControllerCallbacks:controller];
         
-        if([ControllerUtil.activeGCControllers containsObject:controller]){
-            [ControllerUtil.activeGCControllers removeObject:controller];
+        if([ControllerUtil.activeStreamingGCControllers containsObject:controller]){
+            [ControllerUtil.activeStreamingGCControllers removeObject:controller];
             self->_controllerNumbers &= ~(1 << controller.playerIndex);
         }
         Log(LOG_I, @"Unassigning controller index: %ld", (long)controller.playerIndex);

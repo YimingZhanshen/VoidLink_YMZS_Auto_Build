@@ -13,8 +13,9 @@
 
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"
-#import "VoidLink-Swift.h"
 #import "StreamConfiguration.h"
+
+@class PencilHandler;
 
 @protocol UserInteractionDelegate <NSObject>
 
@@ -29,11 +30,7 @@
 
 @end
 
-#if TARGET_OS_TV
-@interface StreamView : UIView <X1KitMouseDelegate, UITextFieldDelegate>
-#else
-@interface StreamView : UIView <X1KitMouseDelegate, UITextFieldDelegate, UIPointerInteractionDelegate, InputAccessoryBarDelegate>
-#endif
+@interface StreamView : UIView
 
 @property (weak, nonatomic) UIView* streamFrameTopLayerView;
 @property (weak, nonatomic) id<UserInteractionDelegate> interactionDelegate;

@@ -1568,7 +1568,7 @@ struct KeyView: View {
                     .onEnded { _ in
                         isPressed = false
                         action?()
-                        print("cmdString \(String(describing: cmdString)) code \(String(describing: keyCode))")
+                        // print("cmdString \(String(describing: cmdString)) code \(String(describing: keyCode))")
                     }
             )
     }

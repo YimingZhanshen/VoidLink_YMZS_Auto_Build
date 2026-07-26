@@ -151,7 +151,6 @@ import CoreMotion
         self.widgetYawFactor = yawFactor
         self.widgetPitchFactor = pitchFactor
         self.widgetRollFactor = rollFactor
-        print("self.widgetRollFactor \(self.widgetRollFactor)")
         if self.motionStarter == nil {
             self.motionStarter = sender
             if sender.motionControlButtonString != "GYROPAUSE" {self.startMotionUpdate()}

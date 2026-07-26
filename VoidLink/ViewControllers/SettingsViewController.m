@@ -10,6 +10,8 @@
 //
 
 #import "SettingsViewController.h"
+#import "MainFrameViewController.h"
+#import "CustomEdgeSlideGestureRecognizer.h"
 #import "TemporarySettings.h"
 #import "DataManager.h"
 #import "VoidLink-Swift.h"
@@ -19,6 +21,10 @@
 #import <UIKit/UIGestureRecognizerSubclass.h>
 
 #import "LocalizationHelper.h"
+
+@interface SettingsViewController () <MenuSectionDelegate, WidgetPickerViewControllerDelegate>
+@property(nonatomic, assign) SettingsMenuMode currentSettingsMenuMode;
+@end
 
 @implementation SettingsViewController {
     TemporarySettings* tempSettings;
@@ -41,7 +47,6 @@
     NSMutableDictionary *_settingStackDict;
     NSMutableArray *_favoriteSettingStackIdentifiers;
     bool settingStackWillBeRelocatedToLowestPosition;
-    uint8_t currentSettingsMenuMode;
     UIView *snapshot;
     UIStackView* capturedStack;
     CADisplayLink *_autoScrollDisplayLink;
@@ -54,11 +59,15 @@
     MenuSectionView *otherSection;
     MenuSectionView *experimentalSection;
     NSMutableSet* hiddenStacks;
+
+    // ControllerNavigator UI navigation state
+    UIView *_controllerNavigationHighlightOverlayView;
         
     GCController *capturedController;
 }
 
 @dynamic overrideUserInterfaceStyle;
+@synthesize controllerNavigationHighlightOverlayView = _controllerNavigationHighlightOverlayView;
 
 
 //static NSString* bitrateFormat;
@@ -373,7 +382,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     self.controllerGyroSwitchButtonSetter.selectedSegmentIndex = oscProfile.controllerGyroSwitchMode;
     if(self.controllerGyroSwitchButtonSetter.selectedSegmentIndex != ControllerGyroSwitchDisabled){
-        bool bothButtonsSet = oscProfile.controllerGyroSwitchHold != ControllerButtonNull && oscProfile.controllerGyroSwitchToggle != ControllerButtonNull;
+        bool bothButtonsSet = oscProfile.controllerGyroSwitchHold != ControllerElementNull && oscProfile.controllerGyroSwitchToggle != ControllerElementNull;
         [self findDynamicLabelFromStack:self.controllerGyroSwitchButtonStack].text = bothButtonsSet ? [LocalizationHelper localizedStringForKey:@" both set "] : @"";
     }
     [self setHidden:oscProfile.controllerGyroSwitchMode==ControllerGyroSwitchDisabled forStack:self.reverseHoldButtonStack];
@@ -556,7 +565,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         else dispatch_async(dispatch_get_main_queue(), ^{[self widget:self.bitrateSlider setEnabled:true];});
     });
     
-    if(currentSettingsMenuMode == AllSettings && MenuSectionView.overridePersistedFoldState){
+    if(self.currentSettingsMenuMode == AllSettings && MenuSectionView.overridePersistedFoldState){
         for(UIView *subview in _parentStack.arrangedSubviews){
             if([subview isKindOfClass:[MenuSectionView class]]){
                 MenuSectionView* section = (MenuSectionView* )subview;
@@ -619,11 +628,16 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     [self touchModeChanged:self.touchModeSelector1]; // a special fix for iOS 14 to set hidden for the "enableOswStack"
     
-    if(!settingsViewAlreadyAppeared && ![self contentOffsetRestored]) _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, tempSettings.settingsMenuOffset.floatValue);
+    if(!settingsViewAlreadyAppeared) {
+        if(![self contentOffsetRestored]) _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, tempSettings.settingsMenuOffset.floatValue);
+        if(@available(iOS 13.0, *)) if(ControllerUtil.primaryGCController) [self restoreControllerNavigationHighlight];
+    }
     _scrollView.hidden = false;
-
+    
     settingsViewJustExpanded = false;
     settingsViewAlreadyAppeared = true;
+    
+    if (@available(iOS 13.0, *)) if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
@@ -637,11 +651,12 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     bool unlockDisplayOrientationFlipped = tempSettings.unlockDisplayOrientation != (_unlockDisplayOrientationSelector.selectedSegmentIndex == 1);
     if(unlockDisplayOrientationFlipped) [_mainFrameViewController setNeedsUpdateAllowedOrientation]; // handle allow portratit on & off
+    if (@available(iOS 13.0, *)) if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
 }
 
 
 - (SettingsMenuMode)getSettingsMenuMode{
-    return currentSettingsMenuMode;
+    return self.currentSettingsMenuMode;
 }
 
 - (void)edgeSwiped {
@@ -666,7 +681,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     if(!_parentStack.superview){
         [self.scrollView addSubview:_parentStack];
         [NSLayoutConstraint activateConstraints:@[
-            [_parentStack.topAnchor constraintEqualToAnchor:self.scrollView.contentLayoutGuide.topAnchor constant: currentSettingsMenuMode == AllSettings ? GenericUtils.settingsMenuNavigationBarHeight : GenericUtils.settingsMenuNavigationBarHeight+10],
+            [_parentStack.topAnchor constraintEqualToAnchor:self.scrollView.contentLayoutGuide.topAnchor constant: self.currentSettingsMenuMode == AllSettings ? GenericUtils.settingsMenuNavigationBarHeight : GenericUtils.settingsMenuNavigationBarHeight+10],
             [_parentStack.bottomAnchor constraintEqualToAnchor:self.scrollView.contentLayoutGuide.bottomAnchor constant:-20],
         ]];
     }
@@ -841,7 +856,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         [videoSection setSectionWithIcon:[UIImage systemImageNamed:@"waveform"] size:13 sizeConstraint:-15];
     }
 
-    self.resolutionStack.hasDynamicLabel = YES;
+    [self addDynamicLabelForStack:self.resolutionSelectorStack];
     [self addSetting:self.resolutionStack ofId:@"resolutionStack" to:videoSection];
 
     [self addSetting:self.fpsStack ofId:@"fpsStack" to:videoSection];
@@ -933,6 +948,20 @@ BOOL isCustomResolution(int resolutionSelected) {
     if (@available(iOS 13.0, *)) {
         [controllerSection setSectionWithIcon:[UIImage systemImageNamed:@"gamecontroller"] size:30 sizeConstraint:-10];
     }
+    
+    self.controllerNavigationStack.hasInfoTag = YES;
+    self.controllerNavigationStack.hasDynamicLabel = YES;
+    [self addSetting:self.controllerNavigationStack ofId:@"controllerNavigationStack" to:controllerSection];
+    
+    self.streamingRadialMenuDelayStack.hasDynamicLabel = YES;
+    [self addSetting:self.streamingRadialMenuDelayStack ofId:@"streamingRadialMenuDelayStack" to:controllerSection];
+
+    self.controllerMouseVelocityStack.hasDynamicLabel = YES;
+    [self addSetting:self.controllerMouseVelocityStack ofId:@"controllerMouseVelocityStack" to:controllerSection];
+
+    self.controllerMouseExpoStack.hasInfoTag = YES;
+    self.controllerMouseExpoStack.hasDynamicLabel = YES;
+    [self addSetting:self.controllerMouseExpoStack ofId:@"controllerMouseExpoStack" to:controllerSection];
 
     [self addSetting:self.swapAbxyStack ofId:@"swapAbaxyStack" to:controllerSection];
     [self addSetting:self.hapticEngineStack ofId:@"hapticEngineStack" to:controllerSection];
@@ -959,17 +988,6 @@ BOOL isCustomResolution(int resolutionSelected) {
     self.rightStickMinOffsetStack.isGameProfileSetting = YES;
     self.rightStickMinOffsetStack.hasDynamicLabel = YES;
     [self addSetting:self.rightStickMinOffsetStack ofId:@"rightStickMinOffsetStack" to:controllerSection];
-
-    self.controllerToMouseStack.hasInfoTag = YES;
-    self.controllerToMouseStack.hasDynamicLabel = YES;
-    [self addSetting:self.controllerToMouseStack ofId:@"controllerToMouseStack" to:controllerSection];
-
-    self.controllerMouseVelocityStack.hasDynamicLabel = YES;
-    [self addSetting:self.controllerMouseVelocityStack ofId:@"controllerMouseVelocityStack" to:controllerSection];
-
-    self.controllerMouseExpoStack.hasInfoTag = YES;
-    self.controllerMouseExpoStack.hasDynamicLabel = YES;
-    [self addSetting:self.controllerMouseExpoStack ofId:@"controllerMouseExpoStack" to:controllerSection];
 
     [controllerSection addToParentStack:_parentStack];
 
@@ -1203,7 +1221,6 @@ BOOL isCustomResolution(int resolutionSelected) {
     // self.touchMoveEventIntervalStack.hasDynamicLabel = YES;
     // [self addSetting:self.touchMoveEventIntervalStack ofId:@"touchMoveEventIntervalStack" to:experimentalSection];
 
-    self.relativeTouchSlideThresholdStack.hasInfoTag = YES;
     self.relativeTouchSlideThresholdStack.hasDynamicLabel = YES;
     [self addSetting:self.relativeTouchSlideThresholdStack ofId:@"relativeTouchSlideThresholdStack" to:experimentalSection];
 
@@ -1226,6 +1243,11 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self addSetting:self.sendDummyEventStack ofId:@"sendDummyEventStack" to:experimentalSection];
 
     [experimentalSection addToParentStack:_parentStack];
+}
+
+- (void)expandGamepadSection {
+    if(_currentSettingsMenuMode == FavoriteSettings) [self switchToAllSettings];
+    [controllerSection setExpanded:true];
 }
 
 - (void)handleAutoScroll:(CGPoint)location{
@@ -1432,7 +1454,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void)handleLongPress:(UILongPressGestureRecognizer *)gesture {
     CGPoint locationInParentStack = [gesture locationInView:_parentStack];
     CGPoint locationInRootView = [gesture locationInView:self.view.superview];
-    if(currentSettingsMenuMode == AllSettings &&gesture.state == UIGestureRecognizerStateBegan) {
+    if(self.currentSettingsMenuMode == AllSettings &&gesture.state == UIGestureRecognizerStateBegan) {
         [self findCapturedStackByTouchLocation:locationInParentStack];
         if(capturedStack == nil) return;
         [self highlightedBackgroundForView:capturedStack animateWithDuration:0 completion:nil];
@@ -1452,7 +1474,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         _autoScrollDisplayLink = nil;
     }
 
-    if(currentSettingsMenuMode == FavoriteSettings){
+    if(self.currentSettingsMenuMode == FavoriteSettings){
         switch (gesture.state) {
             case UIGestureRecognizerStateBegan:
                 // 创建快照视图
@@ -1517,7 +1539,9 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     if([_favoriteSettingStackIdentifiers containsObject:settingStack.accessibilityIdentifier]) return;
     
-    [_favoriteSettingStackIdentifiers addObject:settingStack.accessibilityIdentifier];
+    if(settingStack.accessibilityIdentifier) [_favoriteSettingStackIdentifiers addObject:settingStack.accessibilityIdentifier];
+    else if(settingStack.superview.accessibilityIdentifier) [_favoriteSettingStackIdentifiers addObject:settingStack.superview.accessibilityIdentifier];
+    
     for(NSString *identifier in _favoriteSettingStackIdentifiers){
         NSLog(@"favorite setting: %@", identifier);
     }
@@ -1590,6 +1614,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     NSString* tipText = @"";
     NSString* onlineDocLink = @"";
     bool showOnlineDocAction = false;
+
     
     tipText = @"";
     if([sender.superview.accessibilityIdentifier isEqualToString: @"bitrateStack"]){
@@ -1722,9 +1747,9 @@ BOOL isCustomResolution(int resolutionSelected) {
         tipText = [LocalizationHelper localizedStringForKey:@"controllerGyroSwitchButtonStackTip", [ControllerUtil stringFor:oscProfile.controllerGyroSwitchToggle], [ControllerUtil stringFor:oscProfile.controllerGyroSwitchHold]];
         showOnlineDocAction = false;
     }
-    if([sender.superview.accessibilityIdentifier isEqualToString: @"controllerToMouseStack"]){
+    if([sender.superview.accessibilityIdentifier isEqualToString: @"controllerNavigationStack"]){
         tempSettings = [dataMan getSettings];
-        tipText = [LocalizationHelper localizedStringForKey:@"controllerToMouseStackTip", [ControllerUtil stringFor:tempSettings.controllerMouseSwitch.intValue],  [LocalizationHelper localizedStringForKey:tempSettings.controllerMouseStick.intValue == LeftStickToMouse ? @"Left stick" : @"Right stick"],  [ControllerUtil stringFor:tempSettings.controllerMouseLeftButton.intValue], [ControllerUtil stringFor:tempSettings.controllerMouseRightButton.intValue]];
+        tipText = [LocalizationHelper localizedStringForKey:@"controllerNavigationStackTip", [ControllerUtil stringFor:tempSettings.localRadialMenuButton.intValue], [ControllerUtil stringFor:tempSettings.streamingRadialMenuButton.intValue],  [ControllerUtil stringFor:tempSettings.controllerMouseStick.intValue],  [ControllerUtil stringFor:tempSettings.controllerMouseLeftButton.intValue], [ControllerUtil stringFor:tempSettings.controllerMouseRightButton.intValue]];
         showOnlineDocAction = false;
     }
     if([sender.superview.accessibilityIdentifier isEqualToString: @"reverseHoldButtonStack"]){
@@ -1846,7 +1871,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     //switchToAll/Favorite 调用此方法时，这些hiddenStack已身处新的superView中， 可以正常执行hidden = YES
     for(UIStackView* stack in hiddenStacks) stack.hidden = YES;
 
-    if(currentSettingsMenuMode == AllSettings){
+    if(self.currentSettingsMenuMode == AllSettings){
         for(MenuSectionView* section in _parentStack.arrangedSubviews) [section updateViewForFoldState];
     }
     [self hideDynamicLabelsWhenOverlapped:self.parentStack];
@@ -1857,7 +1882,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     for(UIStackView* stack in hiddenStacks) {
         stack.hidden = NO;
     }
-    if(currentSettingsMenuMode == AllSettings){
+    if(self.currentSettingsMenuMode == AllSettings){
         for(UIView* view in _parentStack.arrangedSubviews){
             if([view isKindOfClass:[MenuSectionView class]]){
                 MenuSectionView* section = (MenuSectionView* )view;
@@ -1876,20 +1901,16 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void)switchToFavoriteSettings{
     [self forceRestoreHeightTemporarilyForSettingStackParentView];
     [_parentStack removeFromSuperview];
-    currentSettingsMenuMode = FavoriteSettings;
+    self.currentSettingsMenuMode = FavoriteSettings;
     [self initParentStack];
     [self updateTheme];
     Settings *currentSettings = [dataMan retrieveSettings];
-    currentSettings.settingsMenuMode = [NSNumber numberWithInteger:currentSettingsMenuMode];
+    currentSettings.settingsMenuMode = [NSNumber numberWithInteger:self.currentSettingsMenuMode];
     [dataMan saveData];
     
     _parentStack.spacing = [self isIPhone] ? 10 : 12;
     
     [self loadFavoriteSettingStackIdentifiers];
-    for(NSString* settingIdentifier in _favoriteSettingStackIdentifiers){
-        [_parentStack addArrangedSubview:_settingStackDict[settingIdentifier]];
-    }
-    
     for(NSString* settingIdentifier in _favoriteSettingStackIdentifiers){
         [_parentStack addArrangedSubview:_settingStackDict[settingIdentifier]];
     }
@@ -1903,11 +1924,20 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     [self hideDynamicLabelsWhenOverlapped:self.parentStack];
     [self layoutSettingsView];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (@available(iOS 13.0, *)) {
+            if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
+            [GamepadNavigationIllustrationHud updateHud];
+            if(ControllerUtil.primaryGCController){
+                [ControllerNavigator restoreSettingsModeSwitchHighlight];
+            };
+        }
+    });
 }
 
 - (void)switchToAllSettings{
     [self forceRestoreHeightTemporarilyForSettingStackParentView];
-    currentSettingsMenuMode = AllSettings;
+    self.currentSettingsMenuMode = AllSettings;
     [_parentStack removeFromSuperview];
     [self initParentStack];
     [self layoutSections];
@@ -1915,13 +1945,22 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self updateTheme];
         //[self doneRemoveSettingItem];
     Settings *currentSettings = [dataMan retrieveSettings];
-    currentSettings.settingsMenuMode = [NSNumber numberWithInteger:currentSettingsMenuMode];
+    currentSettings.settingsMenuMode = [NSNumber numberWithInteger:self.currentSettingsMenuMode];
     [dataMan saveData];
     [self layoutSettingsView];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (@available(iOS 13.0, *)){
+            if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
+            [GamepadNavigationIllustrationHud updateHud];
+            if(ControllerUtil.primaryGCController){
+                [ControllerNavigator restoreSettingsModeSwitchHighlight];
+            };
+        }
+    });
 }
 
 - (void)enterRemoveSettingItemMode{
-    currentSettingsMenuMode = RemoveSettingItem;
+    self.currentSettingsMenuMode = RemoveSettingItem;
     for(UIStackView* stack in _parentStack.arrangedSubviews){
         for(UIView* view in stack.subviews){
             if([view.accessibilityIdentifier isEqualToString:@"infoButton"]) view.hidden = YES;
@@ -1933,7 +1972,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)doneRemoveSettingItem{
-    currentSettingsMenuMode = FavoriteSettings;
+    self.currentSettingsMenuMode = FavoriteSettings;
     for(UIStackView* stack in _parentStack.arrangedSubviews){
         //stack.userInteractionEnabled = true;
         for(UIView* view in stack.subviews){
@@ -1960,7 +1999,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void)saveFavoriteSettingStackIdentifiers {
     
-    if(currentSettingsMenuMode != AllSettings){
+    if(self.currentSettingsMenuMode != AllSettings){
         [_favoriteSettingStackIdentifiers removeAllObjects];
         //for(NSInteger i = 0; i < parentStack.arrangedSubviews.count; i++){
         for(NSInteger i = 0; i < _parentStack.arrangedSubviews.count; i++){
@@ -2061,7 +2100,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         }
 
 
-        self->currentSettingsMenuMode = self->tempSettings.settingsMenuMode.intValue;
+        self.currentSettingsMenuMode = self->tempSettings.settingsMenuMode.intValue;
         [self loadFavoriteSettingStackIdentifiers];
         if(self->tempSettings.settingsMenuMode.intValue == FavoriteSettings) [self switchToFavoriteSettings];
 
@@ -2074,6 +2113,9 @@ BOOL isCustomResolution(int resolutionSelected) {
         // CGFloat safeAreaWidth = (window.frame.size.width - window.safeAreaInsets.left - window.safeAreaInsets.right) * screenScale;
         // CGFloat fullScreenWidth = window.frame.size.width * screenScale;
         // CGFloat fullScreenHeight = window.frame.size.height * screenScale;
+        
+        self.resolutionSelectorStack.accessibilityIdentifier = @"resolutionSelectorStack";
+        self.customResolutionStack.accessibilityIdentifier = @"customResolutionStack";
 
         [self.resolutionSelector removeSegmentAtIndex:0 animated:NO]; // remove 360p
         [self.resolutionSelector removeSegmentAtIndex:5 animated:NO]; // remove custom segment
@@ -2418,15 +2460,15 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.onScreenWidgetSelector sendActionsForControlEvents:UIControlEventValueChanged];
 
         /*
+         // touch move event interval for native-touch.
         [self.touchMoveEventIntervalSlider setValue:self->tempSettings.touchMoveEventInterval.intValue animated:NO]; // Load old setting.
         [self.touchMoveEventIntervalSlider addTarget:self action:@selector(touchMoveEventIntervalSliderMoved:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
         [self touchMoveEventIntervalSliderMoved:self.touchMoveEventIntervalSlider];
+         */
 
-        // touch move event interval for native-touch.
         [self.leftClickDelaySlider setValue:self->tempSettings.leftClickDelayMs.intValue animated:NO]; // Load old setting.
         [self.leftClickDelaySlider addTarget:self action:@selector(leftClickDelaySliderMoved:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
-        [self leftClickDelaySliderMoved:self.leftClickDelaySlider];
-        */
+        [self.leftClickDelaySlider sendActionsForControlEvents:UIControlEventValueChanged];
         
         // touchMode refactored to game profile system
         [self.touchModeSelector1 addTarget:self action:@selector(touchMode1Changed:) forControlEvents:UIControlEventValueChanged];
@@ -2437,11 +2479,15 @@ BOOL isCustomResolution(int resolutionSelected) {
         
         [self.sendDummyEventSwitch setOn:self->tempSettings.sendDummyEvent];// Load old setting
         
-        [self.controllerToMouseSwitch setOn:self->tempSettings.mapControllerToMouse];
-        [self.controllerToMouseSwitch addTarget:self action:@selector(controllerToMouseSwitchFlipped:) forControlEvents:UIControlEventValueChanged];
-        [self.controllerToMouseSwitch sendActionsForControlEvents:UIControlEventValueChanged];
+        [self.controllerNavigationSwitch setOn:self->tempSettings.enableControllerNavigation];
+        [self.controllerNavigationSwitch addTarget:self action:@selector(controllerNavigationSwitchFlipped:) forControlEvents:UIControlEventValueChanged];
+        [self.controllerNavigationSwitch sendActionsForControlEvents:UIControlEventValueChanged];
 
         [self.controllerGyroSwitchButtonSetter addTarget:self action:@selector(controllerGyroSwitchModeChanged:) forControlEvents:UIControlEventValueChanged];
+        
+        [self.streamingRadialMenuDelaySlider setValue:self->tempSettings.streamingRadialMenuDelay.floatValue];
+        [self.streamingRadialMenuDelaySlider addTarget:self action:@selector(streamingRadialMenuDelaySliderMoved:) forControlEvents:UIControlEventValueChanged];
+        [self.streamingRadialMenuDelaySlider sendActionsForControlEvents:UIControlEventValueChanged];
         
         [self.controllerMouseVelocitySlider setValue:self->tempSettings.controllerMousePointerVelocity.floatValue];
         [self.controllerMouseVelocitySlider addTarget:self action:@selector(controllerMouseVelocitySliderMoved:) forControlEvents:UIControlEventValueChanged];
@@ -2511,10 +2557,13 @@ BOOL isCustomResolution(int resolutionSelected) {
             NSLog(@"OK button tapped with no change");
         } */
         
-        // Continue execution after the alert is dismissed
-        if (!self->_mainFrameViewController.settingsExpandedInStreamView) {
-            [self invokeOscLayout]; // Don't open osc layout tool immediately during streaming
-        }
+        [alertController dismissViewControllerAnimated:true completion:^{
+            // Continue execution after the alert is dismissed
+            if (!self->_mainFrameViewController.settingsExpandedInStreamView) {
+                [self invokeOscLayout]; // Don't open osc layout tool immediately during streaming
+            }
+        }];
+
         /*
         [self findDynamicLabelFromStack:self.onScreenWidgetStack].text = [self isCustomOswEnabled] ? [LocalizationHelper localizedStringForKey:@"%d finger tap", self->oswLayoutFingers] : @"";
         [self handleOswGestureChange]; */
@@ -2725,16 +2774,18 @@ BOOL isCustomResolution(int resolutionSelected) {
                     }
                     [self->dataMan saveData];
                 }];
-                [AlertControllerUtil showAlertIn:self
-                                                title:[LocalizationHelper localizedStringForKey:@"Drift Correction"]
-                                              message:[LocalizationHelper localizedStringForKey:@"Calibrating..."]
-                                           withCancel:NO
-                                          buttonTitle:[LocalizationHelper localizedStringForKey:@"Finished!"]
-                                            countdown:6
-                                               action:^{}
-                                           completion:^{
-                    self.mapGyroToSelector.selectedSegmentIndex = self->oscProfile.mapGyroTo;
-                    [self.mapGyroToSelector sendActionsForControlEvents:UIControlEventValueChanged];
+                [AlertControllerUtil.alertController dismissViewControllerAnimated:true completion:^{
+                    [AlertControllerUtil showAlertIn:self
+                                                    title:[LocalizationHelper localizedStringForKey:@"Drift Correction"]
+                                                  message:[LocalizationHelper localizedStringForKey:@"Calibrating..."]
+                                               withCancel:NO
+                                              buttonTitle:[LocalizationHelper localizedStringForKey:@"Finished!"]
+                                                countdown:6
+                                                   action:^{}
+                                               completion:^{
+                        self.mapGyroToSelector.selectedSegmentIndex = self->oscProfile.mapGyroTo;
+                        [self.mapGyroToSelector sendActionsForControlEvents:UIControlEventValueChanged];
+                    }];
                 }];
             }
         }];
@@ -2766,20 +2817,32 @@ BOOL isCustomResolution(int resolutionSelected) {
             if(self->capturedController){
                 __weak typeof(self) weakSelf = self;
                                 
-                [ControllerUtil listenWithController:self->capturedController swapABXY:false handler:^(NSDictionary * buttonDict, GCExtendedGamepad * gamepad, GCControllerElement * element) {
+                [ControllerUtil listenWithController:self->capturedController swapABXY:false handler:^(NSDictionary * elementDict, GCExtendedGamepad * gamepad, GCControllerElement * element) {
                     __strong typeof(weakSelf) self = weakSelf;
                     if (!self) return;
-                    for(NSNumber* buttonFlagId in buttonDict){
-                        GCControllerButtonInput * button = (GCControllerButtonInput *)buttonDict[buttonFlagId];
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)element;
                         if(button.isPressed){
-                            if(sender.selectedSegmentIndex == ControllerGyroSwitchPressToToggle) self->oscProfile.controllerGyroSwitchToggle = buttonFlagId.intValue;
-                            if(sender.selectedSegmentIndex == ControllerGyroSwitchHoldDown) self->oscProfile.controllerGyroSwitchHold = buttonFlagId.intValue;
+                            if(sender.selectedSegmentIndex == ControllerGyroSwitchPressToToggle) self->oscProfile.controllerGyroSwitchToggle = elementEnumInstance.intValue;
+                            if(sender.selectedSegmentIndex == ControllerGyroSwitchHoldDown) self->oscProfile.controllerGyroSwitchHold = elementEnumInstance.intValue;
                             
                             switchButtonCaptured = true;
+                        
                             AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Finished"];
+                            for(UIAlertAction* action in AlertControllerUtil.alertController.actions) {
+                                action.enabled = false;
+                            }
                             gamepad.valueChangedHandler = nil;
                             if(confirmAction) [confirmAction setValue:[LocalizationHelper localizedStringForKey:@"OK"] forKey:@"title"];
                             [self->oscProfileMan replaceSelectedProfileWith:self->oscProfile overwriteDefault:true];
+                            
+                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1*NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                                [AlertControllerUtil.alertController dismissViewControllerAnimated:NO completion:nil];
+                                if(AlertControllerUtil.completion) AlertControllerUtil.completion();
+                            });
                         }
                     }
                 }];
@@ -2807,14 +2870,14 @@ BOOL isCustomResolution(int resolutionSelected) {
         }
                                    completion:^{
             if(!switchButtonCaptured){
-                if(sender.selectedSegmentIndex == ControllerGyroSwitchPressToToggle) self->oscProfile.controllerGyroSwitchToggle = ControllerButtonNull;
-                if(sender.selectedSegmentIndex == ControllerGyroSwitchHoldDown) self->oscProfile.controllerGyroSwitchHold = ControllerButtonNull;
+                if(sender.selectedSegmentIndex == ControllerGyroSwitchPressToToggle) self->oscProfile.controllerGyroSwitchToggle = ControllerElementNull;
+                if(sender.selectedSegmentIndex == ControllerGyroSwitchHoldDown) self->oscProfile.controllerGyroSwitchHold = ControllerElementNull;
                 [self->oscProfileMan replaceSelectedProfileWith:self->oscProfile overwriteDefault:true];
             }
             
-            bool noSwitchButtonSet = self->oscProfile.controllerGyroSwitchHold == ControllerButtonNull && self->oscProfile.controllerGyroSwitchToggle == ControllerButtonNull;
-            bool duplicatedButtons = self->oscProfile.controllerGyroSwitchHold == self->oscProfile.controllerGyroSwitchToggle && self->oscProfile.controllerGyroSwitchToggle != ControllerButtonNull;
-            bool bothButtonsSet = self->oscProfile.controllerGyroSwitchHold != ControllerButtonNull && self->oscProfile.controllerGyroSwitchToggle != ControllerButtonNull && !duplicatedButtons;
+            bool noSwitchButtonSet = self->oscProfile.controllerGyroSwitchHold == ControllerElementNull && self->oscProfile.controllerGyroSwitchToggle == ControllerElementNull;
+            bool duplicatedButtons = self->oscProfile.controllerGyroSwitchHold == self->oscProfile.controllerGyroSwitchToggle && self->oscProfile.controllerGyroSwitchToggle != ControllerElementNull;
+            bool bothButtonsSet = self->oscProfile.controllerGyroSwitchHold != ControllerElementNull && self->oscProfile.controllerGyroSwitchToggle != ControllerElementNull && !duplicatedButtons;
             tipLabel.text = @"";
             if(bothButtonsSet) tipLabel.text = [LocalizationHelper localizedStringForKey:@" both set "];
             if(duplicatedButtons){
@@ -2824,7 +2887,7 @@ BOOL isCustomResolution(int resolutionSelected) {
             }
             if(noSwitchButtonSet) sender.selectedSegmentIndex = ControllerGyroSwitchDisabled;
             if(!noSwitchButtonSet && !bothButtonsSet && !duplicatedButtons){
-                sender.selectedSegmentIndex = self->oscProfile.controllerGyroSwitchToggle != ControllerButtonNull ? ControllerGyroSwitchPressToToggle : ControllerGyroSwitchHoldDown;
+                sender.selectedSegmentIndex = self->oscProfile.controllerGyroSwitchToggle != ControllerElementNull ? ControllerGyroSwitchPressToToggle : ControllerGyroSwitchHoldDown;
             }
             
             [self setHidden:sender.selectedSegmentIndex==ControllerGyroSwitchDisabled forStack:self.reverseHoldButtonStack];
@@ -2834,21 +2897,26 @@ BOOL isCustomResolution(int resolutionSelected) {
     }
 }
 
-- (void)controllerToMouseSwitchFlipped:(UISwitch* )sender{
+- (void)controllerNavigationSwitchFlipped:(UISwitch* )sender{
+    
+    [self setHidden:!sender.isOn forStack:_streamingRadialMenuDelayStack];
     [self setHidden:!sender.isOn forStack:_controllerMouseVelocityStack];
     [self setHidden:!sender.isOn forStack:_controllerMouseExpoStack];
     if(!sender.isOn || settingsViewJustLoaded) return;
     [self.swapAbxySwitch setOn:false]; // swapAbxy can be enabled after mouse to controller is set
-    __block bool switchButtonCaptured = false;
+    __block bool localRadialMenuButtonCaptured = false;
+    __block bool streamingRadialMenuButtonCaptured = false;
+    __block bool previousTriggerPressed = false;
     __block bool stickCaptured = false;
     __block bool leftButtonCaptured = false;
     __block bool rightButtonCaptured = false;
+    __block bool metRadialButtonWithUndefinedPosition = false;
     __block NSMutableSet *capturedButtons = [NSMutableSet new];
     Settings* currentSettings = [dataMan retrieveSettings];
     [AlertControllerUtil showAlertIn:self
-                                title:[LocalizationHelper localizedStringForKey:@"Map controller to mouse"]
-                              message:[LocalizationHelper localizedStringForKey:@"mouseModeSwitchButtonTip"]
-                           withCancel:YES
+                                title:[LocalizationHelper localizedStringForKey:@"Controller Navigation"]
+                              message:[LocalizationHelper localizedStringForKey:@"radialMenuButtonTip"]
+                           withCancel:NO
                           buttonTitle:@""
                             countdown:0
                                action:^{
@@ -2861,42 +2929,152 @@ BOOL isCustomResolution(int resolutionSelected) {
                     element.preferredSystemGestureState = GCSystemGestureStateDisabled;
                 }
             }
+            
+            [ControllerUtil stopListeningPrimaryControllerWithStopListenToRadialMenuButton:true];
 
-            [ControllerUtil listenWithController:self->capturedController swapABXY:false handler:^(NSDictionary * buttonDict, GCExtendedGamepad * gamepad, GCControllerElement * element) {
+            [ControllerUtil listenWithController:self->capturedController swapABXY:false handler:^(NSDictionary * elementDict, GCExtendedGamepad * gamepad, GCControllerElement * element) {
                 __strong typeof(weakSelf) self = weakSelf;
                 if (!self) return;
                 
-                if(!switchButtonCaptured){
-                    for(NSNumber* buttonFlagId in buttonDict){
-                        GCControllerButtonInput * button = (GCControllerButtonInput *)buttonDict[buttonFlagId];
-                        if(button.isPressed && ![capturedButtons containsObject:buttonFlagId]){
-                            currentSettings.controllerMouseSwitch = buttonFlagId;
-                            [capturedButtons addObject:buttonFlagId];
-                            switchButtonCaptured = true;
-                            AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Move the stick you wish to use for mouse control. Another stick will be used for vertical & horizontal scroll."];
+                if(!localRadialMenuButtonCaptured){
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        if (@available(iOS 13.0, *)) if(![ControllerNavigator.radialMenuButtonPool containsObject:elementEnumInstance]) continue;
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)element;
+                        if(button.isPressed){
+                            currentSettings.localRadialMenuButton = elementEnumInstance;
+                            [capturedButtons addObject:elementEnumInstance];
+                            ControllerElementPosition position = [ControllerUtil positionFor:(ControllerElement)currentSettings.localRadialMenuButton.intValue];
+                            metRadialButtonWithUndefinedPosition = position == ControllerElementPositionUndefined || position == ControllerElementPositionMiddle;
+                            localRadialMenuButtonCaptured = true;
+                            if(button == gamepad.leftTrigger || button == gamepad.rightTrigger) previousTriggerPressed = true;
+                            if(metRadialButtonWithUndefinedPosition) {
+                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Which side of the controller is this button on?"];
+                                if (@available(iOS 13.0, *)) [ControllerNavigator updateHudForCustomRadialMenuButtonPosition];
+                                return;
+                            }
+                            AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the same or a different button for controller navigation during streaming."];
+                            
+                            return;
+                        }
+                        else if(button == gamepad.leftTrigger || button == gamepad.rightTrigger) previousTriggerPressed = false;
+                    }
+                }
+                
+                if(metRadialButtonWithUndefinedPosition && localRadialMenuButtonCaptured && !streamingRadialMenuButtonCaptured){
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)element;
+                        if(button.isPressed){
+                            switch (elementEnumInstance.intValue) {
+                                case ControllerElementDpadLeft:
+                                    currentSettings.customLocalRadialMenuButtonPosition = @(ControllerElementPositionLeft);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                case ControllerElementDpadRight:
+                                    currentSettings.customLocalRadialMenuButtonPosition = @(ControllerElementPositionRight);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                case ControllerElementDpadUp:
+                                    currentSettings.customLocalRadialMenuButtonPosition = @(ControllerElementPositionMiddle);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            
+                            if(!metRadialButtonWithUndefinedPosition){
+                                if (@available(iOS 13.0, *)) [GamepadNavigationIllustrationHud clearHud];
+                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the same or a different button for controller navigation during streaming."];
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                if(!streamingRadialMenuButtonCaptured && localRadialMenuButtonCaptured && !metRadialButtonWithUndefinedPosition){
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        if (@available(iOS 13.0, *)) if(![ControllerNavigator.radialMenuButtonPool containsObject:elementEnumInstance]) continue;
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)element;
+                        if(button == gamepad.leftTrigger || button == gamepad.rightTrigger) {
+                            if(button.isPressed == previousTriggerPressed) continue;
+                        }
+                        if(button.isPressed){
+                            currentSettings.streamingRadialMenuButton = elementEnumInstance;
+                            [capturedButtons addObject:elementEnumInstance];
+                            streamingRadialMenuButtonCaptured = true;
+                            ControllerElementPosition position = [ControllerUtil positionFor:(ControllerElement)currentSettings.streamingRadialMenuButton.intValue];
+                            metRadialButtonWithUndefinedPosition = currentSettings.streamingRadialMenuButton.intValue != currentSettings.localRadialMenuButton.intValue && (position == ControllerElementPositionUndefined || position == ControllerElementPositionMiddle);
+                            if(currentSettings.streamingRadialMenuButton.intValue == currentSettings.localRadialMenuButton.intValue) currentSettings.customStreamingRadialMenuButtonPosition = currentSettings.customLocalRadialMenuButtonPosition;
+                            if(metRadialButtonWithUndefinedPosition) {
+                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Which side of the controller is this button on?"];
+                                if (@available(iOS 13.0, *)) [ControllerNavigator updateHudForCustomRadialMenuButtonPosition];
+                                return;
+                            }
+                            AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Move the stick you want to use for mouse control. The other stick will be used for vertical and horizontal scrolling"];
                             return;
                         }
                     }
                 }
                 
-                if(!stickCaptured && switchButtonCaptured){
+                if(metRadialButtonWithUndefinedPosition && streamingRadialMenuButtonCaptured && localRadialMenuButtonCaptured){
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)element;
+                        if(button.isPressed){
+                            switch (elementEnumInstance.intValue) {
+                                case ControllerElementDpadLeft:
+                                    currentSettings.customStreamingRadialMenuButtonPosition = @(ControllerElementPositionLeft);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                case ControllerElementDpadRight:
+                                    currentSettings.customStreamingRadialMenuButtonPosition = @(ControllerElementPositionRight);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                case ControllerElementDpadUp:
+                                    currentSettings.customStreamingRadialMenuButtonPosition = @(ControllerElementPositionMiddle);
+                                    metRadialButtonWithUndefinedPosition = false;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if(!metRadialButtonWithUndefinedPosition){
+                                if (@available(iOS 13.0, *)) [GamepadNavigationIllustrationHud clearHud];
+                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Move the stick you want to use for mouse control. The other stick will be used for vertical and horizontal scrolling"];
+                                return;
+                            }
+                        }
+                    }
+                }
+                                
+                
+                if(!stickCaptured && streamingRadialMenuButtonCaptured && !metRadialButtonWithUndefinedPosition){
                     float leftStickOffset = hypotf(gamepad.leftThumbstick.xAxis.value, gamepad.leftThumbstick.yAxis.value);
                     float rightStickOffset = hypotf(gamepad.rightThumbstick.xAxis.value, gamepad.rightThumbstick.yAxis.value);
                     if(leftStickOffset>0.1||rightStickOffset>0.1){
-                        ControllerMouseStick stick = leftStickOffset>rightStickOffset ? LeftStickToMouse : RightStickToMouse;
+                        ControllerElement stick = leftStickOffset>rightStickOffset ? ControllerElementLeftStick : ControllerElementRightStick;
                         currentSettings.controllerMouseStick = @(stick);
                         stickCaptured = true;
                         AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the button for mouse left button"];
+                        return;
                     }
-                    return;
                 }
                 
+                    
+            
                 if(!leftButtonCaptured && stickCaptured){
-                    for(NSNumber* buttonFlagId in buttonDict){
-                        GCControllerButtonInput * button = (GCControllerButtonInput *)buttonDict[buttonFlagId];
-                        if(button.isPressed && ![capturedButtons containsObject:buttonFlagId]){
-                            currentSettings.controllerMouseLeftButton = buttonFlagId;
-                            [capturedButtons addObject:buttonFlagId];
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if(button.isPressed && ![capturedButtons containsObject:elementEnumInstance]){
+                            currentSettings.controllerMouseLeftButton = elementEnumInstance;
+                            [capturedButtons addObject:elementEnumInstance];
                             leftButtonCaptured = true;
                             AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the button for mouse right button"];
                             return;
@@ -2905,17 +3083,42 @@ BOOL isCustomResolution(int resolutionSelected) {
                 }
 
                 if(!rightButtonCaptured && leftButtonCaptured){
-                    for(NSNumber* buttonFlagId in buttonDict){
-                        GCControllerButtonInput * button = (GCControllerButtonInput *)buttonDict[buttonFlagId];
-                        if(button.isPressed && ![capturedButtons containsObject:buttonFlagId]){
-                            currentSettings.controllerMouseRightButton = buttonFlagId;
-                            [capturedButtons addObject:buttonFlagId];
+                    for(NSNumber* elementEnumInstance in elementDict){
+                        GCControllerElement * element = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+                        GCControllerButtonInput * button = (GCControllerButtonInput *)elementDict[elementEnumInstance];
+                        if(button.isPressed && ![capturedButtons containsObject:elementEnumInstance]){
+                            currentSettings.controllerMouseRightButton = elementEnumInstance;
+                            [capturedButtons addObject:elementEnumInstance];
                             rightButtonCaptured = true;
+                            
+                            if (@available(iOS 13.0, *)) {
+                                NSLog(@"custom posistion local %d , stream: %d", currentSettings.customLocalRadialMenuButtonPosition.intValue, currentSettings.customStreamingRadialMenuButtonPosition.intValue);
+                                
+                                ControllerNavigator.localRadialMenuButton = (ControllerElement)currentSettings.localRadialMenuButton.intValue;
+                                ControllerNavigator.customPositionForLocalRadialMenuButton = (ControllerElementPosition)currentSettings.customLocalRadialMenuButtonPosition.intValue;
+                                ControllerNavigator.streamingRadialMenuButton = (ControllerElement)currentSettings.streamingRadialMenuButton.intValue;
+                                ControllerNavigator.customPositionForStreamingRadialMenuButton = (ControllerElementPosition)currentSettings.customStreamingRadialMenuButtonPosition.intValue;
+                                ControllerNavigator.streamingRadialMenuDelay = (NSTimeInterval)currentSettings.streamingRadialMenuDelay.floatValue;
+                                ControllerNavigator.enabled = true;
+                                [ControllerNavigator setUINavigationDelegate:self];
+                                // ControllerNavigator.controllerMouseStick = (ControllerElement)currentSettings.controllerMouseStick.intValue;
+                                // ControllerNavigator.controllerMouseLeftButton = (ControllerElement)currentSettings.controllerMouseLeftButton.intValue;
+                                // ControllerNavigator.controllerMouseRightButton = (ControllerElement)currentSettings.controllerMouseRightButton.intValue;
+                                // ControllerNavigator.controllerMouseExpo = currentSettings.controllerMouseExpo.floatValue;
+                            }
+                            
                             AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Finished"];
                             gamepad.valueChangedHandler = nil;
+                            // deprecated:
                             UIAlertAction* cancelAction = AlertControllerUtil.alertController.actions.firstObject;
                             if(cancelAction) [cancelAction setValue:[LocalizationHelper localizedStringForKey:@"OK"] forKey:@"title"];
+                            //
                             [self->dataMan saveData];
+                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1*NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                                if (@available(iOS 13.0, *)) [ControllerNavigator restartListening];
+                                [AlertControllerUtil.alertController dismissViewControllerAnimated:NO completion:nil];
+                            });
                         }
                     }
                 }
@@ -2932,12 +3135,12 @@ BOOL isCustomResolution(int resolutionSelected) {
                                           action:^{}
                                       completion:^{
                     if(AlertControllerUtil.actionCancelled){
-                        [self.controllerToMouseSwitch setOn:NO];
-                        [self.controllerToMouseSwitch sendActionsForControlEvents:UIControlEventValueChanged];
+                        [self.controllerNavigationSwitch setOn:NO];
+                        [self.controllerNavigationSwitch sendActionsForControlEvents:UIControlEventValueChanged];
                         return;
                     }
                     [AlertControllerUtil.alertController dismissViewControllerAnimated:NO completion:^{}];
-                    [self.controllerToMouseSwitch sendActionsForControlEvents:UIControlEventValueChanged];
+                    [self.controllerNavigationSwitch sendActionsForControlEvents:UIControlEventValueChanged];
                 }];
             }];
         }
@@ -2945,8 +3148,8 @@ BOOL isCustomResolution(int resolutionSelected) {
                                completion:^{
         if(AlertControllerUtil.actionCancelled){
             if(!rightButtonCaptured){
-                [self.controllerToMouseSwitch setOn:rightButtonCaptured];
-                [self.controllerToMouseSwitch sendActionsForControlEvents:UIControlEventValueChanged];
+                [self.controllerNavigationSwitch setOn:rightButtonCaptured];
+                [self.controllerNavigationSwitch sendActionsForControlEvents:UIControlEventValueChanged];
             }
             if(self->capturedController && self->capturedController.extendedGamepad) self->capturedController.extendedGamepad.valueChangedHandler = nil;
         }
@@ -2972,25 +3175,25 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)rollSensitivitySliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:_rollSensitivityStack].text = [NSString stringWithFormat:@"  %d%%  ", (int16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (int16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]];
 }
 
 - (void)gyroMinStickOffsetSliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:_gyroToStickMinOffsetStack].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, _rollToLeftStickSwitch.isOn?sender.value:0, 0, _yawPitchToRightStickSwitch.isOn?sender.value:0, 0);
     OnScreenWidgetView.gamepadArrivalReported = true;
 }
 
 - (void)leftStickMinOffsetSliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:_leftStickMinOffsetStack].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, sender.value, 0, 0, 0);
     OnScreenWidgetView.gamepadArrivalReported = true;
 }
 
 - (void)rightStickMinOffsetSliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:_rightStickMinOffsetStack].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, 0, 0, sender.value, 0);
     OnScreenWidgetView.gamepadArrivalReported = true;
@@ -3056,24 +3259,24 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) pointerVelocityModeDividerSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:self.pointerVelocityDividerStack].text = [NSString stringWithFormat:@"  | %d%% | %d%% |  ", (uint8_t)sender.value, 100-(uint8_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  | %d%% | %d%% |  ", (uint8_t)sender.value, 100-(uint8_t)sender.value];
 }
 
 - (void) touchPointerVelocityFactorSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:self.pointerVelocityFactorStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]]; // Update label display
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]]; // Update label display
 }
 
 - (void) gyroSensitivitySliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:self.gyroSensitivityStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
 }
 
 - (void) localVolumeSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:self.localVolumeStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
     if(_mainFrameViewController.settingsExpandedInStreamView) [Connection setVolume:sender.value/100];
 }
 
 - (void) micVolumeSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:self.micVolumeStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
     if(_mainFrameViewController.settingsExpandedInStreamView) [MicHandler setVolume:sender.value/100];
 }
 
@@ -3082,7 +3285,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     labelString = [LocalizationHelper localizedStringForKey:@"  keep %d min  ", (uint16_t)sender.value];
     if(sender.value == 0) labelString = [LocalizationHelper localizedStringForKey:@"  disconnect  "];
     if(sender.value == sender.maximumValue) labelString = [LocalizationHelper localizedStringForKey:@"  keep alive  "];
-    [self findDynamicLabelFromStack:self.backgroundSessionTimerStack].text = labelString; // Update label display
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = labelString; // Update label display
 }
 
 - (void)appThemeChanged:(UISegmentedControl* )sender{
@@ -3110,31 +3313,35 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) mousePointerVelocityFactorSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_mousePointerVelocityStack].text = [NSString stringWithFormat:@"  %d%%  ",(uint16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ",(uint16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]];
 }
 
 - (void) singleTapSensitivitySliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_singleTapSensitivityStack].text = [NSString stringWithFormat:@"  %.1f  ",sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.1f  ",sender.value];
 }
 
 - (void) scrollSensitivitySliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_scrollSensitivityStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)(sender.value*100)];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)(sender.value*100)];
 }
 
 - (void) pinchSensitivitySliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_pinchSensitivityStack].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)(sender.value*100)];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)(sender.value*100)];
 }
 
 - (void) relativeTouchSlideThresholdSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_relativeTouchSlideThresholdStack].text = [NSString stringWithFormat:@" %.1f ",sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@" %.1f ",sender.value];
 }
 
 - (void) controllerMouseVelocitySliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_controllerMouseVelocityStack].text = [NSString stringWithFormat:@"  %.1f  ", sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.1f  ", sender.value];
+}
+
+- (void) streamingRadialMenuDelaySliderMoved:(UISlider* )sender {
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.1f s  ", sender.value];
 }
 
 - (void) controllerMouseExpoSliderMoved:(UISlider* )sender {
-    [self findDynamicLabelFromStack:_controllerMouseExpoStack].text = [NSString stringWithFormat:@"  %.1f  ", sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.1f  ", sender.value];
 }
 
 - (uint32_t) getScreenEdgeFromSelector {
@@ -3580,27 +3787,27 @@ BOOL isCustomResolution(int resolutionSelected) {
     NSInteger width = [self getChosenStreamWidth];
     NSInteger height = [self getChosenStreamHeight];
     
-    [self findDynamicLabelFromStack:_resolutionStack].text = [NSString stringWithFormat:@"%ld × %ld", (long)width, (long)height];
+    [self findDynamicLabelFromStack:_resolutionSelectorStack].text = [NSString stringWithFormat:@"%ld × %ld", (long)width, (long)height];
 }
 
 - (void) touchMoveEventIntervalSliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:self.touchMoveEventIntervalStack].text = sender.enabled ?
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = sender.enabled ?
     [NSString stringWithFormat:@"  %d μs  ", (uint16_t)self.touchMoveEventIntervalSlider.value] : @"";
 }
 
 - (void) leftClickDelaySliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:self.leftClickDelayStack].text = [NSString stringWithFormat:@"  %d ms  ", (uint16_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d ms  ", (uint16_t)sender.value];
 }
 
 - (void) slideToMenuDistanceSliderMoved:(UISlider* )sender{
-    UILabel* displayLabel = [self findDynamicLabelFromStack:_slideToSettingsDistanceStack];
+    UILabel* displayLabel = [self findDynamicLabelFromStack:(UIStackView*)sender.superview];
     // displayLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightMedium];
     NSString* labelText = [LocalizationHelper localizedStringForKey:@"%d%% screen width", (uint8_t)(sender.value * 100)];
     displayLabel.text = [NSString stringWithFormat:@"  %@  ", labelText];
 }
 
 - (void) edgeSlidingSensitivitySliderMoved:(UISlider* )sender{
-    UILabel* displayLabel = [self findDynamicLabelFromStack:_edgeSlidingSensitivityStack];
+    UILabel* displayLabel = [self findDynamicLabelFromStack:(UIStackView*)sender.superview];
     // displayLabel.font = [UIFont systemFontOfSize:12 weight:UIFontWeightMedium];
     NSString* labelText = [LocalizationHelper localizedStringForKey:@"  %d  ", (uint8_t)sender.value];
     displayLabel.text = [NSString stringWithFormat:@"  %@  ", labelText];
@@ -3782,7 +3989,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void) frameQueueSizeSliderMoved:(UISlider* )sender {
     assert(self.frameQueueSizeSlider.value >= 0 && self.frameQueueSizeSlider.value <= 5);
     int queueSize = self.frameQueueSizeSlider.value;
-    [self findDynamicLabelFromStack:_frameQueueSizeStack].text = queueSize==0 ? [LocalizationHelper localizedStringForKey:@"lowest latency"] : [NSString stringWithFormat: @"  %d  ", queueSize];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = queueSize==0 ? [LocalizationHelper localizedStringForKey:@"lowest latency"] : [NSString stringWithFormat: @"  %d  ", queueSize];
 }
 
 - (void) enableGraphsChanged:(UISwitch* )sender {
@@ -3811,6 +4018,8 @@ BOOL isCustomResolution(int resolutionSelected) {
     if(![MicHandler permissionGranted]) [self.redirectMicSwitch setOn:false];
     
     [self saveGameProfileConfigs];
+    
+    if (@available(iOS 13.0, *)) if(!self.controllerNavigationSwitch.isOn) ControllerNavigator.enabled = false;
 }
 
 - (void)pencilTickModeChanged:(UISegmentedControl* )sender{
@@ -3863,7 +4072,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)pencilTickIntervalSliderMoved:(UISlider* )sender{
-    [self findDynamicLabelFromStack:self.pencilTickIntervalStack].text = [NSString stringWithFormat:@"  %d μs  ", (uint16_t)sender.value];
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d μs  ", (uint16_t)sender.value];
 }
 
 - (void)pressureCurveSwitchFlipped:(UISwitch* )sender{
@@ -3964,7 +4173,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         self.pencilTickSelector.selectedSegmentIndex = tempSettings.pencilTickMode.intValue;
         [self.pencilTickSelector addTarget:self action:@selector(pencilTickModeChanged:) forControlEvents:UIControlEventValueChanged];
         [self.pencilTickSelector sendActionsForControlEvents:UIControlEventValueChanged];
-        
+                
         [self.pencilTickIntervalSlider setValue:tempSettings.pencilTickIntervalUs.floatValue];
         [self.pencilTickIntervalSlider addTarget:self action:@selector(pencilTickIntervalSliderMoved:) forControlEvents:UIControlEventValueChanged];
         [self.pencilTickIntervalSlider sendActionsForControlEvents:UIControlEventValueChanged];
@@ -4079,7 +4288,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     BOOL ctrlDownForPinch = self.ctrlDownForPinchSwitch.isOn;
     CGFloat leftClickDelayMs = self.leftClickDelaySlider.value;
     BOOL passthroughGestures = self.passthroughGesturesSwitch.isOn;
-    BOOL mapControllerToMouse = self.controllerToMouseSwitch.isOn;
+    BOOL enableControllerNavigation = self.controllerNavigationSwitch.isOn;
     CGFloat controllerMousePointerVelocity = self.controllerMouseVelocitySlider.value;
     CGFloat controllerMouseExpo = self.controllerMouseExpoSlider.value;
     NSInteger controllerGyroSwitchMode = self.controllerGyroSwitchButtonSetter.selectedSegmentIndex;
@@ -4087,6 +4296,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     BOOL asyncFrameDequeue = self.asyncFrameDequeueSwitch.isOn;
     CGFloat softKeyboardHeight = self.softKeyboardHeightSwitch.isOn ? self->softKeyboardHeight : 0;
     BOOL globeAsEscape = self.globeAsEscapeSwitch.isOn;
+    CGFloat streamingRadialMenuDelay = self.streamingRadialMenuDelaySlider.value;
     NSInteger backgroundSessionTimer = self.backgroundSessionTimerSlider.value == self.backgroundSessionTimerSlider.maximumValue ? (uint32_t) INT16_MAX : (uint32_t)self.backgroundSessionTimerSlider.value;
     
     [dataMan saveSettings:currentSettings
@@ -4156,7 +4366,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                     leftClickDelayMs:leftClickDelayMs
                   settingsMenuOffset:settingsMenuOffset
                  passthroughGestures:passthroughGestures
-                mapControllerToMouse:mapControllerToMouse
+          enableControllerNavigation:enableControllerNavigation
       controllerMousePointerVelocity:controllerMousePointerVelocity
                  controllerMouseExpo:controllerMouseExpo
             controllerGyroSwitchMode:controllerGyroSwitchMode
@@ -4164,7 +4374,8 @@ BOOL isCustomResolution(int resolutionSelected) {
                    asyncFrameDequeue:asyncFrameDequeue
             sdrPerformanceWorkaround:sdrPerformanceWorkaround
                   softKeyboardHeight:softKeyboardHeight
-                       globeAsEscape:globeAsEscape
+                      globeAsEscape:globeAsEscape
+           streamingRadialMenuDelay:streamingRadialMenuDelay
               backgroundSessionTimer:backgroundSessionTimer];
 }
 

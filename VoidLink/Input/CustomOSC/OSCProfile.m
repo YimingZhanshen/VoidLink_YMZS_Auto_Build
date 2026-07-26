@@ -121,8 +121,8 @@
         self.physicalRightStickMinOffset = [decoder containsValueForKey:@"physicalRightStickMinOffset"] ? [decoder decodeDoubleForKey:@"physicalRightStickMinOffset"] : 0;
         self.controllerGyroSwitchMode = [decoder containsValueForKey:@"controllerGyroSwitchMode"] ? [decoder decodeIntForKey:@"controllerGyroSwitchMode"] : ControllerGyroSwitchDisabled;
         self.reverseGyroHoldButton = [decoder containsValueForKey:@"reverseGyroHoldButton"] ? [decoder decodeBoolForKey:@"reverseGyroHoldButton"] : false;
-        self.controllerGyroSwitchHold = [decoder containsValueForKey:@"controllerGyroSwitchHold"] ? [decoder decodeIntForKey:@"controllerGyroSwitchHold"] : ControllerButtonNull;
-        self.controllerGyroSwitchToggle = [decoder containsValueForKey:@"controllerGyroSwitchToggle"] ? [decoder decodeIntForKey:@"controllerGyroSwitchToggle"] : ControllerButtonNull;
+        self.controllerGyroSwitchHold = [decoder containsValueForKey:@"controllerGyroSwitchHold"] ? [decoder decodeIntForKey:@"controllerGyroSwitchHold"] : ControllerElementNull;
+        self.controllerGyroSwitchToggle = [decoder containsValueForKey:@"controllerGyroSwitchToggle"] ? [decoder decodeIntForKey:@"controllerGyroSwitchToggle"] : ControllerElementNull;
         
         self.touchMode = [decoder containsValueForKey:@"touchMode"] ? [decoder decodeIntForKey:@"touchMode"] : NativeTouch;
         if(self.touchMode == NativeTouchOnly) self.touchMode = NativeTouch;

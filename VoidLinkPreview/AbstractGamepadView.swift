@@ -518,7 +518,7 @@ struct AbstractGamepadView: View {
         applyTriggerSelection(widget)
         applyDS4TouchSelection(widget)
         
-        print("selectedCmd =", AbstractGamepadView.selectedCmd)
+        // print("selectedCmd =", AbstractGamepadView.selectedCmd)
         return true
     }
     
@@ -733,8 +733,8 @@ struct AbstractGamepadView: View {
         if liveSnapshot.pressedButtons.contains(.b) { result.insert(.b) }
         if liveSnapshot.pressedButtons.contains(.x) { result.insert(.x) }
         if liveSnapshot.pressedButtons.contains(.y) { result.insert(.y) }
-        if liveSnapshot.pressedButtons.contains(.menu) { result.insert(.start) }
-        if liveSnapshot.pressedButtons.contains(.back) { result.insert(.select) }
+        if liveSnapshot.pressedButtons.contains(.start) { result.insert(.start) }
+        if liveSnapshot.pressedButtons.contains(.select) { result.insert(.select) }
         if liveSnapshot.pressedButtons.contains(.special) { result.insert(.home) }
         if liveSnapshot.pressedButtons.contains(.leftShoulder) { result.insert(.leftShoulder) }
         if liveSnapshot.pressedButtons.contains(.rightShoulder) { result.insert(.rightShoulder) }

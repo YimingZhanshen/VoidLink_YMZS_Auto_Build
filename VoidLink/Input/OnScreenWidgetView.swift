@@ -59,13 +59,11 @@ import ObjectiveC.runtime
         func openWidgetProfileTable(pickProfile: Bool)
         func bringUpSoftKeyboard()
         func alterAbsTouchDragWith(mouseButton:Int32)
-        func switchPencilHover()
         func enablePencilHover()
         func disablePencilHover()
         func setAllowSingleTouchEnabled(_ enabled:Bool)
         func replaceBrush(shortcut:String)
         func replaceEraser(shortcut:String)
-        func setPencilTilt(disabled:Bool)
         func presentPressureCurveVC()
         func toggleTouch(disabled:Bool)
         func toggleGamepadOverlay(overlayEnabled:Bool)
@@ -1550,7 +1548,7 @@ import ObjectiveC.runtime
     private func sendLongMouseLeftButtonClickEvent() {
         DispatchQueue.global(qos: .userInteractive).async {
             // Logging the press event
-            NSLog("Sending left mouse button press")
+            // NSLog("Sending left mouse button press")
             LiSendMouseButtonEvent(CChar(BUTTON_ACTION_PRESS), BUTTON_LEFT)
             
             // Wait 200 ms to simulate a real button press
@@ -1560,7 +1558,9 @@ import ObjectiveC.runtime
                     LiSendMouseButtonEvent(CChar(BUTTON_ACTION_RELEASE), BUTTON_LEFT)
                     // NSLog("double click: first long click release")
                 }
-                else{NSLog("Left mouse button release cancelled, keep pressing down, turning into dragging...")}
+                else{
+                    // NSLog("Left mouse button release cancelled, keep pressing down, turning into dragging...")
+                }
                 // Don't release the button if we're still dragging, this will prevent the dragging from being interrupted.
             }
         }

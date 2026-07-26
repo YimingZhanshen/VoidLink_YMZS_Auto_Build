@@ -13,32 +13,43 @@
 #import "DiscoveryManager.h"
 #import "PairManager.h"
 #import "StreamConfiguration.h"
-#import "UIAppView.h"
 #import "AppAssetManager.h"
 #import "SWRevealViewController.h"
-#import "VoidLink-Swift.h"
 
+@class SettingsViewController;
+@class TemporaryApp;
+@class HostCollectionViewController;
 
-@interface MainFrameViewController : UICollectionViewController <DiscoveryCallback, PairCallback, AppCallback, AppAssetCallback, NSURLConnectionDelegate, SWRevealViewControllerDelegate, HostCardActionDelegate, AppViewUpdateLoopDelegate, UITextFieldDelegate, ControllerNavigatorRadialMenuDelegate>
+@interface MainFrameViewController : UICollectionViewController <DiscoveryCallback, PairCallback, AppAssetCallback, NSURLConnectionDelegate, SWRevealViewControllerDelegate, UITextFieldDelegate>
+
 
 @property (nonatomic, strong) IBOutlet UIBarButtonItem *settingsButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *profilesButton;
+@property (weak, nonatomic) SettingsViewController *settingsViewController;
+@property (nonatomic, strong) HostCollectionViewController *hostCollectionVC;
+@property (nonatomic, strong, readonly) NSArray<TemporaryApp *> *sortedAppList;
 
 #if !TARGET_OS_TV
 @property (nonatomic, assign) bool settingsExpandedInStreamView;
-@property (nonatomic, strong) HostCollectionViewController *hostCollectionVC;
+@property (nonatomic, readonly) bool settingsViewExpanded;
 @property (weak, nonatomic) IBOutlet UINavigationItem *navigationItem;
 
 
--(void)expandSettingsView;
+- (void)expandSettingsView;
 - (void)closeSettingViewAnimated:(BOOL)anaimated;
 - (void)reloadStreamConfig;
 - (bool)isIPhonePortrait;
-- (void)quitRunningApp;
+- (bool)isInAppView;
+- (bool)isStreaming;
+- (TemporaryApp*)findRunningApp:(TemporaryHost*)host;
+- (void)quitApp:(TemporaryApp* )app;
+- (void)quitLaunchedApp;
+- (void)launchApp:(TemporaryApp *)app;
+- (void)quitRunningAppAndStart:(TemporaryApp *)app;
+
 - (NSInteger)requestForBitrate:(NSInteger)bitrateKbps;
 #endif
 - (void)fillResolutionTable:(CGSize*)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode;
-- (bool)isIPhone;
 - (void)setNeedsUpdateAllowedOrientation;
 
 @end

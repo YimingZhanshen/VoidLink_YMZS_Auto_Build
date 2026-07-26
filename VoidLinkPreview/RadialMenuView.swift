@@ -10,11 +10,28 @@ import SwiftUI
 import Combine
 import UIKit
 
-public enum RadialMenuItem {
+@objc public enum RadialMenuItem:Int {
     case settings
+    case favoriteSettings
+    case allSettings
+    case addHost
+    case aboutView
     case hostView
     case gameProfiles
+    case disconnect
+    case mouse
+    case quitApp
+    case theme
+    case more
+    case navigationSettings
     case exit
+}
+
+@objc public enum RadialMenuState:Int {
+    case main
+    case mouseModeEnabled
+    case disconnectAndQuit
+    case moreOptions
 }
 
 @available(iOS 13.0, *)
@@ -22,13 +39,13 @@ struct RadialMenuSector: Identifiable, Equatable {
     let id = UUID()
     let title: String
     let subtitle: String
-    let systemImageName: String
+    let symbolName: String
     let item: RadialMenuItem
 
-    init(title: String, subtitle: String, systemImageName: String, item: RadialMenuItem) {
+    init(title: String, subtitle: String, symbol: String, item: RadialMenuItem) {
         self.title = title
         self.subtitle = subtitle
-        self.systemImageName = systemImageName
+        self.symbolName = symbol
         self.item = item
     }
 }
@@ -38,7 +55,7 @@ struct RadialMenuStyle: Equatable {
     var ringColor = Color(white: 0.86)
     var selectedRingColor = Color(red: 0.19, green: 0.72, blue: 0.96)
     var ringStrokeColor = Color.white.opacity(0.72)
-    var centerFillColor = Color.white
+    var centerFillColor = Color(ThemeManager.hostViewBackgroundColor.withAlphaComponent(0.5))
     var iconColor = Color(white: 0.23)
     var selectedIconColor = Color(white: 0.16)
     var titleColor = Color(white: 0.24)
@@ -46,35 +63,97 @@ struct RadialMenuStyle: Equatable {
     var shadowColor = Color.black.opacity(0.18)
     var ringWidthRatio: CGFloat = 0.41
     var segmentGapWidth: CGFloat = 1
-    var centerIconScale: CGFloat = 0.16
+    var centerIconScale: CGFloat = 0.13
     var segmentIconScale: CGFloat = 0.085
+
+    static func themed(for userInterfaceStyle: UIUserInterfaceStyle, accentColor: UIColor) -> RadialMenuStyle {
+        switch userInterfaceStyle {
+        case .dark:
+            return RadialMenuStyle(
+                ringColor: Color(UIColor(red: 44.0 / 255.0, green: 44.0 / 255.0, blue: 46.0 / 255.0, alpha: 0.88)),
+                selectedRingColor: Color(accentColor.withAlphaComponent(0.52)),
+                ringStrokeColor: Color.white.opacity(0.26),
+                // centerFillColor: Color(UIColor(red: 28.0 / 255.0, green: 28.0 / 255.0, blue: 30.0 / 255.0, alpha: 0.96)),
+                centerFillColor: Color(ThemeManager.hostViewBackgroundColor.withAlphaComponent(0.5)),
+                iconColor: Color(UIColor(white: 0.86, alpha: 1)),
+                selectedIconColor: Color.white,
+                titleColor: Color(UIColor(white: 0.92, alpha: 1)),
+                subtitleColor: Color(UIColor(white: 0.70, alpha: 1)),
+                shadowColor: Color(accentColor.withAlphaComponent(0)),
+                ringWidthRatio: 0.41,
+                segmentGapWidth: 1,
+                centerIconScale: 0.16,
+                segmentIconScale: 0.085
+            )
+        default:
+            return RadialMenuStyle(
+                selectedRingColor: Color(accentColor.withAlphaComponent(0.86))
+            )
+        }
+    }
+}
+
+@available(iOS 13.0, *)
+enum RadialMenuSelectionChangeReason {
+    case began
+    case moved
+    case released
+    case unchanged
 }
 
 @available(iOS 13.0, *)
 final class RadialMenuSelectionState: ObservableObject {
     @Published private(set) var selectedIndex: Int?
     @Published private(set) var hasReceivedJoystickInput = false
+    @Published private(set) var lastChangeReason: RadialMenuSelectionChangeReason = .unchanged
 
     private var itemCount = 0
 
-    func updateSelection(xOffset: Float, yOffset: Float) {
+    func updateSelection(xOffset: CGFloat, yOffset: CGFloat) {
         updateSelection(xOffset: xOffset, yOffset: yOffset, deadZone: 0.1)
     }
 
-    func updateSelection(xOffset: Float, yOffset: Float, deadZone: Float) {
+    func updateSelection(xOffset: CGFloat, yOffset: CGFloat, deadZone: CGFloat) {
+        let x = max(min(xOffset, 1), -1)
+        let y = max(min(yOffset, 1), -1)
+        let distance = hypot(x, y)
+        if distance < deadZone {
+            guard !hasReceivedJoystickInput || selectedIndex != nil else {
+                lastChangeReason = .unchanged
+                return
+            }
+
+            hasReceivedJoystickInput = true
+            lastChangeReason = selectedIndex == nil ? .unchanged : .released
+            selectedIndex = nil
+            return
+        }
+
+        // Near center, tiny return-to-center offsets have unstable angles. Keep the
+        // last high-confidence sector until the stick fully enters the dead zone.
+        let selectionUpdateDeadZone = max(deadZone, 0.35)
+        guard distance >= selectionUpdateDeadZone else {
+            hasReceivedJoystickInput = true
+            lastChangeReason = .unchanged
+            return
+        }
+
         let nextSelectedIndex = Self.selectedIndex(
-            xOffset: xOffset,
-            yOffset: yOffset,
+            xOffset: x,
+            yOffset: y,
             itemCount: itemCount,
             deadZone: deadZone
         )
 
         guard !hasReceivedJoystickInput || nextSelectedIndex != selectedIndex else {
+            lastChangeReason = .unchanged
             return
         }
 
+        let previousSelectedIndex = selectedIndex
         hasReceivedJoystickInput = true
         selectedIndex = nextSelectedIndex
+        lastChangeReason = Self.changeReason(from: previousSelectedIndex, to: nextSelectedIndex)
     }
 
     fileprivate func configureItemCount(_ itemCount: Int) {
@@ -84,7 +163,7 @@ final class RadialMenuSelectionState: ObservableObject {
         }
     }
 
-    static func selectedIndex(xOffset: Float, yOffset: Float, itemCount: Int, deadZone: Float = 0.1) -> Int? {
+    static func selectedIndex(xOffset: CGFloat, yOffset: CGFloat, itemCount: Int, deadZone: CGFloat = 0.1) -> Int? {
         guard itemCount > 0 else { return nil }
 
         let x = max(min(xOffset, 1), -1)
@@ -103,6 +182,19 @@ final class RadialMenuSelectionState: ObservableObject {
     private static func positiveRemainder(_ value: Double, _ divisor: Double) -> Double {
         let remainder = value.truncatingRemainder(dividingBy: divisor)
         return remainder >= 0 ? remainder : remainder + divisor
+    }
+
+    private static func changeReason(from previousIndex: Int?, to nextIndex: Int?) -> RadialMenuSelectionChangeReason {
+        switch (previousIndex, nextIndex) {
+        case (nil, .some):
+            return .began
+        case (.some(let previous), .some(let next)) where previous != next:
+            return .moved
+        case (.some, nil):
+            return .released
+        default:
+            return .unchanged
+        }
     }
 }
 
@@ -151,7 +243,7 @@ struct RadialMenuView: View {
         self.joystickSelectionState.configureItemCount(sectors.count)
     }
 
-    func updateSelection(xOffset: Float, yOffset: Float) {
+    func updateSelection(xOffset: CGFloat, yOffset: CGFloat) {
         joystickSelectionState.configureItemCount(sectors.count)
         joystickSelectionState.updateSelection(xOffset: xOffset, yOffset: yOffset)
     }
@@ -192,9 +284,13 @@ struct RadialMenuView: View {
 
                 ForEach(sectors.indices, id: \.self) { index in
                     let item = sectors[index]
-                    Image(systemName: item.systemImageName)
-                        .font(.system(size: max(diameter * style.segmentIconScale, 18), weight: .medium))
-                        .foregroundColor(index == effectiveSelectedIndex ? style.selectedIconColor : style.iconColor)
+                    RadialMenuIconView(
+                        symbolName: item.symbolName,
+                        fallbackSystemName: "circle",
+                        size: max(diameter * style.segmentIconScale, 18),
+                        weight: .medium,
+                        color: index == effectiveSelectedIndex ? style.selectedIconColor : style.iconColor
+                    )
                         .scaleEffect(index == effectiveSelectedIndex ? 1.18 : 1)
                         .position(iconPosition(index: index, count: sectors.count, center: center, radius: (outerRadius + innerRadius) / 2))
                         .animation(.spring(response: 0.24, dampingFraction: 0.72), value: effectiveSelectedIndex)
@@ -203,7 +299,7 @@ struct RadialMenuView: View {
                 RadialMenuCenterView(item: selectedItem, style: style, diameter: diameter)
                     .frame(width: innerRadius * 1.72, height: innerRadius * 1.72)
                     .position(center)
-                    .animation(.easeInOut(duration: 0.16), value: effectiveSelectedIndex)
+                    .animation(.easeInOut(duration: selectedItem?.item == .gameProfiles ? 0 : 0.16), value: effectiveSelectedIndex)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .contentShape(Circle())
@@ -266,18 +362,25 @@ private struct RadialMenuCenterView: View {
     let diameter: CGFloat
 
     var body: some View {
-        VStack(spacing: max(diameter * 0.018, 4)) {
-            Image(systemName: item?.systemImageName ?? "circle.grid.cross")
-                .font(.system(size: max(diameter * style.centerIconScale, 28), weight: .medium))
-                .foregroundColor(style.iconColor)
+        VStack(spacing: 0) {
+            RadialMenuIconView(
+                symbolName: item?.symbolName ?? "circle.grid.cross",
+                fallbackSystemName: "circle.grid.cross",
+                size: centerIconSize,
+                weight: .medium,
+                color: style.iconColor
+            )
                 .id(item?.id)
                 .transition(.opacity)
+                .frame(width: centerIconSize * 1.35, height: centerIconSize * 1.2)
+                .padding(.bottom, centerIconTitleSpacing)
 
             Text(item?.title ?? "")
                 .font(.system(size: max(diameter * 0.047, 13), weight: .medium))
                 .foregroundColor(style.titleColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.62)
+                .padding(.bottom, item?.subtitle.isEmpty == false ? centerTextSpacing : 0)
 
             if item?.subtitle.isEmpty == false {
                 Text(item?.subtitle ?? "")
@@ -289,6 +392,114 @@ private struct RadialMenuCenterView: View {
         }
         .multilineTextAlignment(.center)
         .padding(.horizontal, diameter * 0.035)
+    }
+
+    private var centerIconSize: CGFloat {
+        max(diameter * style.centerIconScale, 28)
+    }
+
+    private var centerTextSpacing: CGFloat {
+        max(diameter * 0.018, 4)
+    }
+
+    private var centerIconTitleSpacing: CGFloat {
+        if #available(iOS 14.0, *) {
+            return centerTextSpacing
+        }
+
+        return max(diameter * 0.034, 8)
+    }
+}
+
+@available(iOS 13.0, *)
+private struct RadialMenuIconView: View {
+    let symbolName: String
+    let fallbackSystemName: String
+    let size: CGFloat
+    let weight: Font.Weight
+    let color: Color
+
+    var body: some View {
+        Group {
+            if UIImage(systemName: symbolName) != nil {
+                Image(systemName: symbolName)
+                    .font(.system(size: size, weight: weight))
+            } else if let assetImage = RadialMenuIconImageRenderer.templateImage(named: symbolName, pointSize: size) {
+                Image(uiImage: assetImage)
+                    .renderingMode(.template)
+            } else {
+                Image(systemName: fallbackSystemName)
+                    .font(.system(size: size, weight: weight))
+            }
+        }
+        .foregroundColor(color)
+    }
+}
+
+@available(iOS 13.0, *)
+private enum RadialMenuIconImageRenderer {
+    private static let cache = NSCache<NSString, UIImage>()
+    private static let assetCanvasScale: CGFloat = 1.05
+    private static let assetVisualScale: CGFloat = 1
+
+    static func templateImage(named name: String, pointSize: CGFloat) -> UIImage? {
+        let scale = UIScreen.main.scale
+        let normalizedPointSize = max(ceil(pointSize * 2) / 2, 1)
+        let cacheKey = "\(name)-\(normalizedPointSize)-\(scale)-\(assetCanvasScale)-\(assetVisualScale)" as NSString
+
+        if let cachedImage = cache.object(forKey: cacheKey) {
+            return cachedImage
+        }
+
+        guard let sourceImage = UIImage(named: name) else {
+            return nil
+        }
+
+        let canvasSize = CGSize(
+            width: normalizedPointSize * assetCanvasScale,
+            height: normalizedPointSize * assetCanvasScale
+        )
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+
+        let renderedImage = UIGraphicsImageRenderer(size: canvasSize, format: format).image { _ in
+            let drawBounds = scaledRect(
+                CGRect(origin: .zero, size: canvasSize),
+                by: assetVisualScale
+            )
+            sourceImage.draw(in: aspectFitRect(for: sourceImage.size, in: drawBounds))
+        }.withRenderingMode(.alwaysTemplate)
+
+        cache.setObject(renderedImage, forKey: cacheKey)
+        return renderedImage
+    }
+
+    private static func scaledRect(_ rect: CGRect, by scale: CGFloat) -> CGRect {
+        let width = rect.width * scale
+        let height = rect.height * scale
+        return CGRect(
+            x: rect.midX - width / 2,
+            y: rect.midY - height / 2,
+            width: width,
+            height: height
+        )
+    }
+
+    private static func aspectFitRect(for sourceSize: CGSize, in bounds: CGRect) -> CGRect {
+        guard sourceSize.width > 0, sourceSize.height > 0 else {
+            return bounds
+        }
+
+        let scale = min(bounds.width / sourceSize.width, bounds.height / sourceSize.height)
+        let width = sourceSize.width * scale
+        let height = sourceSize.height * scale
+        return CGRect(
+            x: bounds.midX - width / 2,
+            y: bounds.midY - height / 2,
+            width: width,
+            height: height
+        )
     }
 }
 
@@ -387,10 +598,10 @@ struct RadialMenuDemoView: View {
     @SwiftUI.State private var isTouchSelectionEnabled = true
 
     static let menuItems = [
-        RadialMenuSector(title: "Settings Menu".localized, subtitle: "", systemImageName: "sidebar.left", item: .settings),
-        RadialMenuSector(title: "Host View".localized, subtitle: "", systemImageName: PublicUtils.liquidGlassEnabled ? "macwindow.on.rectangle" : "tv", item: .hostView),
-        RadialMenuSector(title: "Game Profiles".localized, subtitle: "", systemImageName: "gamecontroller.circle", item: .gameProfiles),
-        RadialMenuSector(title: "Exit/Disconnect".localized, subtitle: "", systemImageName: "personalhotspot.slash", item: .gameProfiles),
+        RadialMenuSector(title: "Settings Menu".localized, subtitle: "", symbol: "sidebar.left", item: .settings),
+        RadialMenuSector(title: "Host View".localized, subtitle: "", symbol: PublicUtils.liquidGlassEnabled ? "macwindow.on.rectangle" : "tv", item: .hostView),
+        RadialMenuSector(title: "Game Profiles".localized, subtitle: "", symbol: "gamecontroller.circle", item: .gameProfiles),
+        RadialMenuSector(title: "Exit/Disconnect".localized, subtitle: "", symbol: "personalhotspot.slash", item: .gameProfiles),
     ]
 
     private var visibleItems: [RadialMenuSector] {

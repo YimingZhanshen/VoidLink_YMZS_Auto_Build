@@ -36,6 +36,7 @@ class ThemeManager: NSObject {
     
     @objc class func setUserInterfaceStyle(_ style: UIUserInterfaceStyle) {
         _privateUserInterfaceStyle = style
+        applyUserInterfaceStyleOverride(style)
         
         if _userInterfaceStyle == style {
             return
@@ -47,6 +48,27 @@ class ThemeManager: NSObject {
             name: Notification.Name(ThemeDidChangeNotification),
             object: nil
         )
+    }
+
+    @objc class func applyUserInterfaceStyleOverride(_ style: UIUserInterfaceStyle) {
+        guard #available(iOS 13.0, *) else { return }
+
+        let applyOverride = {
+            let sceneWindows = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+
+            let allWindows = sceneWindows + UIApplication.shared.windows
+            Set(allWindows).forEach { window in
+                window.overrideUserInterfaceStyle = style
+            }
+        }
+
+        if Thread.isMainThread {
+            applyOverride()
+        } else {
+            DispatchQueue.main.async(execute: applyOverride)
+        }
     }
     
     @objc static var menuBackgroundColor: UIColor {

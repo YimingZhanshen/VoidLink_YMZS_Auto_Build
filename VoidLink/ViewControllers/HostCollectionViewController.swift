@@ -126,7 +126,6 @@ class HostCollectionViewController: UICollectionViewController, UICollectionView
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        NSLog("View did appear")
     }
 
     override func didMove(toParent parent: UIViewController?) {
@@ -209,6 +208,7 @@ class HostCollectionViewController: UICollectionViewController, UICollectionView
         if let host = items[indexPath.item] as? TemporaryHost {
             cell.configure(with: host)
         }
+        applyControllerNavigationHighlight(to: cell, highlighted: indexPath == controllerNavigationSelectedIndexPath)
         return cell
     }
 

@@ -76,6 +76,11 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 }
 
 
+@interface StreamFrameViewController () <ToolboxSpecialEntryDelegate, OnScreenFunctionalWidgetDelegate, AbstractGamepadOverlayCloseButtonDelegate>
+@end
+
+static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil;
+
 @implementation StreamFrameViewController {
     ControllerSupport *_controllerSupport;
     TemporarySettings *_settings;
@@ -128,6 +133,10 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     UITapGestureRecognizer *_playPauseTapGestureRecognizer;
 #endif
 
+}
+
++ (StreamFrameViewController *)sharedInstance {
+    return VLSharedStreamFrameViewController;
 }
 
 - (void)pictureInPictureControllerWillStartPictureInPicture:(AVPictureInPictureController *)pictureInPictureController {
@@ -660,6 +669,12 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     [self setMagnifierViewportInteractionEnabled:_oscProfile.touchMode == AbsoluteTouch && !_settings.passthroughGestures];
     
     GenericUtils.globeAsEscape = _settings.globeAsEscape;
+    
+    if (@available(iOS 13.0, *)) {
+        ControllerNavigator.localRadialMenuButton = (ControllerElement)_settings.localRadialMenuButton.intValue;
+        ControllerNavigator.streamingRadialMenuButton = (ControllerElement)_settings.streamingRadialMenuButton.intValue;
+        ControllerNavigator.streamingRadialMenuDelay = (NSTimeInterval)_settings.streamingRadialMenuDelay.floatValue;
+    }
 
     NSLog(@"frameview gestures: %d", (uint32_t)[self.view.gestureRecognizers count]);
     NSLog(@"streamview gestures: %d", (uint32_t)[_streamView.gestureRecognizers count]);
@@ -828,6 +843,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 
 - (void)viewDidLoad
 {
+    VLSharedStreamFrameViewController = self;
     _viewJustLoaded = true;
     viewIsBeingResized = false;
     _magnifierViewportInteractionActive = false;
@@ -1005,8 +1021,6 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     dispatch_after(delay, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         OnScreenWidgetView.enableFolderAnimation = true;
     });
-    
-    [ControllerNavigator stop];
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification{
@@ -1118,10 +1132,12 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     if(!profile){
         profile = [OSCProfilesManager sharedManager:CGRectZero].getSelectedProfile;
     }
-    [self setMagnifierViewportInteractionEnabled:true];
-    CGPoint streamViewOffset = CGPointMake(profile.normalizedStreamViewOffset.x*self.view.bounds.size.width, profile.normalizedStreamViewOffset.y*self.view.bounds.size.height);
-    [self restoreMagnifierStreamViewWithOffset:streamViewOffset scale:profile.streamViewScale animated:YES];
-    [self setMagnifierViewportInteractionEnabled:profile.touchMode == AbsoluteTouch && !_settings.passthroughGestures];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self setMagnifierViewportInteractionEnabled:true];
+        CGPoint streamViewOffset = CGPointMake(profile.normalizedStreamViewOffset.x*self.view.bounds.size.width, profile.normalizedStreamViewOffset.y*self.view.bounds.size.height);
+        [self restoreMagnifierStreamViewWithOffset:streamViewOffset scale:profile.streamViewScale animated:YES];
+        [self setMagnifierViewportInteractionEnabled:profile.touchMode == AbsoluteTouch && !self->_settings.passthroughGestures];
+    });
 }
 
 - (void)restoreMagnifierStreamViewWithOffset:(CGPoint)offset scale:(CGFloat)scale {
@@ -1289,10 +1305,10 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 - (void)setupOverlayView{
     if (_overlayView == nil) {
         _overlayView = [[PaddedLabel alloc] initWithFrame:CGRectZero];
-        [_overlayView setTextInsets:UIEdgeInsetsMake([_mainFrameViewcontroller isIPhone]?4:6, 12, [_mainFrameViewcontroller isIPhone]?4:6, 12)];
+        [_overlayView setTextInsets:UIEdgeInsetsMake(PublicUtils.isIPhone?4:6, 12, PublicUtils.isIPhone?4:6, 12)];
         [_overlayView setUserInteractionEnabled:NO];
         [_overlayView setNumberOfLines:100];
-        [_overlayView.layer setCornerRadius:[_mainFrameViewcontroller isIPhone]?7:10];
+        [_overlayView.layer setCornerRadius:PublicUtils.isIPhone?7:10];
         [_overlayView.layer setMasksToBounds:YES];
         
         // HACK: If not using stats overlay, center the text
@@ -1305,13 +1321,13 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 #if TARGET_OS_TV
         [_overlayView setFont:[UIFont systemFontOfSize:24 weight:UIFontWeightMedium]];
 #else
-        [_overlayView setFont:[UIFont systemFontOfSize: [_mainFrameViewcontroller isIPhone]?10:12 weight:UIFontWeightMedium]];
+        [_overlayView setFont:[UIFont systemFontOfSize: PublicUtils.isIPhone?10:12 weight:UIFontWeightMedium]];
 #endif
         [_overlayView setAlpha:(float)[_settings.graphOpacity intValue]/ 100.0];
         [self.view addSubview:_overlayView];
     }
     if (@available(iOS 13.0, *)) {
-       if(overlayLevel == 1) _overlayView.font = [UIFont monospacedSystemFontOfSize:[_mainFrameViewcontroller isIPhone]?10:12 weight:UIFontWeightMedium];
+       if(overlayLevel == 1) _overlayView.font = [UIFont monospacedSystemFontOfSize:PublicUtils.isIPhone?10:12 weight:UIFontWeightMedium];
     }
     
     [_overlayView setHidden:YES];
@@ -1336,7 +1352,18 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     }
 }
 
-- (void) returnToMainFrame {
+- (void)returnToMainFrame {
+    if (@available(iOS 13.0, *)) {
+        // [ControllerNavigator setUINavigationDelegate:[_mainFrameViewcontroller isInAppView] ? _mainFrameViewcontroller : _mainFrameViewcontroller.hostCollectionVC];
+        [ControllerNavigator restorePreviousUINavigationDelegateWithIfCurrentDelegateIs:self];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if(ControllerNavigator.radialMenuView) [ControllerNavigator updateRadialMenu];
+        });
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [ControllerNavigator restoreUINavigationHighlight];
+        });
+    }
+    
     [_streamView saveStreamingGameProfileChanges];
     [_streamView clearOnScreenWidgets];
     if(micHandler) [micHandler clean];
@@ -1347,11 +1374,11 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     if (@available(iOS 13.0, *)) {
         [SceneDelegate clearExternalDisplayRenderView];
     }
-
+    
     if (_settings.enablePIP) {
         [self cleanupPiPController];
     }
-
+    
     [_statsUpdateTimer invalidate];
     _statsUpdateTimer = nil;
     
@@ -1360,8 +1387,10 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     _extWindow = nil;
     
     if(_streamConfig.redirectMic) [micHandler stopTappingWithStopEngine:true];
-
+    
     self.mainFrameViewcontroller.settingsExpandedInStreamView = false; // reset this flag to false
+        
+    [ControllerUtil disableSysGestures: ControllerUtil.primaryGCController];
 }
 
 // External Screen connected
@@ -1569,7 +1598,6 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 }
 
 - (void)expandSettingsView{
-    self.mainFrameViewcontroller.settingsExpandedInStreamView = true; //notify mainFrameViewContorller that this is a setting expansion in stream view, some settings shall be disabled.
     [_streamView saveStreamingGameProfileChanges];
     [self.mainFrameViewcontroller expandSettingsView];
 }
@@ -1593,7 +1621,7 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         sleep(1.5);
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.mainFrameViewcontroller quitRunningApp];
+            [self.mainFrameViewcontroller quitLaunchedApp];
         });
     });
 }
@@ -2258,6 +2286,9 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
 
 
 - (void)dealloc {
+    if (VLSharedStreamFrameViewController == self) {
+        VLSharedStreamFrameViewController = nil;
+    }
     NSLog(@"dealloc StreamFrameViewController %f", CACurrentMediaTime());
 }
 
@@ -2270,5 +2301,6 @@ static NSString* VLTerminationHintForErrorCode(int errorCode) {
         });
     }];
 }
+
 
 @end

@@ -22,6 +22,7 @@
 #import "HttpRequest.h"
 #import "IdManager.h"
 #import "LocalizationHelper.h"
+#import "VoidLink-Swift.h"
 
 #include <Limelight.h>
 

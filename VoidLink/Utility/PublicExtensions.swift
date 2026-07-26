@@ -8,6 +8,14 @@
 
 import UIKit
 
+extension UIViewController {
+    var hasNoPresentedVC: Bool {
+        let hasPresentedVC = self.presentedViewController == nil && self.view.window != nil
+        // let presentedVC = self.presentedViewController
+        return hasPresentedVC
+    }
+}
+
 public extension UIView {
     var parentViewController: UIViewController? {
         var responder: UIResponder? = self
@@ -27,6 +35,15 @@ public extension CGPoint {
     }
 }
 
+public extension Array where Element: Equatable {
+    @discardableResult
+    mutating func appendIfNotContains(_ newElement: Element) -> Bool {
+        guard !contains(newElement) else { return false }
+        append(newElement)
+        return true
+    }
+}
+
 public extension String {
     var localized: String {
         LocalizationHelper.localizedString(forKey: self)
@@ -37,6 +54,35 @@ public extension String {
         let isRestored = self.contains(" - Restored")
         let localized = isRestored ? "\(parts.first?.localized ?? "") - \("Restored".localized)" : self.localized
         return localized
+    }
+}
+
+public extension UIFont {
+    static func roundedSystemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let font = UIFont.systemFont(ofSize: size, weight: weight)
+        if #available(iOS 13.0, *) {
+            if let roundedDescriptor = font.fontDescriptor.withDesign(.rounded) {
+                return UIFont(descriptor: roundedDescriptor, size: size)
+            }
+        }
+
+        return font
+    }
+}
+
+public extension UISlider {
+    func step(forward: Bool, visualStepRatio: Float) {
+        let range = self.maximumValue - self.minimumValue
+        guard range > 0 else { return }
+
+        let step = range * visualStepRatio
+        let nextValue = self.value + (forward ? step : -step)
+
+        let clampedValue = min(max(nextValue, self.minimumValue), self.maximumValue)
+        DispatchQueue.main.async {
+            self.setValue(clampedValue, animated: false)
+            self.sendActions(for: .valueChanged)
+        }
     }
 }
 
@@ -104,7 +150,7 @@ public extension UISegmentedControl {
 
         let currentValue = selectedSegmentIndex
         if currentValue != newValue {
-            storePreviousSelectedSegmentIndex(newValue)
+            storePreviousSelectedSegmentIndex(currentValue)
             storeLastKnownSelectedSegmentIndex(newValue)
         }
 
@@ -181,5 +227,11 @@ public extension UISegmentedControl {
         } else {
             method_exchangeImplementations(originalMethod, swizzledMethod)
         }
+    }
+    
+    func nextIndex(forward: Bool) -> Int {
+        var targetIndex = forward ? self.selectedSegmentIndex + 1 : self.selectedSegmentIndex - 1
+        targetIndex = forward ? (targetIndex == self.numberOfSegments ? 0 : targetIndex) : (targetIndex == -1 ? self.numberOfSegments-1 : targetIndex)
+        return targetIndex
     }
 }

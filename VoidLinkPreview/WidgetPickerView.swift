@@ -777,7 +777,7 @@ struct WidgetPickerView: View {
         FunctionalButtonOption(
             localizationKey: "=disableTilt",
             cmd: "DISABLETILT",
-            tip: LocalizationHelper.localizedString(forKey: "Disable tilt for apple pencil"),
+            tip: "Disable tilt for apple pencil".localized,
             allowsKeyboardCombination: false,
             allowsGamepadCombination: false,
             allowsSkillCombo: false,

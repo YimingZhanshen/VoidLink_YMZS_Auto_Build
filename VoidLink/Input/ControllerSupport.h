@@ -26,6 +26,8 @@
 
 @property (readonly) bool shallDisableGyroHotSwitch;
 
++(ControllerSupport*) sharedInstance;
+
 -(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
 -(void) connectionEstablished;
 
@@ -59,5 +61,8 @@
 -(NSUInteger) getConnectedGamepadCount;
 
 -(void)updateControllerSupport:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
+
+-(void) reinitiatePrimaryController;
+-(void)sendNavigationButtonPress;
 
 @end

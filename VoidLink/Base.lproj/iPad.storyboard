@@ -71,27 +71,32 @@
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="zpX-lo-MLA" userLabel="Resolutionstak">
                                 <rect key="frame" x="16" y="57" width="380" height="92.5"/>
                                 <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Resolution   " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pYZ-GR-EwO">
-                                        <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
-                                        <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="17"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                        <size key="shadowOffset" width="0.0" height="0.0"/>
-                                    </label>
-                                    <segmentedControl verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" apportionsSegmentWidthsByContent="YES" segmentControlStyle="plain" selectedSegmentIndex="5" translatesAutoresizingMaskIntoConstraints="NO" id="ckc-Dm-8ex">
-                                        <rect key="frame" x="0.0" y="25.5" width="380" height="35"/>
-                                        <segments>
-                                            <segment title="360p" enabled="NO"/>
-                                            <segment title="720p"/>
-                                            <segment title="1080p"/>
-                                            <segment title="4K"/>
-                                            <segment title="Safe Area"/>
-                                            <segment title="FullScr/Window"/>
-                                            <segment title="Custom"/>
-                                        </segments>
-                                        <color key="tintColor" systemColor="linkColor"/>
-                                        <color key="selectedSegmentTintColor" systemColor="linkColor"/>
-                                    </segmentedControl>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Iv4-iA-dkv" userLabel="ResolutionSelectorStack">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="59.5"/>
+                                        <subviews>
+                                            <label verifyAmbiguity="off" opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Resolution   " lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pYZ-GR-EwO">
+                                                <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
+                                                <fontDescription key="fontDescription" name=".AppleSystemUIFont" family=".AppleSystemUIFont" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                                <size key="shadowOffset" width="0.0" height="0.0"/>
+                                            </label>
+                                            <segmentedControl verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" apportionsSegmentWidthsByContent="YES" segmentControlStyle="plain" selectedSegmentIndex="5" translatesAutoresizingMaskIntoConstraints="NO" id="ckc-Dm-8ex">
+                                                <rect key="frame" x="0.0" y="25.5" width="380" height="35"/>
+                                                <segments>
+                                                    <segment title="360p" enabled="NO"/>
+                                                    <segment title="720p"/>
+                                                    <segment title="1080p"/>
+                                                    <segment title="4K"/>
+                                                    <segment title="Safe Area"/>
+                                                    <segment title="FullScr/Window"/>
+                                                    <segment title="Custom"/>
+                                                </segments>
+                                                <color key="tintColor" systemColor="linkColor"/>
+                                                <color key="selectedSegmentTintColor" systemColor="linkColor"/>
+                                            </segmentedControl>
+                                        </subviews>
+                                    </stackView>
                                     <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="djj-8b-2pB" userLabel="ResolutionInnerStack2">
                                         <rect key="frame" x="0.0" y="64.5" width="380" height="28"/>
                                         <subviews>
@@ -972,16 +977,16 @@
                                 </constraints>
                             </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="0n9-vQ-WC2">
-                                <rect key="frame" x="852" y="850" width="300" height="31"/>
+                                <rect key="frame" x="852" y="850" width="310.5" height="31"/>
                                 <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Controller → Mouse" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.64999997615814209" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P1g-rW-Mgp" userLabel="uiLabel">
-                                        <rect key="frame" x="0.0" y="0.0" width="150" height="31"/>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Controller Navigation" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.64999997615814209" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="P1g-rW-Mgp" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="160.5" height="31"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ect-CM-odK">
-                                        <rect key="frame" x="170" y="0.0" width="132" height="31"/>
+                                        <rect key="frame" x="180.5" y="0.0" width="132" height="31"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="130" id="G04-14-Q74"/>
                                         </constraints>
@@ -991,44 +996,24 @@
                                     <constraint firstAttribute="height" constant="31" id="7kp-OR-e5f"/>
                                 </constraints>
                             </stackView>
-                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="lBq-CW-xFb">
-                                <rect key="frame" x="852" y="899" width="380" height="55.5"/>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="xXr-dB-QWZ">
+                                <rect key="frame" x="852" y="911" width="380" height="55.5"/>
                                 <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Pointer Velocity" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xnd-C4-8N9" userLabel="uiLabel">
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Streaming Radial Menu Delay" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9d1-RN-lqW" userLabel="uiLabel">
                                         <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
                                         <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="60" translatesAutoresizingMaskIntoConstraints="NO" id="w6S-nD-AXU">
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="3" translatesAutoresizingMaskIntoConstraints="NO" id="qZX-tG-Pwf">
                                         <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
                                         <color key="tintColor" systemColor="linkColor"/>
                                     </slider>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="380" id="4aR-eF-inq"/>
-                                    <constraint firstAttribute="height" constant="55.5" id="ScL-Y2-bDH"/>
-                                </constraints>
-                            </stackView>
-                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="5gN-F1-wWR">
-                                <rect key="frame" x="852" y="974" width="380" height="55.5"/>
-                                <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Curve Exponent" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Cy-aH-DXp" userLabel="uiLabel">
-                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
-                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="ciD-6k-n6o">
-                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
-                                        <color key="tintColor" systemColor="linkColor"/>
-                                    </slider>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="380" id="h9D-G7-Nuh"/>
-                                    <constraint firstAttribute="height" constant="55.5" id="kLV-xF-5SV"/>
+                                    <constraint firstAttribute="height" constant="55.5" id="3OW-fn-a4x"/>
+                                    <constraint firstAttribute="width" constant="380" id="Vyh-Uu-Qdl"/>
                                 </constraints>
                             </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="v6i-HA-XRx">
@@ -1054,46 +1039,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="56.5" id="loF-uJ-Fuw"/>
                                     <constraint firstAttribute="width" constant="380" id="qOk-ee-a8A"/>
-                                </constraints>
-                            </stackView>
-                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="B5K-lN-ZSc">
-                                <rect key="frame" x="852" y="1055" width="380" height="55.5"/>
-                                <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Left Stick Minimum Offset" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3XV-jL-NYF" userLabel="uiLabel">
-                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
-                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="16383" translatesAutoresizingMaskIntoConstraints="NO" id="KtJ-qH-KJX">
-                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
-                                        <color key="tintColor" systemColor="linkColor"/>
-                                    </slider>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="380" id="EJU-Jy-UYb"/>
-                                    <constraint firstAttribute="height" constant="55.5" id="z8Y-An-DwI"/>
-                                </constraints>
-                            </stackView>
-                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="yl0-WY-ZqV">
-                                <rect key="frame" x="852" y="1129" width="380" height="55.5"/>
-                                <subviews>
-                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Right Stick Minimum Offset" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f3L-bA-RW6" userLabel="uiLabel">
-                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
-                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="16383" translatesAutoresizingMaskIntoConstraints="NO" id="qt5-Hq-mIa">
-                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
-                                        <color key="tintColor" systemColor="linkColor"/>
-                                    </slider>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="380" id="Skp-ya-Odl"/>
-                                    <constraint firstAttribute="height" constant="55.5" id="f4J-WQ-LBI"/>
                                 </constraints>
                             </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="A31-WC-As7">
@@ -2198,6 +2143,86 @@
                                     <constraint firstAttribute="height" constant="31" id="EpQ-lj-XBq"/>
                                 </constraints>
                             </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="lBq-CW-xFb">
+                                <rect key="frame" x="852" y="987" width="380" height="55.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Controller Mouse Velocity" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xnd-C4-8N9" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
+                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="60" translatesAutoresizingMaskIntoConstraints="NO" id="w6S-nD-AXU">
+                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
+                                        <color key="tintColor" systemColor="linkColor"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="4aR-eF-inq"/>
+                                    <constraint firstAttribute="height" constant="55.5" id="ScL-Y2-bDH"/>
+                                </constraints>
+                            </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="5gN-F1-wWR">
+                                <rect key="frame" x="852" y="1062" width="380" height="55.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Curve Exponent" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6Cy-aH-DXp" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
+                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="1" maxValue="5" translatesAutoresizingMaskIntoConstraints="NO" id="ciD-6k-n6o">
+                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
+                                        <color key="tintColor" systemColor="linkColor"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="h9D-G7-Nuh"/>
+                                    <constraint firstAttribute="height" constant="55.5" id="kLV-xF-5SV"/>
+                                </constraints>
+                            </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="B5K-lN-ZSc">
+                                <rect key="frame" x="852" y="1143" width="380" height="55.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Left Stick Minimum Offset" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3XV-jL-NYF" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
+                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="16383" translatesAutoresizingMaskIntoConstraints="NO" id="KtJ-qH-KJX">
+                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
+                                        <color key="tintColor" systemColor="linkColor"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="EJU-Jy-UYb"/>
+                                    <constraint firstAttribute="height" constant="55.5" id="z8Y-An-DwI"/>
+                                </constraints>
+                            </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="yl0-WY-ZqV">
+                                <rect key="frame" x="852" y="1217" width="380" height="55.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Right Stick Minimum Offset" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f3L-bA-RW6" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="16.5"/>
+                                        <color key="tintColor" red="0.81533776120000001" green="0.85979419950000002" blue="0.91372549020000005" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="16383" translatesAutoresizingMaskIntoConstraints="NO" id="qt5-Hq-mIa">
+                                        <rect key="frame" x="0.0" y="21.5" width="380" height="34"/>
+                                        <color key="tintColor" systemColor="linkColor"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="Skp-ya-Odl"/>
+                                    <constraint firstAttribute="height" constant="55.5" id="f4J-WQ-LBI"/>
+                                </constraints>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </view>
@@ -2230,10 +2255,11 @@
                         <outlet property="controllerMouseExpoStack" destination="5gN-F1-wWR" id="hgt-xH-dts"/>
                         <outlet property="controllerMouseVelocitySlider" destination="w6S-nD-AXU" id="rws-D6-zMT"/>
                         <outlet property="controllerMouseVelocityStack" destination="lBq-CW-xFb" id="zOW-iC-wBn"/>
-                        <outlet property="controllerToMouseStack" destination="0n9-vQ-WC2" id="DhB-o2-VWn"/>
-                        <outlet property="controllerToMouseSwitch" destination="Ect-CM-odK" id="SCB-GH-0hd"/>
+                        <outlet property="controllerNavigationStack" destination="0n9-vQ-WC2" id="DhB-o2-VWn"/>
+                        <outlet property="controllerNavigationSwitch" destination="Ect-CM-odK" id="SCB-GH-0hd"/>
                         <outlet property="ctrlDownForPinchStack" destination="4Jb-ey-ca7" id="Ou2-Qz-VO6"/>
                         <outlet property="ctrlDownForPinchSwitch" destination="zfr-Wn-dB4" id="GXR-zn-daI"/>
+                        <outlet property="customResolutionStack" destination="djj-8b-2pB" id="MQH-Fc-cH9"/>
                         <outlet property="customResolutionSwitch" destination="E5w-kK-dOo" id="hrt-v2-8dY"/>
                         <outlet property="delayLeftClickStack" destination="Xp7-7O-Ndt" id="CwB-Wy-beh"/>
                         <outlet property="delayLeftClickSwitch" destination="Haf-rg-zLB" id="FaA-3p-JDw"/>
@@ -2340,6 +2366,7 @@
                         <outlet property="renderingBackendSelector" destination="53H-ST-OtY" id="jhu-Pw-Phg"/>
                         <outlet property="renderingBackendStack" destination="6hG-dw-YSr" id="qqz-lA-EOE"/>
                         <outlet property="resolutionSelector" destination="ckc-Dm-8ex" id="rl6-rx-wd3"/>
+                        <outlet property="resolutionSelectorStack" destination="Iv4-iA-dkv" id="vlg-5X-iMR"/>
                         <outlet property="resolutionStack" destination="zpX-lo-MLA" id="9Hu-I9-hjH"/>
                         <outlet property="reverseHoldButtonStack" destination="mB8-aJ-7qO" id="3bo-br-Tcb"/>
                         <outlet property="reverseHoldButtonSwitch" destination="00w-mO-Ehj" id="Ptz-f8-nTx"/>
@@ -2378,6 +2405,8 @@
                         <outlet property="squeezeShortcutSwitch" destination="VCg-Es-PQV" id="kgj-FT-fcZ"/>
                         <outlet property="statsOverlaySelector" destination="NLH-qN-qCo" id="EF8-JF-O3S"/>
                         <outlet property="statsOverlayStack" destination="UcP-0b-nJD" id="UdI-NS-O6k"/>
+                        <outlet property="streamingRadialMenuDelaySlider" destination="qZX-tG-Pwf" id="V5Z-kn-irq"/>
+                        <outlet property="streamingRadialMenuDelayStack" destination="xXr-dB-QWZ" id="I9M-3Y-HGg"/>
                         <outlet property="swapAbxyStack" destination="2rP-Ui-wVU" id="gUR-Vz-ORP"/>
                         <outlet property="swapAbxySwitch" destination="hv7-6b-rez" id="iKX-qk-Dep"/>
                         <outlet property="swapYawAndRollStack" destination="EsN-yO-7OW" id="Ncq-Y1-lku"/>

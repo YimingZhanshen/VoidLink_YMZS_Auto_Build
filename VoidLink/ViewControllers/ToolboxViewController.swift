@@ -463,7 +463,7 @@ import UIKit
     
     
     private func sendKeyboardCommand(_ cmd: RemoteCommand) {
-        print("Sending key-value")
+        // print("Sending key-value")
         let keyboardCmdStrings = CommandManager.shared.extractAutoReleaseButtonStrings(from: cmd.cmdString)
         CommandManager.shared.sendAutoReleaseComboCommand(cmdStrings: keyboardCmdStrings!)
     }

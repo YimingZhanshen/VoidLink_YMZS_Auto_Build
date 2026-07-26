@@ -10,21 +10,21 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "AppDelegate.h"
-#import "MainFrameViewController.h"
-#import "CustomEdgeSlideGestureRecognizer.h"
-#import "VoidLink-Swift.h"
+#import "SWRevealViewController.h"
 
 @class LayoutOnScreenControlsViewController;
+@class MainFrameViewController;
 @class MicHandler;
 @class WidgetPickerViewController;
-@protocol WidgetPickerViewControllerDelegate;
 
-@interface SettingsViewController : UIViewController <RearNavigationBarMenuDelegate, MenuSectionDelegate, UITextFieldDelegate, WidgetPickerViewControllerDelegate>
+@interface SettingsViewController : UIViewController <RearNavigationBarMenuDelegate, UITextFieldDelegate>
 
 @property (strong, nonatomic) IBOutlet UINavigationBar *navigationBar;
 @property (strong, nonatomic) UIStackView *parentStack;
 @property (strong, nonatomic) IBOutlet UIStackView *resolutionStack;
+@property (strong, nonatomic) IBOutlet UIStackView *resolutionSelectorStack;
+@property (weak, nonatomic) IBOutlet UIStackView *customResolutionStack;
+
 @property (strong, nonatomic) IBOutlet UIStackView *fpsStack;
 @property (strong, nonatomic) IBOutlet UIStackView *bitrateStack;
 @property (strong, nonatomic) IBOutlet UIStackView *touchModeStack;
@@ -103,7 +103,8 @@
 @property (strong, nonatomic) IBOutlet UILabel *mousePointerVelocityFactorUILabel;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *unlockDisplayOrientationSelector;
 @property (weak, nonatomic) LayoutOnScreenControlsViewController *layoutOnScreenControlsVC;
-@property (nonatomic, strong) MainFrameViewController *mainFrameViewController;
+@property (nonatomic, weak) MainFrameViewController *mainFrameViewController;
+@property (strong, nonatomic) UIView *controllerNavigationHighlightOverlayView;
 
 @property (strong, nonatomic) IBOutlet UISegmentedControl *externalDisplayModeSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *localMousePointerModeSelector;
@@ -231,8 +232,11 @@
 @property (weak, nonatomic) IBOutlet UIStackView *softKeyboardHeightStack;
 @property (weak, nonatomic) IBOutlet UISwitch *softKeyboardHeightSwitch;
 
-@property (strong, nonatomic) IBOutlet UIStackView *controllerToMouseStack;
-@property (strong, nonatomic) IBOutlet UISwitch *controllerToMouseSwitch;
+@property (strong, nonatomic) IBOutlet UIStackView *controllerNavigationStack;
+@property (strong, nonatomic) IBOutlet UISwitch *controllerNavigationSwitch;
+
+@property (weak, nonatomic) IBOutlet UIStackView *streamingRadialMenuDelayStack;
+@property (weak, nonatomic) IBOutlet UISlider *streamingRadialMenuDelaySlider;
 
 @property (strong, nonatomic) IBOutlet UIStackView *controllerMouseVelocityStack;
 @property (strong, nonatomic) IBOutlet UISlider *controllerMouseVelocitySlider;
@@ -307,11 +311,13 @@
 
 // This is okay because it's just an enum and access uses @available checks
 @property(nonatomic) UIUserInterfaceStyle overrideUserInterfaceStyle;
+@property(nonatomic, readonly) SettingsMenuMode currentSettingsMenuMode;
 
 #pragma clang diagnostic pop
 
 - (bool)hdrSupported;
 - (void)saveSettings;
+- (void)saveFavoriteSettingStackIdentifiers;
 + (bool)isLandscapeNow;
 - (void)updateResolutionTable;
 - (void)widget:(UIView*)widget setEnabled:(bool)enabled;
@@ -320,5 +326,7 @@
 - (void)setHidden:(BOOL)hidden forStack:(UIStackView* )stack;
 - (void)updateCodecDependentSwitches;
 - (void)mainFrameGameProfileButtonTapped:(bool)animated;
+- (void)addSettingToFavorite:(UIStackView* )settingStack;
+- (void)expandGamepadSection;
 
 @end

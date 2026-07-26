@@ -107,10 +107,12 @@
 @property (nonatomic, retain) NSNumber * controllerMouseLeftButton;
 @property (nonatomic, retain) NSNumber * controllerMouseRightButton;
 @property (nonatomic, retain) NSNumber * controllerMouseStick;
-@property (nonatomic, retain) NSNumber * controllerMouseSwitch;
-@property (nonatomic) BOOL mapControllerToMouse;
+@property (nonatomic, retain) NSNumber * localRadialMenuButton;
+@property (nonatomic, retain) NSNumber * streamingRadialMenuButton;
+@property (nonatomic) BOOL enableControllerNavigation;
 @property (nonatomic, retain) NSNumber * controllerMousePointerVelocity;
 @property (nonatomic, retain) NSNumber * controllerMouseExpo;
+@property (nonatomic, retain) NSNumber * streamingRadialMenuDelay;
 @property (nonatomic) BOOL globeAsEscape;
 
 // Pencil settings:

@@ -11,6 +11,7 @@
 #import "NativeTouchPointer.h"
 #import "OnScreenControls.h"
 #import "StreamView.h"
+#import "VoidLink-Swift.h"
 
 #include <Limelight.h>
 
@@ -337,4 +338,3 @@
 }
 
 @end
-

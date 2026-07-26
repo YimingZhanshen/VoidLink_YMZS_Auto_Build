@@ -10,7 +10,26 @@
 import SwiftUI
 
 @available(iOS 13.0, *)
-@objc class AboutViewController: UIViewController {
+@objc class AboutViewController: UIViewController, ControllerUINavigationDelegate {
+    func getNavigationElements() -> [ControllerNavigationElement] {
+        var elements: [ControllerNavigationElement] = []
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .x, action: "ok"))
+        return elements
+    }
+    
+    func navigateByController(forward: Bool) {}
+    func navigateByController(downward: Bool) {}
+    func persistControllerNavigationHighlight() {}
+    func restoreControllerNavigationHighlight() {}
+    func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {}
+    func uiWidgetActionForControllerNavigator(forward: Bool, from navigation: ControllerNavigationElement) {}
+    
+    func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+        if pressed, navigation.action == "ok" {
+            self.dismiss(animated: true)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -31,6 +50,14 @@ import SwiftUI
         preferredContentSize = CGSize(width: 530, height: 430)
 
         modalPresentationStyle = .formSheet
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        ControllerNavigator.setUINavigationDelegate(self)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        ControllerNavigator.restorePreviousUINavigationDelegate(ifCurrentDelegateIs: self)
     }
 }
 

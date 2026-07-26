@@ -107,6 +107,7 @@ class HostCardView: UIView {
     }
 
     @objc func appButtonTapped() {
+        guard host?.pairState == pairStatePaired, host?.state == .online, self.parentViewController?.hasNoPresentedVC == true else { return }
         if longPressFired {
             longPressFired = false
             return
@@ -120,6 +121,7 @@ class HostCardView: UIView {
     }
 
     @objc func launchButtonTapped() {
+        guard host?.pairState == pairStatePaired, host?.state == .online, self.parentViewController?.hasNoPresentedVC == true else { return }
         if longPressFired {
             longPressFired = false
             return
@@ -133,6 +135,7 @@ class HostCardView: UIView {
     }
 
     @objc func wakeupButtonTapped() {
+        guard host?.state != .online, self.parentViewController?.hasNoPresentedVC == true else { return }
         if longPressFired {
             longPressFired = false
             return
@@ -146,6 +149,7 @@ class HostCardView: UIView {
     }
 
     @objc func pairButtonTapped() {
+        guard !pairButton.isHidden, self.parentViewController?.hasNoPresentedVC == true else { return }
         if longPressFired {
             longPressFired = false
             return
@@ -442,7 +446,6 @@ class HostCardView: UIView {
     }
 
     func tintAdjustmentModeDidChange() {
-        NSLog("tintChanged........")
         tintAdjustmentMode = .normal
     }
 
@@ -476,7 +479,10 @@ class HostCardView: UIView {
             return
         }
 
-        updateContents(for: host)
+        DispatchQueue.main.asyncAfter(deadline: .now()+0.36) { [weak self] in
+            self?.updateContents(for: self?.host)
+        }
+        
         perform(#selector(updateLoop), with: self, afterDelay: Self.refreshCycle)
     }
 

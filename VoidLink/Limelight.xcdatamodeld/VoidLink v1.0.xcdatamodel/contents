@@ -10,6 +10,7 @@
     <entity name="Host" representedClassName="Host" syncable="YES" codeGenerationType="class">
         <attribute name="activeAddressPool" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="address" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="controllerNavigationHighlightedAppID" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="externalAddress" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ipv6Address" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="localAddress" optional="YES" attributeType="String" syncable="YES"/>
@@ -40,17 +41,19 @@
         <attribute name="controllerGyroBiasY" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="controllerGyroBiasZ" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="controllerMouseExpo" optional="YES" attributeType="Float" defaultValueString="1.6" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="controllerMouseLeftButton" attributeType="Integer 32" defaultValueString="16777215" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="controllerMouseLeftButton" attributeType="Integer 32" defaultValueString="8" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="controllerMousePointerVelocity" optional="YES" attributeType="Float" defaultValueString="12" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="controllerMouseRightButton" attributeType="Integer 32" defaultValueString="16777215" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="controllerMouseStick" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="controllerMouseSwitch" attributeType="Integer 32" defaultValueString="16777215" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="controllerMouseRightButton" attributeType="Integer 32" defaultValueString="2" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="controllerMouseStick" attributeType="Integer 32" defaultValueString="8388640" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="ctrlDownForPinch" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="customLocalRadialMenuButtonPosition" attributeType="Integer 32" defaultValueString="16777215" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="customStreamingRadialMenuButtonPosition" attributeType="Integer 32" defaultValueString="16777215" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="delayLeftClick" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="deviceGyroMode" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="duckOtherApps" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="edgeSlidingSensitivity" optional="YES" attributeType="Float" defaultValueString="22" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="emulatedControllerType" optional="YES" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="enableControllerNavigation" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="enableFrameTimebase" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="enableGraphs" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="enableHdr" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
@@ -75,8 +78,8 @@
         <attribute name="leftClickDelayMs" optional="YES" attributeType="Float" defaultValueString="15" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="liftStreamViewForKeyboard" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="localMousePointerMode" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="localRadialMenuButton" attributeType="Integer 32" defaultValueString="256" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="localVolume" optional="YES" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="mapControllerToMouse" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="micVolume" optional="YES" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="mousePointerVelocityFactor" optional="YES" attributeType="Float" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="multiController" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
@@ -110,6 +113,8 @@
         <attribute name="softKeyboardHeight" attributeType="Float" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="statsOverlayEnabled" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="statsOverlayLevel" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="streamingRadialMenuButton" attributeType="Integer 32" defaultValueString="32" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="streamingRadialMenuDelay" optional="YES" attributeType="Float" defaultValueString="0.5" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="swapABXYButtons" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="touchMode" optional="YES" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="touchMoveEventInterval" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>

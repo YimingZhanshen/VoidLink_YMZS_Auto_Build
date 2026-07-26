@@ -28,7 +28,7 @@
 
 @interface StreamFrameViewController : GCEventViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate, AVPictureInPictureControllerDelegate>
 #else
-@interface StreamFrameViewController : UIViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate, ToolboxSpecialEntryDelegate, AVPictureInPictureControllerDelegate, OnScreenFunctionalWidgetDelegate, AbstractGamepadOverlayCloseButtonDelegate>
+@interface StreamFrameViewController : UIViewController <ConnectionCallbacks, ControllerSupportDelegate, UserInteractionDelegate, UIScrollViewDelegate, AVPictureInPictureControllerDelegate>
 
 #endif
 @property (nonatomic, strong) StreamManager* streamMan;
@@ -48,14 +48,19 @@
 @property (nonatomic, assign) CGFloat streamViewMagnifierZoomScale;
 
 
++ (StreamFrameViewController *)sharedInstance;
 
 - (void)updatePreferredDisplayMode:(BOOL)streamActive;
 - (void)setUserInteractionEnabledForStreamView:(bool)enabled;
 - (bool)shallDisableGyroHotSwitch;
 - (void)loadGameProfileConfigs:(OSCProfile* )profile;
+- (void)openWidgetProfileTableWithPickProfile:(BOOL)pickProfile;
 - (void)toggleGamepadOverlayWithOverlayEnabled:(BOOL)overlayEnabled API_AVAILABLE(ios(13.0));
 - (void)loadAbstractGamepadOverlayIfNeeded API_AVAILABLE(ios(13.0));
 - (void)restorePersistedStreamViewOffsetAndScaleWithProfile:(OSCProfile* )profile;
 - (void)updateMagnifierViewportMetrics;
+- (void)setMagnifierViewportInteractionEnabled:(BOOL)enabled;
+- (void)resetMagnifierStreamViewWithAnimated:(BOOL)animated;
+- (void)returnToMainFrame;
 
 @end

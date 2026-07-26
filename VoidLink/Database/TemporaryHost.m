@@ -45,6 +45,7 @@
     if(!(host.mac == nil || [host.mac isEqualToString:@"00:00:00:00:00:00"])) self.mac = host.mac; // try to fix invalid mac happens in some cases
     self.name = host.name;
     self.uuid = host.uuid;
+    self.controllerNavigationHighlightedAppID = host.controllerNavigationHighlightedAppID;
     self.serverCodecModeSupport = host.serverCodecModeSupport;
     self.serverCert = host.serverCert;
     
@@ -101,6 +102,7 @@
     }
     parentHost.name = self.name;
     parentHost.uuid = self.uuid;
+    parentHost.controllerNavigationHighlightedAppID = self.controllerNavigationHighlightedAppID;
     parentHost.serverCodecModeSupport = self.serverCodecModeSupport;
     parentHost.pairState = [NSNumber numberWithInt:self.pairState];
 }

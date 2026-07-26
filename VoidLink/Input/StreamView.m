@@ -28,7 +28,11 @@
 #import "StreamFrameViewController.h"
 
 
-@interface StreamView()
+#if TARGET_OS_TV
+@interface StreamView() <X1KitMouseDelegate, UITextFieldDelegate>
+#else
+@interface StreamView() <X1KitMouseDelegate, UITextFieldDelegate, UIPointerInteractionDelegate, InputAccessoryBarDelegate>
+#endif
 @property (weak, nonatomic) StreamFrameViewController* streamFrameVC;
 @end
 

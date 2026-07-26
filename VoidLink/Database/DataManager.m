@@ -123,7 +123,7 @@
                 leftClickDelayMs:(CGFloat)leftClickDelayMs
               settingsMenuOffset:(CGFloat)settingsMenuOffset
              passthroughGestures:(BOOL)passthroughGestures
-            mapControllerToMouse:(BOOL)mapControllerToMouse
+      enableControllerNavigation:(BOOL)enableControllerNavigation
   controllerMousePointerVelocity:(CGFloat)controllerMousePointerVelocity
              controllerMouseExpo:(CGFloat)controllerMouseExpo
         controllerGyroSwitchMode:(NSInteger)controllerGyroSwitchMode
@@ -132,6 +132,7 @@
         sdrPerformanceWorkaround:(BOOL)sdrPerformanceWorkaround
               softKeyboardHeight:(CGFloat)softKeyboardHeight
                    globeAsEscape:(BOOL)globeAsEscape
+        streamingRadialMenuDelay:(CGFloat)streamingRadialMenuDelay
           backgroundSessionTimer:(NSInteger)backgroundSessionTimer{
     
     __block Settings* settingsToSave = settings;
@@ -208,11 +209,12 @@
         settingsToSave.leftClickDelayMs = [NSNumber numberWithFloat:leftClickDelayMs];
         settingsToSave.settingsMenuOffset = [NSNumber numberWithFloat:settingsMenuOffset];
         settingsToSave.passthroughGestures = passthroughGestures;
-        settingsToSave.mapControllerToMouse = mapControllerToMouse;
+        settingsToSave.enableControllerNavigation = enableControllerNavigation;
         settingsToSave.controllerMousePointerVelocity = [NSNumber numberWithFloat:controllerMousePointerVelocity];
         settingsToSave.controllerMouseExpo = [NSNumber numberWithFloat:controllerMouseExpo];
         settingsToSave.softKeyboardHeight = softKeyboardHeight;
         settingsToSave.globeAsEscape = globeAsEscape;
+        settingsToSave.streamingRadialMenuDelay = @(streamingRadialMenuDelay);
         settingsToSave.rememberFoldState = rememberFoldState;
         [self saveData];
     }];

@@ -39,6 +39,8 @@
 		2A263D4F2FF3BA2800154DEA /* PublicUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */; };
 		2A263D502FF3BA2800154DEA /* PublicUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */; };
 		2A7113FD2F5A6C65001D852D /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7113FC2F5A6C65001D852D /* ThemeManager.swift */; };
+		2A7113FF2F5A6C65001D852D /* UIAppView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7113FE2F5A6C65001D852D /* UIAppView.swift */; };
+		2A7114012F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A7114002F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift */; };
 		2AAA4E822F7666C5001E20DC /* ControllerUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A765BC2ECD51FB004784AA /* ControllerUtil.swift */; };
 		2AAA4E842F7666EE001E20DC /* LocalizationHelperExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1CDF92C4FE83400547904 /* LocalizationHelperExtension.swift */; };
 		2AAA4E872F985F12001E20DC /* LocalizationHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84FD0B502C31338D006B5BE5 /* LocalizationHelper.m */; };
@@ -156,7 +158,6 @@
 		FBD3495019FF2174002D2A60 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD3494F19FF2174002D2A60 /* SettingsViewController.m */; };
 		FBD3495319FF36FB002D2A60 /* SWRevealViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */; };
 		FBD349621A0089F6002D2A60 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FBD349611A0089F6002D2A60 /* DataManager.m */; };
-		FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */ = {isa = PBXBuildFile; fileRef = FBDE86E519F82297001C18A8 /* UIAppView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -214,6 +215,8 @@
 		2A263D492FF3B3F800154DEA /* PublicExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicExtensions.swift; sourceTree = "<group>"; };
 		2A263D4E2FF3BA2800154DEA /* PublicUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicUtils.swift; sourceTree = "<group>"; };
 		2A7113FC2F5A6C65001D852D /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		2A7113FE2F5A6C65001D852D /* UIAppView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIAppView.swift; sourceTree = "<group>"; };
+		2A7114002F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamepadNavigationIllustrationHud.swift; sourceTree = "<group>"; };
 		2AC1E3822F507D80004F76C0 /* GenericUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericUtils.swift; sourceTree = "<group>"; };
 		2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackExtension.swift; sourceTree = "<group>"; };
 		3A4A3A102F0C000100000001 /* OSCProfilesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSCProfilesTableViewController.swift; sourceTree = "<group>"; };
@@ -422,8 +425,6 @@
 		FBD3495219FF36FB002D2A60 /* SWRevealViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SWRevealViewController.m; sourceTree = "<group>"; };
 		FBD349601A0089F6002D2A60 /* DataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DataManager.h; path = Database/DataManager.h; sourceTree = "<group>"; };
 		FBD349611A0089F6002D2A60 /* DataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DataManager.m; path = Database/DataManager.m; sourceTree = "<group>"; };
-		FBDE86E419F82297001C18A8 /* UIAppView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIAppView.h; sourceTree = "<group>"; };
-		FBDE86E519F82297001C18A8 /* UIAppView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIAppView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -699,8 +700,8 @@
 				848F45692DDCD12500581E36 /* HostCardView.swift */,
 				2A7113FC2F5A6C65001D852D /* ThemeManager.swift */,
 				847D2FDA2DDA015F00937A62 /* MenuSectionView.swift */,
-				FBDE86E419F82297001C18A8 /* UIAppView.h */,
-				FBDE86E519F82297001C18A8 /* UIAppView.m */,
+				2A7113FE2F5A6C65001D852D /* UIAppView.swift */,
+				2A7114002F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift */,
 				180E6E362E93BFDB0067C73A /* AlertControllerUtil.swift */,
 				1888C1902E24C2C800108730 /* AboutView.swift */,
 				1888C1912E24C33100108730 /* AboutViewController.swift */,
@@ -1154,7 +1155,8 @@
 				FB290D0419B2C406004C83CF /* AppDelegate.m in Sources */,
 				FB9AFD401A7E127D00872C98 /* AppListResponse.m in Sources */,
 				FB89463419F646E200339C8A /* Utils.m in Sources */,
-				FBDE86E619F82297001C18A8 /* UIAppView.m in Sources */,
+				2A7113FF2F5A6C65001D852D /* UIAppView.swift in Sources */,
+				2A7114012F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift in Sources */,
 				FB89462F19F646E200339C8A /* Connection.m in Sources */,
 				FB9AFD321A7D867C00872C98 /* AppAssetRetriever.m in Sources */,
 				843E93BE2C41528700B1651F /* OrientationHelper.swift in Sources */,

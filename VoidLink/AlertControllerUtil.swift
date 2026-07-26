@@ -76,6 +76,7 @@ import UIKit
     @objc public static var actionCancelled:Bool = false
     @objc public static var alertController:UIAlertController = UIAlertController()
     @objc public static var cancelButtonString:String = "Cancel"
+    @objc static var completion: (() -> Void)? = nil
     @objc public static var autoCompletion:Bool = false
     @objc public static var isCountingDown:Bool = false
 
@@ -92,6 +93,8 @@ import UIKit
         var remainingSeconds = countdown
         let originalMessage = message
         var isAlertDismissed = false
+        
+        AlertControllerUtil.completion = completion
         
         guard let viewController = viewController else {return}
 
@@ -148,16 +151,19 @@ import UIKit
                 isCountingDown = false
                 isAlertDismissed = true
                 timer.cancel()
+                
                 if autoCompletion {
                     alertController.message = originalMessage
                     applyLeftAlignment(title: title, message: originalMessage)
                     autoCompletion = false
                     completion?()
+                    AlertControllerUtil.completion = nil
                     alertController.dismiss(animated: false)
                     return
                 }
 
                 if PublicUtils.isRunningOnMacAsiPadApp && buttonTitle != "" {
+                    AlertControllerUtil.completion = nil
                     alertController.dismiss(animated: false) {
                         showAlert(
                             in: viewController,
@@ -176,6 +182,10 @@ import UIKit
                 confirmAction.isEnabled = true
                 alertController.message = originalMessage
                 applyLeftAlignment(title: title, message: originalMessage)
+                
+                if #available(iOS 13.0, *) {
+                    ControllerNavigator.setUINavigationDelegate(alertController)
+                }
             } else {
                 if !autoCompletion {
                     let countdownMessage = makeCountdownMessage(baseMessage: originalMessage, remainingSeconds: remainingSeconds)

@@ -51,7 +51,7 @@ class MenuSectionView: UIView {
     private var toggleButton: UIButton!
     private var toggleArea: UIButton!
     private var heightConstraint: NSLayoutConstraint!
-    private var headerView: UIView!
+    var headerView: UIView!
     private var titleOffset: CGFloat = 41.5
 
     override init(frame: CGRect) {
@@ -69,8 +69,9 @@ class MenuSectionView: UIView {
         layer.masksToBounds = true
         backgroundColor = .clear
 
-        headerView = UIView()
+        headerView = UIButton()
         headerView.translatesAutoresizingMaskIntoConstraints = false
+        headerView.accessibilityIdentifier = "sectionHeader"
         addSubview(headerView)
 
         iconImageView = UIImageView()
@@ -273,6 +274,8 @@ class MenuSectionView: UIView {
             persistedFoldState = true
         }
         setExpanded(MenuSectionView.overridePersistedFoldState ? expandable : persistedFoldState)
+        
+        headerView.accessibilityIdentifier = "\(self.headerView.accessibilityIdentifier ?? "sectionHeader")-\(self.identifier ?? "")"
     }
 
     func removeSubStackView(_ stackView: UIStackView) {

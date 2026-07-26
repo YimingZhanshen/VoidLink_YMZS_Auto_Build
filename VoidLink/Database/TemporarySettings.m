@@ -161,13 +161,15 @@
     self.ctrlDownForPinch = settings.ctrlDownForPinch;
     self.settingsMenuOffset = settings.settingsMenuOffset;
     self.passthroughGestures = settings.passthroughGestures;
-    self.mapControllerToMouse = settings.mapControllerToMouse;
+    self.enableControllerNavigation = settings.enableControllerNavigation;
     self.controllerMouseLeftButton = settings.controllerMouseLeftButton;
     self.controllerMouseRightButton = settings.controllerMouseRightButton;
-    self.controllerMouseSwitch = settings.controllerMouseSwitch;
+    self.localRadialMenuButton = settings.localRadialMenuButton;
+    self.streamingRadialMenuButton = settings.streamingRadialMenuButton;
     self.controllerMouseStick = settings.controllerMouseStick;
     self.controllerMousePointerVelocity = settings.controllerMousePointerVelocity;
     self.controllerMouseExpo = settings.controllerMouseExpo;
+    self.streamingRadialMenuDelay = settings.streamingRadialMenuDelay;
     self.globeAsEscape = settings.globeAsEscape;
     
     // Pencil settings:

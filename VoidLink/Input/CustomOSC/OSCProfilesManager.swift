@@ -329,7 +329,7 @@ class OSCProfilesManager: NSObject {
         
         return profiles[Int(selectedIndex)] as! OSCProfile
 
-        return (profiles.firstObject as? OSCProfile) ?? OSCProfile(name: "", buttonStates: NSMutableArray(), isSelected: false)
+        // return (profiles.firstObject as? OSCProfile) ?? OSCProfile(name: "", buttonStates: NSMutableArray(), isSelected: false)
     }
 
     func getIndexOfSelectedProfile() -> Int {
@@ -401,8 +401,8 @@ class OSCProfilesManager: NSObject {
             normalizedPosition.x = position.x / Self.layoutViewBounds.size.width
             normalizedPosition.y = position.y / Self.layoutViewBounds.size.height
         }
-        NSLog("layoutToolView bounds: %f, %f", Self.layoutViewBounds.size.width, Self.layoutViewBounds.size.height)
-        NSLog("position: %f, %f, denormalized position: %f, %f", normalizedPosition.x, normalizedPosition.y, originalPosition.x, originalPosition.y)
+        // NSLog("layoutToolView bounds: %f, %f", Self.layoutViewBounds.size.width, Self.layoutViewBounds.size.height)
+        // NSLog("position: %f, %f, denormalized position: %f, %f", normalizedPosition.x, normalizedPosition.y, originalPosition.x, originalPosition.y)
         return normalizedPosition
     }
 

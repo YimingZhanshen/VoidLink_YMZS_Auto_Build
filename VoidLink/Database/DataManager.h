@@ -146,7 +146,7 @@ typedef NS_ENUM(NSInteger, PencilTickMode) {
                 leftClickDelayMs:(CGFloat)leftClickDelayMs
               settingsMenuOffset:(CGFloat)settingsMenuOffset
              passthroughGestures:(BOOL)passthroughGestures
-            mapControllerToMouse:(BOOL)mapControllerToMouse
+      enableControllerNavigation:(BOOL)mapControllerToMouse
   controllerMousePointerVelocity:(CGFloat)controllerMousePointerVelocity
              controllerMouseExpo:(CGFloat)controllerMouseExpo
         controllerGyroSwitchMode:(NSInteger)controllerGyroSwitchMode
@@ -155,6 +155,7 @@ typedef NS_ENUM(NSInteger, PencilTickMode) {
         sdrPerformanceWorkaround:(BOOL)sdrPerformanceWorkaround
               softKeyboardHeight:(CGFloat)softKeyboardHeight
                    globeAsEscape:(BOOL)globeAsEscape
+        streamingRadialMenuDelay:(CGFloat)streamingRadialMenuDelay
           backgroundSessionTimer:(NSInteger)backgroundSessionTimer;
 
 - (NSArray*) getHosts;

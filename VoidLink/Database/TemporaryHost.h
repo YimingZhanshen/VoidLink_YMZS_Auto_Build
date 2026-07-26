@@ -24,6 +24,7 @@
 @property (atomic, nullable, retain) NSString *localAddress;
 @property (atomic, nullable, retain) NSString *ipv6Address;
 @property (atomic, nullable, retain) NSString *mac;
+@property (atomic, nullable, retain) NSString *controllerNavigationHighlightedAppID;
 @property (atomic)                   int serverCodecModeSupport;
 
 NS_ASSUME_NONNULL_BEGIN

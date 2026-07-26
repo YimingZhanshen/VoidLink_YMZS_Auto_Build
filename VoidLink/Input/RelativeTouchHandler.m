@@ -8,6 +8,7 @@
 
 #import "RelativeTouchHandler.h"
 #import "DataManager.h"
+#import "VoidLink-Swift.h"
 
 #include <Limelight.h>
 

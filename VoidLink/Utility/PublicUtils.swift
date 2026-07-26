@@ -86,6 +86,39 @@ import UIKit
         }
     }
     
+    @objc public static func controllerMouseSymbol() -> String {
+        if #available(iOS 17.0, tvOS 17.0, *) {
+            return "pointer.arrow.ipad"
+        }
+        else if #available(iOS 16.0, tvOS 16.0, *) {
+            return "pointer.arrow.ipad"
+        }
+        else {
+            return "paperplane"
+        }
+    }
+    
+    @objc public static func disableControllerMouseSymbol() -> String {
+        if #available(iOS 17.0, tvOS 17.0, *) {
+            return "pointer.arrow.slash.square"
+        }
+        else if #available(iOS 16.0, tvOS 16.0, *) {
+            return "pointer.arrow"
+        }
+        else {
+            return "paperplane"
+        }
+    }
+    
+    @objc public static func quitSymbol() -> String {
+        if #available(iOS 14.0, tvOS 14.0, *) {
+            return "pip.exit"
+        }
+        else {
+            return "arrow.left.square"
+        }
+    }
+
     @objc public static func disconnectSymbolSize() -> CGFloat {
         if #available(iOS 26.0, tvOS 26.0, *) {
             return 15
@@ -174,6 +207,36 @@ import UIKit
         }
 
         return rootViewController
+    }
+    
+    public static func runOnMain(_ work: @escaping () -> Void) {
+        if Thread.isMainThread {
+            work()
+        } else {
+            DispatchQueue.main.async(execute: work)
+        }
+    }
+
+    @objc public static func controllerMouseExpoMappedOffset(_ offset: CGFloat, expo: CGFloat) -> CGFloat {
+        guard offset != 0 else { return 0 }
+        let magnitude = pow(abs(offset), expo)
+        return offset > 0 ? magnitude : -magnitude
+    }
+
+    @objc public static func controllerMouseVelocity(pointerVelocity: CGFloat, frameRate: CGFloat) -> CGFloat {
+        guard frameRate > 0 else { return pointerVelocity }
+        return pointerVelocity * 60 / frameRate
+    }
+
+    @objc public static func controllerMouseMoveVector(stickX: CGFloat, stickY: CGFloat, velocity: CGFloat, expo: CGFloat) -> CGVector {
+        return CGVector(
+            dx: velocity * controllerMouseExpoMappedOffset(stickX, expo: expo),
+            dy: -velocity * controllerMouseExpoMappedOffset(stickY, expo: expo)
+        )
+    }
+
+    @objc public static func controllerMouseScrollVector(stickX: CGFloat, stickY: CGFloat, multiplier: CGFloat) -> CGVector {
+        return CGVector(dx: multiplier * stickX, dy: multiplier * stickY)
     }
         
     @objc(openUrl:)

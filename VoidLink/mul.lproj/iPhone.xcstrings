@@ -1621,6 +1621,36 @@
         }
       }
     },
+    "bPX-Kf-kdP.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"Streaming Radial Menu Delay\"; ObjectID = \"bPX-Kf-kdP\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Streaming Radial Menu Delay"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流手柄菜单延迟"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流手把選單延遲"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流手把選單延遲"
+          }
+        }
+      }
+    },
     "BQ1-w6-Opg.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Point Tracking\"; ObjectID = \"BQ1-w6-Opg\";",
       "extractionState" : "extracted_with_value",
@@ -2402,31 +2432,31 @@
       }
     },
     "F0O-Ht-fW5.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Controller → Mouse\"; ObjectID = \"F0O-Ht-fW5\";",
+      "comment" : "Class = \"UILabel\"; text = \"Controller Navigation\"; ObjectID = \"F0O-Ht-fW5\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Controller → Mouse"
+            "value" : "Controller Navigation"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手柄映射为鼠标"
+            "value" : "手柄导航"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手把映射為滑鼠"
+            "value" : "手把導覽"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手把映射為滑鼠"
+            "value" : "手把導覽"
           }
         }
       }
@@ -2738,31 +2768,31 @@
       }
     },
     "H3s-ud-yqh.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Pointer Velocity\"; ObjectID = \"H3s-ud-yqh\";",
+      "comment" : "Class = \"UILabel\"; text = \"Controller Mouse Velocity\"; ObjectID = \"H3s-ud-yqh\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Pointer Velocity"
+            "value" : "Controller Mouse Velocity"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指针速度"
+            "value" : "手柄鼠标速度"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指針速度"
+            "value" : "手把滑鼠速度"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指針速度"
+            "value" : "手把滑鼠速度"
           }
         }
       }

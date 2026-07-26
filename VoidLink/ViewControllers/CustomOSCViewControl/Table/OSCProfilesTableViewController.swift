@@ -30,7 +30,8 @@ enum FileOperation: Int {
 }
 
 @objcMembers
-final class OSCProfilesTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIDocumentPickerDelegate, UIGestureRecognizerDelegate {
+final class OSCProfilesTableViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIDocumentPickerDelegate, UIGestureRecognizerDelegate, ControllerUINavigationDelegate {
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var profileTableViewNavigationBar: UINavigationBar!
     @IBOutlet private weak var profileTableViewNavigationItem: UINavigationItem!
@@ -44,6 +45,9 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
 
     private var profilesManager: OSCProfilesManager!
     private var horizontalConstraintsConfigured = false
+    private var profiles: NSMutableArray = []
+    private var selectedProfileIndex = 0
+    private var profilesLoadGeneration = 0
 
     private func contentWidthMultiplier() -> CGFloat {
         PublicUtils.viewIsLandscape(view) ? (PublicUtils.isIPhone ? 0.8 : 0.65) : (PublicUtils.isIPhone ? 0.83 : 0.85)
@@ -102,6 +106,13 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
         NotificationCenter.default.post(name: Notification.Name("OscLayoutTableViewCloseNotification"), object: self)
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if #available(iOS 13.0, *) {
+            ControllerNavigator.restorePreviousUINavigationDelegate(ifCurrentDelegateIs: self)
+        }
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
@@ -144,6 +155,8 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             profileTableViewNavigationItem.leftBarButtonItems?.forEach { $0.hidesSharedBackground = true }
             profileTableViewNavigationItem.rightBarButtonItems?.forEach { $0.hidesSharedBackground = true }
         }
+
+        reloadProfilesAsync(scrollToSelected: true)
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -167,9 +180,17 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             horizontalConstraintsConfigured = true
         }
         configureTableView()
-        if profilesManager.getAllProfiles().count > 0 {
-            let indexPath = IndexPath(row: profilesManager.getIndexOfSelectedProfile(), section: 0)
-            tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+        if profiles.count > 0 {
+            scrollToSelectedProfile(animated: true)
+        } else {
+            reloadProfilesAsync(scrollToSelected: true)
+        }
+        
+        if (loadingMode == .selectProfileFromMainFrame || loadingMode == .selectProfileFromStreamView)
+            && ControllerUtil.primaryGCController != nil {
+            if #available(iOS 13.0, *) {
+                ControllerNavigator.setUINavigationDelegate(self)
+            }
         }
     }
 
@@ -178,6 +199,94 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "ProfileTableViewCell", bundle: nil), forCellReuseIdentifier: "Cell")
+    }
+
+    private func reloadProfilesAsync(scrollToSelected: Bool = false, notify: Bool = false) {
+        profilesLoadGeneration += 1
+        let generation = profilesLoadGeneration
+        let manager = profilesManager
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let manager else { return }
+
+            let loadedProfiles = manager.getAllProfiles()
+            let loadedSelectedIndex = Self.selectedProfileIndex(in: loadedProfiles)
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self, generation == self.profilesLoadGeneration else { return }
+
+                self.profiles = loadedProfiles
+                self.selectedProfileIndex = loadedSelectedIndex
+                self.tableView.reloadData()
+
+                if scrollToSelected {
+                    self.scrollToSelectedProfile(animated: true)
+                }
+
+                if notify {
+                    self.notifyProfileViewDidRefresh()
+                }
+            }
+        }
+    }
+
+    private func scrollToSelectedProfile(animated: Bool) {
+        guard let selectedProfileIndex = validProfileIndex(selectedProfileIndex) else {
+            return
+        }
+
+        let indexPath = IndexPath(row: selectedProfileIndex, section: 0)
+        tableView.scrollToRow(at: indexPath, at: .middle, animated: animated)
+    }
+
+    private func moveSelectedProfile(by offset: Int) {
+        PublicUtils.runOnMain { [weak self] in
+            guard let self,
+                  self.profiles.count > 0,
+                  self.tableView.numberOfSections > 0,
+                  self.tableView.numberOfRows(inSection: 0) > 0 else {
+                return
+            }
+
+            let maxIndex = min(self.profiles.count, self.tableView.numberOfRows(inSection: 0)) - 1
+            let currentIndex = min(max(self.selectedProfileIndex, 0), maxIndex)
+            let nextIndex = min(max(currentIndex + offset, 0), maxIndex)
+            let nextIndexPath = IndexPath(row: nextIndex, section: 0)
+
+            self.tableView.selectRow(at: nextIndexPath, animated: true, scrollPosition: .middle)
+            self.tableView(self.tableView, didSelectRowAt: nextIndexPath)
+        }
+    }
+
+    private func validProfileIndex(_ index: Int) -> Int? {
+        guard profiles.count > 0 else { return nil }
+        return min(max(index, 0), profiles.count - 1)
+    }
+
+    private func notifyProfileViewDidRefresh() {
+        needToUpdateOscLayoutTVC?()
+        if loadingMode != .selectProfileFromStreamView
+            && loadingMode != .pickProfile
+            && loadingMode != .pickProfileData
+            && loadingMode != .selectProfile
+        {
+            guard let selectedProfileIndex = validProfileIndex(selectedProfileIndex) else { return }
+            NotificationCenter.default.post(name: Notification.Name("GameProfileSelectedNotification"), object: self.profiles[selectedProfileIndex])
+        }
+    }
+
+    private static func selectedProfileIndex(in profiles: NSMutableArray) -> Int {
+        for index in 0..<profiles.count {
+            guard let profile = profiles.object(at: index) as? OSCProfile else {
+                continue
+            }
+
+            if profile.isSelected {
+                return index
+            }
+        }
+
+        return 0
     }
 
     @IBAction func duplicateTapped(_ sender: Any?) {
@@ -252,15 +361,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
     }
 
     func profileViewRefresh() {
-        tableView.reloadData()
-        needToUpdateOscLayoutTVC?()
-        if loadingMode != .selectProfileFromStreamView
-            && loadingMode != .pickProfile
-            && loadingMode != .pickProfileData
-            && loadingMode != .selectProfile
-        {
-            NotificationCenter.default.post(name: Notification.Name("GameProfileSelectedNotification"), object: self)
-        }
+        reloadProfilesAsync(notify: true)
     }
 
     @IBAction func deleteTapped(_ sender: Any?) {
@@ -312,7 +413,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             }
             try data.write(to: destinationURL, options: .atomic)
         } catch {
-            NSLog("写入失败: \(error)")
+            // NSLog("写入失败: \(error)")
         }
     }
 
@@ -331,7 +432,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
 
         do {
             let fileData = try Data(contentsOf: sourceURL)
-            NSLog("profile file read: \(UInt32(fileData.count))")
+            // NSLog("profile file read: \(UInt32(fileData.count))")
             let classes: [AnyClass] = [NSMutableData.self, NSMutableArray.self]
             let profilesEncoded = try NSKeyedUnarchiver.unarchivedObject(ofClasses: classes, from: fileData) as? NSMutableArray
 
@@ -357,7 +458,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             }
 
             profileViewRefresh()
-            NSLog("profile test: \(UInt32(profilesEncoded?.count ?? 0))")
+            // NSLog("profile test: \(UInt32(profilesEncoded?.count ?? 0))")
         } catch {
             restoreFailed = true
             let failedAlert = UIAlertController(
@@ -368,17 +469,18 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             failedAlert.addAction(UIAlertAction(title: LocalizationHelper.localizedString(forKey: "OK"), style: .default))
             present(failedAlert, animated: true)
             profileViewRefresh()
-            NSLog("解码失败: \(error)")
+            // NSLog("解码失败: \(error)")
         }
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        profilesManager.getAllProfiles().count
+        profiles.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as? ProfileTableViewCell,
-              let profile = profilesManager.getAllProfiles().object(at: indexPath.row) as? OSCProfile,
+              indexPath.row < profiles.count,
+              let profile = profiles.object(at: indexPath.row) as? OSCProfile,
               let nameLabel = cell.name else {
             return UITableViewCell()
         }
@@ -395,7 +497,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
         cell.contentView.backgroundColor = UIColor.clear
 
         if loadingMode != .pickProfileData,
-           indexPath.row == profilesManager.getIndexOfSelectedProfile() {
+           indexPath.row == selectedProfileIndex {
             cell.accessoryType = UITableViewCell.AccessoryType.checkmark
             let checkmarkLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
             checkmarkLabel.text = "✓"
@@ -421,7 +523,7 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
     }
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        let profiles = profilesManager.getAllProfiles()
+        guard indexPath.row < profiles.count else { return }
 
         if let profile = profiles.object(at: indexPath.row) as? OSCProfile, profile.name == "Default" {
             let alert = UIAlertController(title: "", message: "Deleting the 'Default' profile is not allowed", preferredStyle: .alert)
@@ -451,31 +553,58 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
                 UserDefaults.standard.synchronize()
             }
 
-            tableView.reloadData()
+            reloadProfilesAsync()
         }
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.section == 0,
+              indexPath.row >= 0,
+              indexPath.row < profiles.count else {
+            return
+        }
+
         if loadingMode == .pickProfileData,
-           let pickedProfile = profilesManager.getAllProfiles().object(at: indexPath.row) as? OSCProfile {
+           let pickedProfile = profiles.object(at: indexPath.row) as? OSCProfile {
             pickedProfileDataHandler?(pickedProfile)
             dismiss(animated: false)
             return
         }
 
         let selectedIndexPath = IndexPath(row: indexPath.row, section: 0)
-        let lastSelectedIndexPath = IndexPath(row: profilesManager.getIndexOfSelectedProfile(), section: 0)
+        let lastSelectedIndex = validProfileIndex(selectedProfileIndex)
+        let lastSelectedIndexPath = lastSelectedIndex.map { IndexPath(row: $0, section: 0) }
 
         if selectedIndexPath != lastSelectedIndexPath {
-            let selectedCell = tableView.cellForRow(at: selectedIndexPath)
-            selectedCell?.accessoryType = .checkmark
-            selectedCell?.accessoryView?.tintColor = UIColor(red: 0.5, green: 0.5, blue: 1.0, alpha: 1.0).withAlphaComponent(1.0)
+            if let lastSelectedIndexPath {
+                let previousCell = tableView.cellForRow(at: lastSelectedIndexPath)
+                previousCell?.accessoryType = .none
+                previousCell?.accessoryView = nil
+            }
 
             profilesManager.setProfileToSelected(UInt32(indexPath.row))
+            selectedProfileIndex = indexPath.row
 
-            let lastSelectedCell = tableView.cellForRow(at: lastSelectedIndexPath)
-            lastSelectedCell?.accessoryType = .none
-            tableView.deselectRow(at: lastSelectedIndexPath, animated: true)
+            let selectedCell = tableView.cellForRow(at: selectedIndexPath)
+            selectedCell?.accessoryType = .checkmark
+            let checkmarkLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+            checkmarkLabel.text = "✓"
+            checkmarkLabel.font = .systemFont(ofSize: 25)
+            checkmarkLabel.textAlignment = .center
+            checkmarkLabel.textColor = .green
+            checkmarkLabel.layer.zPosition = 0
+            selectedCell?.accessoryView = checkmarkLabel
+
+            let rowsToReload = [lastSelectedIndexPath, selectedIndexPath]
+                .compactMap { $0 }
+                .filter {
+                    $0.section < tableView.numberOfSections &&
+                    $0.row >= 0 &&
+                    $0.row < tableView.numberOfRows(inSection: $0.section)
+                }
+            if !rowsToReload.isEmpty {
+                tableView.reloadRows(at: rowsToReload, with: .none)
+            }
         }
         profileViewRefresh()
     }
@@ -490,5 +619,44 @@ final class OSCProfilesTableViewController: UIViewController, UITableViewDelegat
             return true
         }
         return touch.view == view
+    }
+    
+    @available(iOS 13.0, *)
+    func getNavigationElements() -> [ControllerNavigationElement] {
+        var elements: [ControllerNavigationElement] = []
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .y, action: "previousItem"))
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .a, action: "nextItem"))
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .x, action: "exit"))
+        return elements
+    }
+    
+    func navigateByController(forward: Bool) {
+    }
+    
+    func navigateByController(downward: Bool) {
+        
+    }
+
+    func persistControllerNavigationHighlight() {}
+    func restoreControllerNavigationHighlight() {}
+    func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {}
+    
+    func uiWidgetActionForControllerNavigator(forward: Bool, from navigation: ControllerNavigationElement) {
+    }
+    
+    func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+        guard pressed else { return }
+        PublicUtils.runOnMain { [weak self] in
+            switch navigation.action {
+            case "previousItem":
+                self?.moveSelectedProfile(by: -1)
+            case "nextItem":
+                self?.moveSelectedProfile(by: 1)
+            case "exit":
+                self?.dismiss(animated: false)
+            default:
+                break
+            }
+        }
     }
 }

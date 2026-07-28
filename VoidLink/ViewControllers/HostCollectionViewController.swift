@@ -208,7 +208,9 @@ class HostCollectionViewController: UICollectionViewController, UICollectionView
         if let host = items[indexPath.item] as? TemporaryHost {
             cell.configure(with: host)
         }
-        applyControllerNavigationHighlight(to: cell, highlighted: indexPath == controllerNavigationSelectedIndexPath)
+        if #available(iOS 13.0, *) {
+            applyControllerNavigationHighlight(to: cell, highlighted: indexPath == controllerNavigationSelectedIndexPath)
+        }
         return cell
     }
 

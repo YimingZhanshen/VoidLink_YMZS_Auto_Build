@@ -23,6 +23,7 @@ final class ControllerNavigationElement: NSObject {
 
 private var controllerNavigationSelectedIndexPathKey: UInt8 = 0
 private var controllerNavigationPersistTokenKey: UInt8 = 0
+private var controllerNavigationHighlightGenerationKey: UInt8 = 0
 private let settingsControllerNavigationHighlightedIdentifierKey = "SettingsControllerNavigationHighlightedIdentifier"
 private let hostControllerNavigationHighlightedUUIDKey = "HostControllerNavigationHighlightedUUID"
 
@@ -48,6 +49,27 @@ private final class ControllerMouseDisplayLinkTarget: NSObject {
     func persistControllerNavigationHighlight()
     func restoreControllerNavigationHighlight()
     func restoreControllerNavigationHighlightAfterSettingsModeSwitch()
+}
+
+protocol ControllerNavigationHighlightTargetProviding: AnyObject {
+    var controllerNavigationHighlightTargetView: UIView { get }
+    func controllerNavigationHighlightDidApply()
+    func controllerNavigationHighlightDidClear()
+}
+
+extension ControllerNavigationHighlightTargetProviding {
+    func controllerNavigationHighlightDidApply() {
+    }
+
+    func controllerNavigationHighlightDidClear() {
+    }
+}
+
+@available(iOS 13.0, *)
+protocol ControllerCollectionNavigationDelegate: ControllerUINavigationDelegate where Self: UIViewController {
+    var controllerNavigationCollectionView: UICollectionView { get }
+    func controllerNavigationCurrentIndexPathForControllerNavigator() -> IndexPath?
+    func clearCollectionControllerNavigationHighlightForControllerNavigator()
 }
 
 @available(iOS 13.0, *)
@@ -416,7 +438,7 @@ final class ControllerNavigator: NSObject {
                 mainFrameVC.hostCollectionVC?.clearCollectionControllerNavigationHighlightForControllerNavigator()
             } else {
                 (uiNavigationDelegate as? SettingsViewController)?.clearControllerNavigationHighlightForControllerNavigator()
-                (uiNavigationDelegate as? UICollectionViewController)?.clearCollectionControllerNavigationHighlightForControllerNavigator()
+                (uiNavigationDelegate as? ControllerCollectionNavigationDelegate)?.clearCollectionControllerNavigationHighlightForControllerNavigator()
             }
 
             controllerNavigationHighlightedView = nil
@@ -486,6 +508,12 @@ final class ControllerNavigator: NSObject {
             }
         case .exit:
             exit(0)
+        case .shortcuts:
+            DispatchQueue.main.async {
+                radialMenuView?.dismiss()
+                radialMenuView = nil
+                StreamFrameViewController.sharedInstance().bringUpToolboxMenu()
+            }
         default:
             break
         }
@@ -516,7 +544,7 @@ final class ControllerNavigator: NSObject {
                 if radialMenuState == .moreOptions {
                     if mainFrameVC.isStreaming() {
                         RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "Game Profiles".localized, subtitle: "", symbol:PublicUtils.iOS18Available ? "gamecontroller.circle" : "gamecontroller.fill", item: .gameProfiles))
-                        RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "=shortcuts".localized, subtitle: "", symbol: "apple.terminal", item: .mouse))
+                        RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "=shortcuts".localized, subtitle: "", symbol: "apple.terminal", item: .shortcuts))
                     }
                     else {
                         if !mainFrameVC.isInAppView(), !mainFrameVC.settingsViewExpanded {RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "About".localized, subtitle: "", symbol: "questionmark.circle", item: .aboutView))}
@@ -668,7 +696,7 @@ final class ControllerNavigator: NSObject {
         
 
         
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController {
             let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
@@ -679,7 +707,7 @@ final class ControllerNavigator: NSObject {
                         if uiNavigationDelegate is SettingsViewController {
                             navigateContinuously(forward: true)
                         }
-                        if uiNavigationDelegate is UICollectionViewController {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
                             navigateContinuously(downward: true)
                         }
                     }
@@ -688,7 +716,7 @@ final class ControllerNavigator: NSObject {
                         if uiNavigationDelegate is SettingsViewController {
                             navigateContinuously(forward: false)
                         }
-                        if uiNavigationDelegate is UICollectionViewController {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
                             navigateContinuously(downward: false)
                         }
                     }
@@ -698,7 +726,7 @@ final class ControllerNavigator: NSObject {
             }
         }
         
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController{
             let horizontalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickX : .rightStickX
             ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
@@ -706,13 +734,13 @@ final class ControllerNavigator: NSObject {
                 switch state {
                 case .orderedAscending:
                     if navigationTimer?.isRunning() != true {
-                        if uiNavigationDelegate is UICollectionViewController {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
                             navigateContinuously(forward: false)
                         }
                     }
                 case .orderedDescending:
                     if navigationTimer?.isRunning() != true {
-                        if uiNavigationDelegate is UICollectionViewController {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
                             navigateContinuously(forward: true)
                         }
                     }
@@ -722,7 +750,7 @@ final class ControllerNavigator: NSObject {
             }
         }
 
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is OSCProfilesTableViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is OSCProfilesTableViewController || uiNavigationDelegate is ToolboxViewController {
             let navigations = uiNavigationDelegate.getNavigationElements()
             let buttonNavigations = navigations.filter({$0.control.type == .button})
             // let stickNavigations = navigations.filter({$0.control.type == .stick || $0.control.type == .stickAxis})
@@ -764,7 +792,7 @@ final class ControllerNavigator: NSObject {
 
 @available(iOS 13.0, *)
 extension SettingsViewController: ControllerUINavigationDelegate {
-    func persistControllerNavigationHighlight() {
+    @objc func persistControllerNavigationHighlight() {
         guard let highlightedView = ControllerNavigator.controllerNavigationHighlightedView,
               let identifier = controllerNavigationPersistenceIdentifier(for: highlightedView) else {
             return
@@ -773,20 +801,20 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         UserDefaults.standard.set(identifier, forKey: settingsControllerNavigationHighlightedIdentifierKey)
     }
 
-    func restoreControllerNavigationHighlight() {
+    @objc func restoreControllerNavigationHighlight() {
         guard ControllerNavigator.enabled, ControllerUtil.primaryGCController != nil else {return}
         PublicUtils.runOnMain { [weak self] in
             self?.restoreControllerNavigationHighlightOnMain()
         }
     }
 
-    func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {
+    @objc func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {
         PublicUtils.runOnMain { [weak self] in
             self?.restoreControllerNavigationHighlightAfterSettingsModeSwitchOnMain()
         }
     }
     
-    func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+    @objc func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
         let isHighlightingUIStack = ControllerNavigator.controllerNavigationHighlightedView is UIStackView
         
         if navigation.action == "holdToReorder", isHighlightingUIStack {
@@ -1427,7 +1455,8 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     }
 }
 
-extension UICollectionViewController {
+@available(iOS 13.0, *)
+extension ControllerCollectionNavigationDelegate {
     var controllerNavigationSelectedIndexPath: IndexPath? {
         get {
             objc_getAssociatedObject(self, &controllerNavigationSelectedIndexPathKey) as? IndexPath
@@ -1446,16 +1475,49 @@ extension UICollectionViewController {
         }
     }
 
+    private var controllerNavigationHighlightGeneration: Int {
+        get {
+            objc_getAssociatedObject(self, &controllerNavigationHighlightGenerationKey) as? Int ?? 0
+        }
+        set {
+            objc_setAssociatedObject(self, &controllerNavigationHighlightGenerationKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    var controllerNavigationCollectionView: UICollectionView {
+        guard let collectionViewController = self as? UICollectionViewController else {
+            assertionFailure("ControllerCollectionNavigationDelegate adopters must provide controllerNavigationCollectionView")
+            return UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        }
+
+        return collectionViewController.collectionView
+    }
+
     func applyControllerNavigationHighlight(to cell: UICollectionViewCell, highlighted: Bool) {
         clearControllerNavigationHighlightBorder(in: cell)
         guard highlighted else { return }
         let highlightedView = controllerNavigationHighlightTargetView(for: cell)
-        highlightedView.layer.borderWidth = (self is HostCollectionViewController) ? 3 : 5
         let isDarkTheme = ThemeManager.userInterfaceStyle() == .dark
-        highlightedView.layer.borderColor = ThemeManager.appPrimaryColor.withAlphaComponent(isDarkTheme ? 0.85 : 0.93).cgColor
+        if self is ToolboxViewController {
+            highlightedView.layer.borderColor = UIColor.systemOrange.withAlphaComponent(isDarkTheme ? 0.8 : 0.97).cgColor
+            highlightedView.layer.borderWidth = 3
+        }
+        else {
+            highlightedView.layer.borderColor = ThemeManager.appPrimaryColor.withAlphaComponent(isDarkTheme ? 0.85 : 0.93).cgColor
+            highlightedView.layer.borderWidth = (self is HostCollectionViewController) ? 3 : 5
+        }
+        (cell as? ControllerNavigationHighlightTargetProviding)?.controllerNavigationHighlightDidApply()
     }
 
     private func clearControllerNavigationHighlightBorder(in cell: UICollectionViewCell) {
+        if let highlightProvider = cell as? ControllerNavigationHighlightTargetProviding {
+            let targetView = highlightProvider.controllerNavigationHighlightTargetView
+            targetView.layer.borderWidth = 0
+            targetView.layer.borderColor = nil
+            highlightProvider.controllerNavigationHighlightDidClear()
+            return
+        }
+
         for view in [cell, cell.contentView] + cell.contentView.subviews + cell.subviews {
             view.layer.borderWidth = 0
             view.layer.borderColor = nil
@@ -1463,6 +1525,10 @@ extension UICollectionViewController {
     }
 
     private func controllerNavigationHighlightTargetView(for cell: UICollectionViewCell) -> UIView {
+        if let highlightProvider = cell as? ControllerNavigationHighlightTargetProviding {
+            return highlightProvider.controllerNavigationHighlightTargetView
+        }
+
         if let contentView = controllerNavigationContentView(in: cell) {
             return contentView
         }
@@ -1486,8 +1552,41 @@ extension UICollectionViewController {
 }
 
 @available(iOS 13.0, *)
-extension UICollectionViewController: ControllerUINavigationDelegate {
-    func persistControllerNavigationHighlight() {
+extension UICollectionViewController: ControllerCollectionNavigationDelegate {
+    @objc func persistControllerNavigationHighlight() {
+        controllerNavigationPersistCollectionHighlight()
+    }
+
+    @objc func restoreControllerNavigationHighlight() {
+        controllerNavigationRestoreCollectionHighlight()
+    }
+
+    @objc func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {
+    }
+
+    @objc func uiWidgetActionForControllerNavigator(forward: Bool, from navigation: ControllerNavigationElement) {
+    }
+
+    @objc func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+        controllerNavigationPerformDefaultButtonAction(pressed: pressed, from: navigation)
+    }
+
+    @objc func getNavigationElements() -> [ControllerNavigationElement] {
+        controllerNavigationDefaultNavigationElements()
+    }
+
+    @objc func navigateByController(forward: Bool) {
+        controllerNavigationNavigateCollection(forward: forward)
+    }
+
+    @objc func navigateByController(downward: Bool) {
+        controllerNavigationNavigateCollection(downward: downward)
+    }
+}
+
+@available(iOS 13.0, *)
+extension ControllerCollectionNavigationDelegate {
+    func controllerNavigationPersistCollectionHighlight() {
         if let hostCollectionVC = self as? HostCollectionViewController {
             persistHostControllerNavigationHighlight(in: hostCollectionVC)
             return
@@ -1498,7 +1597,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         }
     }
 
-    func restoreControllerNavigationHighlight() {
+    func controllerNavigationRestoreCollectionHighlight() {
         guard ControllerNavigator.enabled, ControllerUtil.primaryGCController != nil else {return}
 
         PublicUtils.runOnMain { [weak self] in
@@ -1515,18 +1614,15 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         }
     }
 
-    func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {
-    }
-
     private func currentControllerNavigationCell() -> UICollectionViewCell? {
         guard let selectedIndexPath = controllerNavigationSelectedIndexPath,
-              selectedIndexPath.section < collectionView.numberOfSections,
+              selectedIndexPath.section < controllerNavigationCollectionView.numberOfSections,
               selectedIndexPath.item >= 0,
-              selectedIndexPath.item < collectionView.numberOfItems(inSection: selectedIndexPath.section) else {
+              selectedIndexPath.item < controllerNavigationCollectionView.numberOfItems(inSection: selectedIndexPath.section) else {
             return nil
         }
 
-        return collectionView.cellForItem(at: selectedIndexPath)
+        return controllerNavigationCollectionView.cellForItem(at: selectedIndexPath)
     }
 
     private func currentControllerNavigationContentView() -> UIView? {
@@ -1534,7 +1630,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         return controllerNavigationContentView(in: cell)
     }
 
-    func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+    func controllerNavigationPerformDefaultButtonAction(pressed: Bool, from navigation: ControllerNavigationElement) {
         PublicUtils.runOnMain { [weak self] in
             guard let self else { return }
 
@@ -1570,10 +1666,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         }
     }
     
-    func uiWidgetActionForControllerNavigator(forward: Bool, from navigation: ControllerNavigationElement) {
-    }
-    
-    func getNavigationElements() -> [ControllerNavigationElement] {
+    func controllerNavigationDefaultNavigationElements() -> [ControllerNavigationElement] {
         var elements: [ControllerNavigationElement] = []
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButton, action: "radialMenu"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .rightStick : .leftStick, action: "focusNavigation"))
@@ -1584,13 +1677,13 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         return elements
     }
     
-    func navigateByController(forward: Bool) {
+    func controllerNavigationNavigateCollection(forward: Bool) {
         guard hasNoPresentedVC else { return }
         performControllerNavigationSelectionMove(horizontalOffset: forward ? 1 : -1)
         scheduleControllerNavigationHighlightPersistenceWhenStickSettles()
     }
 
-    func navigateByController(downward: Bool) {
+    func controllerNavigationNavigateCollection(downward: Bool) {
         guard hasNoPresentedVC else { return }
         performControllerNavigationSelectionMove(verticalOffset: downward ? 1 : -1)
         scheduleControllerNavigationHighlightPersistenceWhenStickSettles()
@@ -1648,7 +1741,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
                 continue
             }
 
-            highlightControllerNavigationItem(at: IndexPath(item: index, section: 0))
+            controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: index, section: 0))
             return
         }
 
@@ -1674,7 +1767,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         }
         
         for (index, app) in mainFrameVC.sortedAppList.enumerated() where app.id == appID {
-            highlightControllerNavigationItem(at: IndexPath(item: index, section: 0))
+            controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: index, section: 0))
             return
         }
 
@@ -1682,13 +1775,13 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
     }
 
     private func restoreFirstControllerNavigationItemIfNeeded() {
-        guard collectionView.numberOfSections > 0,
-              collectionView.numberOfItems(inSection: 0) > 0 else {
+        guard controllerNavigationCollectionView.numberOfSections > 0,
+              controllerNavigationCollectionView.numberOfItems(inSection: 0) > 0 else {
             clearCollectionControllerNavigationHighlight()
             return
         }
 
-        highlightControllerNavigationItem(at: IndexPath(item: 0, section: 0))
+        controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: 0, section: 0))
     }
 
     private func performControllerNavigationSelectionMove(horizontalOffset: Int) {
@@ -1704,23 +1797,23 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
     }
 
     private func moveControllerNavigationSelection(horizontalOffset: Int) {
-        let itemCount = collectionView.numberOfItems(inSection: 0)
+        let itemCount = controllerNavigationCollectionView.numberOfItems(inSection: 0)
         guard itemCount > 0 else {
             clearCollectionControllerNavigationHighlight()
             return
         }
 
         guard let currentIndexPath = currentControllerNavigationIndexPath() else {
-            highlightControllerNavigationItem(at: IndexPath(item: horizontalOffset >= 0 ? 0 : itemCount - 1, section: 0))
+            controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: horizontalOffset >= 0 ? 0 : itemCount - 1, section: 0))
             return
         }
 
         let nextItem = (currentIndexPath.item + horizontalOffset + itemCount) % itemCount
-        highlightControllerNavigationItem(at: IndexPath(item: nextItem, section: currentIndexPath.section))
+        controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: nextItem, section: currentIndexPath.section))
     }
 
     private func moveControllerNavigationSelection(verticalOffset: Int) {
-        let itemCount = collectionView.numberOfItems(inSection: 0)
+        let itemCount = controllerNavigationCollectionView.numberOfItems(inSection: 0)
         guard itemCount > 0 else {
             clearCollectionControllerNavigationHighlight()
             return
@@ -1728,7 +1821,7 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
 
         guard let currentIndexPath = currentControllerNavigationIndexPath(),
               let currentAttributes = layoutAttributesForItem(at: currentIndexPath) else {
-            highlightControllerNavigationItem(at: IndexPath(item: verticalOffset >= 0 ? 0 : itemCount - 1, section: 0))
+            controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: verticalOffset >= 0 ? 0 : itemCount - 1, section: 0))
             return
         }
 
@@ -1767,65 +1860,77 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
         }?.indexPath
 
         if let nextIndexPath {
-            highlightControllerNavigationItem(at: nextIndexPath)
+            controllerNavigationHighlightItemForControllerNavigator(at: nextIndexPath)
         }
     }
 
     private func currentControllerNavigationIndexPath() -> IndexPath? {
         if let selectedIndexPath = controllerNavigationSelectedIndexPath,
-           selectedIndexPath.section < collectionView.numberOfSections,
-           selectedIndexPath.item < collectionView.numberOfItems(inSection: selectedIndexPath.section) {
+           selectedIndexPath.section < controllerNavigationCollectionView.numberOfSections,
+           selectedIndexPath.item < controllerNavigationCollectionView.numberOfItems(inSection: selectedIndexPath.section) {
             return selectedIndexPath
         }
 
         if let highlightedView = ControllerNavigator.controllerNavigationHighlightedView,
            let highlightedCell = collectionViewCell(containing: highlightedView),
-           let indexPath = collectionView.indexPath(for: highlightedCell) {
+           let indexPath = controllerNavigationCollectionView.indexPath(for: highlightedCell) {
             return indexPath
         }
 
         return nil
     }
 
-    private func highlightControllerNavigationItem(at indexPath: IndexPath) {
+    func controllerNavigationCurrentIndexPathForControllerNavigator() -> IndexPath? {
+        currentControllerNavigationIndexPath()
+    }
+
+    func controllerNavigationHighlightItemForControllerNavigator(at indexPath: IndexPath) {
         PublicUtils.runOnMain { [weak self] in
             guard let self else { return }
 
-            guard indexPath.section < self.collectionView.numberOfSections,
+            let collectionView = self.controllerNavigationCollectionView
+            guard indexPath.section < collectionView.numberOfSections,
                   indexPath.item >= 0,
-                  indexPath.item < self.collectionView.numberOfItems(inSection: indexPath.section) else {
+                  indexPath.item < collectionView.numberOfItems(inSection: indexPath.section) else {
                 self.clearCollectionControllerNavigationHighlight()
                 return
             }
 
-            self.collectionView.layoutIfNeeded()
+            collectionView.layoutIfNeeded()
 
             let previousIndexPath = self.controllerNavigationSelectedIndexPath
+            self.controllerNavigationHighlightGeneration += 1
+            let highlightGeneration = self.controllerNavigationHighlightGeneration
             self.controllerNavigationSelectedIndexPath = indexPath
 
             if let previousIndexPath,
                previousIndexPath != indexPath,
-               let previousCell = self.collectionView.cellForItem(at: previousIndexPath) {
+               let previousCell = collectionView.cellForItem(at: previousIndexPath) {
                 self.applyControllerNavigationHighlight(to: previousCell, highlighted: false)
             }
 
-            self.collectionView.scrollToItem(at: indexPath, at: [.centeredHorizontally, .centeredVertically], animated: true)
+            collectionView.scrollToItem(at: indexPath, at: [.centeredHorizontally, .centeredVertically], animated: true)
+            self.applyControllerNavigationHighlightWhenCellIsReady(at: indexPath, generation: highlightGeneration, remainingAttempts: 8)
+        }
+    }
 
-            if let cell = self.collectionView.cellForItem(at: indexPath) {
-                self.applyControllerNavigationHighlight(to: cell, highlighted: true)
-                ControllerNavigator.controllerNavigationHighlightedView = self.controllerNavigationHighlightTargetView(for: cell)
-            }
+    private func applyControllerNavigationHighlightWhenCellIsReady(at indexPath: IndexPath, generation: Int, remainingAttempts: Int) {
+        guard controllerNavigationSelectedIndexPath == indexPath,
+              controllerNavigationHighlightGeneration == generation else { return }
 
-            DispatchQueue.main.async { [weak self] in
-                guard let self,
-                      self.controllerNavigationSelectedIndexPath == indexPath,
-                      let cell = self.collectionView.cellForItem(at: indexPath) else {
-                    return
-                }
+        let collectionView = controllerNavigationCollectionView
+        collectionView.layoutIfNeeded()
 
-                self.applyControllerNavigationHighlight(to: cell, highlighted: true)
-                ControllerNavigator.controllerNavigationHighlightedView = self.controllerNavigationHighlightTargetView(for: cell)
-            }
+        if let cell = collectionView.cellForItem(at: indexPath) {
+            applyControllerNavigationHighlight(to: cell, highlighted: true)
+            ControllerNavigator.controllerNavigationHighlightedView = controllerNavigationHighlightTargetView(for: cell)
+            return
+        }
+
+        guard remainingAttempts > 0 else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
+            self?.applyControllerNavigationHighlightWhenCellIsReady(at: indexPath, generation: generation, remainingAttempts: remainingAttempts - 1)
         }
     }
 
@@ -1834,21 +1939,28 @@ extension UICollectionViewController: ControllerUINavigationDelegate {
             guard let self else { return }
 
             if let selectedIndexPath = self.controllerNavigationSelectedIndexPath,
-               let cell = self.collectionView.cellForItem(at: selectedIndexPath) {
+               let cell = self.controllerNavigationCollectionView.cellForItem(at: selectedIndexPath) {
                 self.applyControllerNavigationHighlight(to: cell, highlighted: false)
             }
 
+            self.controllerNavigationHighlightGeneration += 1
             self.controllerNavigationSelectedIndexPath = nil
             ControllerNavigator.controllerNavigationHighlightedView = nil
         }
     }
 
-    fileprivate func clearCollectionControllerNavigationHighlightForControllerNavigator() {
+    func clearCollectionControllerNavigationHighlightForControllerNavigator() {
         clearCollectionControllerNavigationHighlight()
     }
 
+    func invalidateCollectionControllerNavigationHighlightForControllerNavigator() {
+        controllerNavigationHighlightGeneration += 1
+        controllerNavigationSelectedIndexPath = nil
+        ControllerNavigator.controllerNavigationHighlightedView = nil
+    }
+
     private func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        collectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
+        controllerNavigationCollectionView.collectionViewLayout.layoutAttributesForItem(at: indexPath)
     }
 
     private func collectionViewCell(containing view: UIView) -> UICollectionViewCell? {

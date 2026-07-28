@@ -62,5 +62,6 @@
 - (void)setMagnifierViewportInteractionEnabled:(BOOL)enabled;
 - (void)resetMagnifierStreamViewWithAnimated:(BOOL)animated;
 - (void)returnToMainFrame;
+- (void)bringUpToolboxMenu;
 
 @end

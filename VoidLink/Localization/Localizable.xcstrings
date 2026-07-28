@@ -866,7 +866,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Close"
+            "value" : "Close Window"
           }
         },
         "zh-Hans" : {
@@ -2519,25 +2519,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nvidia Rec"
+            "value" : "NVIDIA Recording"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡录屏"
+            "value" : "NVIDIA 录屏"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡錄影"
+            "value" : "NVIDIA 螢幕錄影"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡錄影"
+            "value" : "NVIDIA 螢幕錄影"
           }
         }
       }
@@ -2548,25 +2548,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nvidia Shot"
+            "value" : "NVIDIA Screenshot"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡截图"
+            "value" : "NVIDIA 截图"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡截圖"
+            "value" : "NVIDIA 螢幕截圖"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "N卡截圖"
+            "value" : "NVIDIA 螢幕截圖"
           }
         }
       }
@@ -2828,6 +2828,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "版面清單"
+          }
+        }
+      }
+    },
+    "=projectDisplay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Project Display"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投影显示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投影顯示"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "投影顯示"
           }
         }
       }
@@ -3470,6 +3499,64 @@
         }
       }
     },
+    "=steamOverlay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam Overlay"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam 覆盖层"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam 覆蓋介面"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam 覆蓋介面"
+          }
+        }
+      }
+    },
+    "=switchDesktop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch to Desktop"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换到桌面"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切換到桌面"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切換到桌面"
+          }
+        }
+      }
+    },
     "=switchWindow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3582,6 +3669,151 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "工具箱"
+          }
+        }
+      }
+    },
+    "=toolboxDisconnectQuit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnect & Quit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "断开并退出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "斷線並退出"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "斷線並退出"
+          }
+        }
+      }
+    },
+    "=toolboxSoftKeyboard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft Keyboard"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "软键盘"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軟體鍵盤"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軟體鍵盤"
+          }
+        }
+      }
+    },
+    "=toolboxStatsOverlay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats Overlay"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "统计覆盖层"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統計覆蓋層"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "統計覆蓋層"
+          }
+        }
+      }
+    },
+    "=toolboxSwitchProfile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Switch Profile"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切换配置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切換配置"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切換配置"
+          }
+        }
+      }
+    },
+    "=toolboxWidgetLayout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit Layout"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑布局"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編輯佈局"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "編輯佈局"
           }
         }
       }
@@ -3872,6 +4104,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "修改佈局"
+          }
+        }
+      }
+    },
+    "=xboxGameBar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox Game Bar"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox 游戏栏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox 遊戲列"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox 遊戲列"
           }
         }
       }
@@ -4252,6 +4513,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新增至我的最愛"
+          }
+        }
+      }
+    },
+    "addEntry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Entry"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增条目"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增條目"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增條目"
           }
         }
       }
@@ -6716,6 +7006,35 @@
         }
       }
     },
+    "doublePressPinExecute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Double Press Pin Execute"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "双击执行不退出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雙擊執行不退出"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雙擊執行不退出"
+          }
+        }
+      }
+    },
     "doublePressToAddFavorite" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7738,6 +8057,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "例如: e, ctrl+e, alt+e …"
+          }
+        }
+      }
+    },
+    "execute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "执行"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行"
           }
         }
       }
@@ -10193,35 +10541,6 @@
         }
       }
     },
-    "leftButton" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left Button"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鼠标左键"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠左鍵"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠左鍵"
-          }
-        }
-      }
-    },
     "Layout of the Default profile can not be changed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10500,6 +10819,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "左扳機觸控板"
+          }
+        }
+      }
+    },
+    "leftButton" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left Button"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鼠标左键"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠左鍵"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠左鍵"
           }
         }
       }
@@ -11410,6 +11758,29 @@
         }
       }
     },
+    "Move the stick you want to use for mouse control. The other stick will be used for vertical and horizontal scrolling" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移动用于控制鼠标指针的摇杆。另一侧的摇杆将用于控制垂直、水平滚动。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動用於控制滑鼠指標的搖桿。另一側的搖桿將用於控制垂直、水平滾動。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動用於控制滑鼠指標的搖桿。另一側的搖桿將用於控制垂直、水平滾動。"
+          }
+        }
+      }
+    },
     "moveCursor" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11435,29 +11806,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移動游標"
-          }
-        }
-      }
-    },
-    "Move the stick you want to use for mouse control. The other stick will be used for vertical and horizontal scrolling" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移动用于控制鼠标指针的摇杆。另一侧的摇杆将用于控制垂直、水平滚动。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移動用於控制滑鼠指標的搖桿。另一側的搖桿將用於控制垂直、水平滾動。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移動用於控制滑鼠指標的搖桿。另一側的搖桿將用於控制垂直、水平滾動。"
           }
         }
       }
@@ -14679,35 +15027,6 @@
         }
       }
     },
-    "rightButton" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Right Button"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鼠标右键"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠右鍵"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠右鍵"
-          }
-        }
-      }
-    },
     "Right Button" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14773,6 +15092,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "右扳機觸控板"
+          }
+        }
+      }
+    },
+    "rightButton" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right Button"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "鼠标右键"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠右鍵"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠右鍵"
           }
         }
       }
@@ -17618,35 +17966,6 @@
         }
       }
     },
-    "verticalHorizontalScroll" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scroll"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "横纵滚动"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "橫縱捲動"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "橫縱捲動"
-          }
-        }
-      }
-    },
     "Velocity-based right stick pad" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17730,6 +18049,35 @@
     },
     "Version %@" : {
 
+    },
+    "verticalHorizontalScroll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scroll"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "横纵滚动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橫縱捲動"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "橫縱捲動"
+          }
+        }
+      }
     },
     "Video" : {
       "extractionState" : "manual",

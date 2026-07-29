@@ -24,13 +24,138 @@ final class ControllerNavigationElement: NSObject {
 private var controllerNavigationSelectedIndexPathKey: UInt8 = 0
 private var controllerNavigationPersistTokenKey: UInt8 = 0
 private var controllerNavigationHighlightGenerationKey: UInt8 = 0
+private var controllerMouseCurvePreviewViewKey: UInt8 = 0
+private var controllerMouseCurvePreviewDismissWorkItemKey: UInt8 = 0
 private let settingsControllerNavigationHighlightedIdentifierKey = "SettingsControllerNavigationHighlightedIdentifier"
 private let hostControllerNavigationHighlightedUUIDKey = "HostControllerNavigationHighlightedUUID"
+private let settingsExcludedControllerNavigationSectionIdentifiers: Set<String> = [
+    "SettingsSectionTouch&Controller",
+    "SettingsSectionPencil"
+]
 
 @available(iOS 13.0, *)
 private final class ControllerMouseDisplayLinkTarget: NSObject {
     @objc func displayLinkDidFire() {
         ControllerNavigator.controllerMouseDisplayLinkDidFire()
+    }
+}
+
+@available(iOS 13.0, *)
+private final class ControllerMouseCurvePreviewView: UIView {
+    var expo: CGFloat = 1.0 {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
+    private func commonInit() {
+        isOpaque = false
+        layer.cornerRadius = 14
+        layer.cornerCurve = .continuous
+        layer.masksToBounds = true
+        layer.borderWidth = 1
+    }
+
+    override func draw(_ rect: CGRect) {
+        let isDark = ThemeManager.userInterfaceStyle() == .dark
+        let backgroundColor = isDark
+            ? UIColor(white: 0.08, alpha: 0.88)
+            : UIColor.white.withAlphaComponent(0.92)
+        let axisColor = ThemeManager.textColor.withAlphaComponent(isDark ? 0.62 : 0.48)
+        let textColor = ThemeManager.textColor.withAlphaComponent(isDark ? 0.78 : 0.68)
+        let curveColor = ThemeManager.appPrimaryColor
+        layer.borderColor = ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.32 : 0.22).cgColor
+
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.setFillColor(backgroundColor.cgColor)
+        context.fill(bounds)
+
+        let footerHeight: CGFloat = 22
+        let xLabelHeight: CGFloat = 24
+        let plotHorizontalMargin: CGFloat = 34
+        let chartRect = bounds.inset(by: UIEdgeInsets(top: 18, left: 0, bottom: footerHeight + xLabelHeight, right: 0))
+        let plotSide = min(bounds.width - plotHorizontalMargin * 2, chartRect.height)
+        let plotRect = CGRect(
+            x: bounds.midX - plotSide / 2,
+            y: chartRect.midY - plotSide / 2,
+            width: plotSide,
+            height: plotSide
+        )
+        guard plotRect.width > 1, plotRect.height > 1 else { return }
+
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.roundedSystemFont(ofSize: 11, weight: .medium),
+            .foregroundColor: textColor
+        ]
+
+        ("Cursor Speed".localized as NSString).draw(at: CGPoint(x: plotRect.minX + 8, y: plotRect.minY + 8), withAttributes: textAttributes)
+        let xAxisTitle = "Stick Offset".localized as NSString
+        let xAxisTitleSize = xAxisTitle.size(withAttributes: textAttributes)
+        xAxisTitle.draw(at: CGPoint(x: plotRect.midX - xAxisTitleSize.width / 2, y: plotRect.maxY + 10), withAttributes: textAttributes)
+
+        context.setStrokeColor(axisColor.cgColor)
+        context.setLineWidth(1)
+        context.move(to: CGPoint(x: plotRect.minX, y: plotRect.minY))
+        context.addLine(to: CGPoint(x: plotRect.minX, y: plotRect.maxY))
+        context.addLine(to: CGPoint(x: plotRect.maxX, y: plotRect.maxY))
+        context.strokePath()
+
+        ("0" as NSString).draw(at: CGPoint(x: plotRect.minX - 10, y: plotRect.maxY - 8), withAttributes: textAttributes)
+        ("1" as NSString).draw(at: CGPoint(x: plotRect.minX - 10, y: plotRect.minY - 7), withAttributes: textAttributes)
+        ("1" as NSString).draw(at: CGPoint(x: plotRect.maxX - 4, y: plotRect.maxY + 10), withAttributes: textAttributes)
+
+        let guidePath = UIBezierPath()
+        guidePath.move(to: CGPoint(x: plotRect.minX, y: plotRect.maxY))
+        guidePath.addLine(to: CGPoint(x: plotRect.maxX, y: plotRect.minY))
+        context.saveGState()
+        context.setLineDash(phase: 0, lengths: [4, 4])
+        axisColor.withAlphaComponent(0.35).setStroke()
+        guidePath.lineWidth = 1
+        guidePath.stroke()
+        context.restoreGState()
+
+        let curvePath = UIBezierPath()
+        for step in 0...120 {
+            let normalizedX = CGFloat(step) / 120
+            let speed = abs(PublicUtils.controllerMouseExpoMappedOffset(normalizedX, expo: expo))
+            let point = CGPoint(
+                x: plotRect.minX + normalizedX * plotRect.width,
+                y: plotRect.maxY - min(max(speed, 0), 1) * plotRect.height
+            )
+            if step == 0 {
+                curvePath.move(to: point)
+            } else {
+                curvePath.addLine(to: point)
+            }
+        }
+
+        curveColor.setStroke()
+        curvePath.lineWidth = 3
+        curvePath.lineCapStyle = .round
+        curvePath.lineJoinStyle = .round
+        curvePath.stroke()
+
+        let footerParagraphStyle = NSMutableParagraphStyle()
+        footerParagraphStyle.alignment = .center
+        let footerAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.roundedSystemFont(ofSize: 10, weight: .medium),
+            .foregroundColor: textColor.withAlphaComponent(0.76),
+            .paragraphStyle: footerParagraphStyle
+        ]
+        ("Inspired by RC hobby transmitters".localized as NSString).draw(
+            in: CGRect(x: 12, y: bounds.maxY - footerHeight + 1, width: bounds.width - 24, height: footerHeight - 2),
+            withAttributes: footerAttributes
+        )
     }
 }
 
@@ -508,11 +633,11 @@ final class ControllerNavigator: NSObject {
             }
         case .exit:
             exit(0)
-        case .shortcuts:
+        case .toolbox:
             DispatchQueue.main.async {
                 radialMenuView?.dismiss()
                 radialMenuView = nil
-                StreamFrameViewController.sharedInstance().bringUpToolboxMenu()
+                StreamFrameViewController.sharedInstance().bringUpToolboxMenuWithoutWidgetLayoutTool()
             }
         default:
             break
@@ -544,7 +669,7 @@ final class ControllerNavigator: NSObject {
                 if radialMenuState == .moreOptions {
                     if mainFrameVC.isStreaming() {
                         RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "Game Profiles".localized, subtitle: "", symbol:PublicUtils.iOS18Available ? "gamecontroller.circle" : "gamecontroller.fill", item: .gameProfiles))
-                        RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "=shortcuts".localized, subtitle: "", symbol: "apple.terminal", item: .shortcuts))
+                        RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "=toolbox".localized, subtitle: "", symbol: "apple.terminal", item: .toolbox))
                     }
                     else {
                         if !mainFrameVC.isInAppView(), !mainFrameVC.settingsViewExpanded {RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "About".localized, subtitle: "", symbol: "questionmark.circle", item: .aboutView))}
@@ -655,6 +780,94 @@ final class ControllerNavigator: NSObject {
         }
     }
     
+    private static func listenToNavigationCluster() {
+        guard let mainFrameVC = radialMenuDelegate as? MainFrameViewController else {return}
+        
+        let upNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadUp : .y
+        let downNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadDown : .a
+        let leftNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadLeft : .x
+        let rightNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadRight : .b
+
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+            let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
+            ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
+                GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
+                guard radialMenuView == nil else {return}
+                switch state {
+                case .orderedAscending:
+                    if navigationTimer?.isRunning() != true {
+                        if uiNavigationDelegate is SettingsViewController {
+                            navigateContinuously(downward: true)
+                        }
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
+                            navigateContinuously(downward: true)
+                        }
+                    }
+                case .orderedDescending:
+                    if navigationTimer?.isRunning() != true {
+                        if uiNavigationDelegate is SettingsViewController {
+                            navigateContinuously(downward: false)
+                        }
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
+                            navigateContinuously(downward: false)
+                        }
+                    }
+                case .orderedSame:
+                    navigationTimer?.clean()
+                }
+            }
+            ControllerUtil.listenPrimaryControllerButton(upNavButton) {pressed in 
+                GamepadNavigationIllustrationHud.updateActionState(for: upNavButton, isInAction: pressed)
+                if pressed {
+                    uiNavigationDelegate.navigateByController(downward: false)
+                }
+            }
+            ControllerUtil.listenPrimaryControllerButton(downNavButton) {pressed in
+                GamepadNavigationIllustrationHud.updateActionState(for: downNavButton, isInAction: pressed)
+                if pressed {
+                    uiNavigationDelegate.navigateByController(downward: true)
+                }
+            }
+        }
+                
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+            let horizontalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickX : .rightStickX
+            ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
+                GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
+                guard radialMenuView == nil else {return}
+                switch state {
+                case .orderedAscending:
+                    if navigationTimer?.isRunning() != true {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
+                            navigateContinuously(forward: false)
+                        }
+                    }
+                case .orderedDescending:
+                    if navigationTimer?.isRunning() != true {
+                        if uiNavigationDelegate is ControllerCollectionNavigationDelegate {
+                            navigateContinuously(forward: true)
+                        }
+                    }
+                case .orderedSame:
+                    navigationTimer?.clean()
+                }
+            }
+            ControllerUtil.listenPrimaryControllerButton(leftNavButton) {pressed in
+                GamepadNavigationIllustrationHud.updateActionState(for: leftNavButton, isInAction: pressed)
+                if pressed {
+                    uiNavigationDelegate.navigateByController(forward: false)
+                }
+            }
+            ControllerUtil.listenPrimaryControllerButton(rightNavButton) {pressed in
+                GamepadNavigationIllustrationHud.updateActionState(for: rightNavButton, isInAction: pressed)
+                if pressed {
+                    uiNavigationDelegate.navigateByController(forward: true)
+                }
+            }
+        }
+
+    }
+    
     @objc static func listenToControllerMouse() {
         guard radialMenuState == .mouseModeEnabled else { return }
         ControllerUtil.listenPrimaryControllerButton(controllerMouseLeftButton){ pressed in
@@ -693,9 +906,9 @@ final class ControllerNavigator: NSObject {
         
         listenToRadialMenuButton()
         listenToRadialMenuStick()
-        
+        listenToNavigationCluster()
 
-        
+        /*
         if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
             let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
@@ -749,6 +962,7 @@ final class ControllerNavigator: NSObject {
                 }
             }
         }
+         */
 
         if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is ProfileSelectorViewController || uiNavigationDelegate is ToolboxViewController {
             let navigations = uiNavigationDelegate.getNavigationElements()
@@ -792,6 +1006,13 @@ final class ControllerNavigator: NSObject {
 
 @available(iOS 13.0, *)
 extension SettingsViewController: ControllerUINavigationDelegate {
+    @objc(showControllerMouseCurvePreviewWithExpo:)
+    func showControllerMouseCurvePreview(expo: CGFloat) {
+        PublicUtils.runOnMain { [weak self] in
+            self?.showControllerMouseCurvePreviewOnMain(expo: expo)
+        }
+    }
+
     @objc func persistControllerNavigationHighlight() {
         guard let highlightedView = ControllerNavigator.controllerNavigationHighlightedView,
               let identifier = controllerNavigationPersistenceIdentifier(for: highlightedView) else {
@@ -799,6 +1020,64 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         }
 
         UserDefaults.standard.set(identifier, forKey: settingsControllerNavigationHighlightedIdentifierKey)
+    }
+
+    private var controllerMouseCurvePreviewView: ControllerMouseCurvePreviewView? {
+        get {
+            objc_getAssociatedObject(self, &controllerMouseCurvePreviewViewKey) as? ControllerMouseCurvePreviewView
+        }
+        set {
+            objc_setAssociatedObject(self, &controllerMouseCurvePreviewViewKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    private var controllerMouseCurvePreviewDismissWorkItem: DispatchWorkItem? {
+        get {
+            objc_getAssociatedObject(self, &controllerMouseCurvePreviewDismissWorkItemKey) as? DispatchWorkItem
+        }
+        set {
+            objc_setAssociatedObject(self, &controllerMouseCurvePreviewDismissWorkItemKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    private func showControllerMouseCurvePreviewOnMain(expo: CGFloat) {
+        let previewView = controllerMouseCurvePreviewView ?? ControllerMouseCurvePreviewView()
+        controllerMouseCurvePreviewView = previewView
+        previewView.expo = expo
+        previewView.translatesAutoresizingMaskIntoConstraints = false
+
+        if previewView.superview == nil {
+            previewView.alpha = 0
+            view.addSubview(previewView)
+            let preferredWidth = previewView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor, multiplier: 0.72)
+            preferredWidth.priority = .defaultHigh
+            NSLayoutConstraint.activate([
+                previewView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+                previewView.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
+                preferredWidth,
+                previewView.heightAnchor.constraint(equalToConstant: 190),
+                previewView.bottomAnchor.constraint(equalTo: controllerMouseExpoStack.topAnchor, constant: -10)
+            ])
+        }
+
+        view.bringSubviewToFront(previewView)
+        UIView.animate(withDuration: 0.12) {
+            previewView.alpha = 1
+        }
+
+        controllerMouseCurvePreviewDismissWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self, weak previewView] in
+            UIView.animate(withDuration: 0.18, animations: {
+                previewView?.alpha = 0
+            }, completion: { _ in
+                previewView?.removeFromSuperview()
+                if self?.controllerMouseCurvePreviewView === previewView {
+                    self?.controllerMouseCurvePreviewView = nil
+                }
+            })
+        }
+        controllerMouseCurvePreviewDismissWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: workItem)
     }
 
     @objc func restoreControllerNavigationHighlight() {
@@ -853,23 +1132,25 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         }
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButton, action: "radialMenu"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .rightStickY : .leftStickY, action: "menuNavigation"))
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "menuNavigation"))
+
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: "widgetOperationBackward"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .b, action: "widgetOperationForward"))
         return elements
     }
     
-    func navigateByController(forward:Bool) {
+    func navigateByController(downward:Bool) {
         guard self.hasNoPresentedVC else {return}
         if currentSettingsMenuMode == .FavoriteSettings,
            ControllerNavigator.settingsFavoriteReorderActive {
-            moveHighlightedFavoriteSettingStack(by: forward ? 1 : -1)
+            moveHighlightedFavoriteSettingStack(by: downward ? 1 : -1)
             return
         }
 
-        performControllerNavigationSelectionMove(by: forward ? 1 : -1)
+        performControllerNavigationSelectionMove(by: downward ? 1 : -1)
     }
     
-    func navigateByController(downward:Bool) {
+    func navigateByController(forward:Bool) {
     }
     
     func uiWidgetActionForControllerNavigator(forward: Bool, from navigation:ControllerNavigationElement) {
@@ -1270,6 +1551,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
                 targets.append(headerView)
             }
 
+            guard !shouldSkipControllerNavigationSection(sectionView) else { continue }
             guard let rootStackView = sectionView.rootStackView else { continue }
             guard isControllerNavigationVisible(rootStackView, within: sectionView) else { continue }
 
@@ -1280,6 +1562,14 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         }
 
         return targets
+    }
+
+    private func shouldSkipControllerNavigationSection(_ sectionView: MenuSectionView) -> Bool {
+        guard let identifier = sectionView.identifier else {
+            return false
+        }
+
+        return settingsExcludedControllerNavigationSectionIdentifiers.contains(identifier)
     }
 
     private func favoriteSettingsControllerNavigationTargets(in parentStack: UIStackView, skippingDisabledStacks: Bool) -> [UIView] {
@@ -1673,10 +1963,11 @@ extension ControllerCollectionNavigationDelegate {
         var elements: [ControllerNavigationElement] = []
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButton, action: "radialMenu"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .rightStick : .leftStick, action: "focusNavigation"))
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "focusNavigation"))
         if self is HostCollectionViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "applications"))}
         if self is HostCollectionViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .x, action: "launchPairWake"))}
         if self is MainFrameViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "launch"))}
-        if self is MainFrameViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .x, action: "quitApp"))}
+        if self is MainFrameViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .b, action: "quitApp"))}
         return elements
     }
     
@@ -2055,13 +2346,28 @@ extension UIAlertController: ControllerUINavigationDelegate {
 
         guard enabledActions.count > 1, let lastAction = enabledActions.last else {
             guard let title = firstAction.title, !title.isEmpty else { return [] }
-            return [ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .x, action: title)]
+            return [ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: title)]
         }
 
-        return [
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: firstAction.title ?? ""),
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .b, action: lastAction.title ?? "")
-        ].filter { !$0.action.isEmpty }
+        
+        
+        
+        var elements: [ControllerNavigationElement] = []
+        
+        if ControllerNavigator.radialMenuButtonPosition == .left {
+            elements.append(ControllerNavigationElement(control: firstAction.style == .default ? .dpadRight : .dpadUp, action: firstAction.title ?? ""))
+            if firstAction.style != lastAction.style {
+                elements.append(ControllerNavigationElement(control: lastAction.style == .cancel ? .dpadUp : .dpadRight, action: lastAction.title ?? ""))
+            }
+        }
+        else {
+            elements.append(ControllerNavigationElement(control: firstAction.style == .default ? .a : .b, action: firstAction.title ?? ""))
+            if firstAction.style != lastAction.style {
+                elements.append(ControllerNavigationElement(control: lastAction.style == .cancel ? .b : .a, action: lastAction.title ?? ""))
+            }
+        }
+        
+        return elements
     }
     
     func navigateByController(forward: Bool) {}

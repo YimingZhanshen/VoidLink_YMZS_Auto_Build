@@ -17,6 +17,7 @@ import Foundation
     case stick
     case stickAxis
     case touchpad
+    case cluster
     case undefined
 }
 
@@ -70,6 +71,9 @@ import Foundation
     case rightStick = 0x800020
     case rightStickX = 0x800021
     case rightStickY = 0x800022
+    
+    case dpad = 0x800013
+    case abxy = 0x800023
 
     case null = 0xFFFFFF
 
@@ -111,6 +115,9 @@ import Foundation
         case .rightStick: return "RStick".localized
         case .rightStickX: return "RStickX".localized
         case .rightStickY: return "RStickY".localized
+            
+        case .dpad: return "DPad".localized
+        case .abxy: return "ABXY".localized
 
         case .null: return "Null".localized
         }
@@ -130,6 +137,9 @@ import Foundation
         case .dpadRight:
             if #available(iOS 15.0, *) {return "dpad.right.filled"}
             else {return ""}
+        case .dpad:
+            if #available(iOS 14.0, *) {return "dpad"}
+            else {return ""}
         case .a:
             if #available(iOS 15.0, *) {return "circle.grid.cross.down.filled"}
             else {return ""}
@@ -142,6 +152,10 @@ import Foundation
         case .y:
             if #available(iOS 15.0, *) {return "circle.grid.cross.up.filled"}
             else {return ""}
+        case .abxy:
+            if #available(iOS 14.0, *) {return "circle.grid.cross"}
+            else {return ""}
+
         default: return ""
         }
     }
@@ -184,6 +198,9 @@ import Foundation
         case .rightStick: return .stick
         case .rightStickX: return .stickAxis
         case .rightStickY: return .stickAxis
+        
+        case .dpad: return .cluster
+        case .abxy: return .cluster
 
         case .null: return .undefined
         }
@@ -227,6 +244,9 @@ import Foundation
         case .rightStick: return .right
         case .rightStickX: return .right
         case .rightStickY: return .right
+            
+        case .abxy: return .right
+        case .dpad: return .left
 
         case .null: return .undefined
         }

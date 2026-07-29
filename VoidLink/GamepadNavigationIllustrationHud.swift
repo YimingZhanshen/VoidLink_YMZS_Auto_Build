@@ -19,7 +19,7 @@ final class GamepadNavigationIllustrationHud: UIView {
     private struct Hint {
         let control: ControllerElement
         let keyContent: KeyContent
-        let title: String
+        let titles: [String]
         let isInAction: Bool
     }
 
@@ -39,10 +39,7 @@ final class GamepadNavigationIllustrationHud: UIView {
     private static let hudScale: CGFloat = PublicUtils.isIPhone ? 0.74 : 1
     private static let hudWidth: CGFloat = 235
     private static let edgeMargin: CGFloat = PublicUtils.isIPhone ? 5 : 24
-    private var hints: [Hint] = [
-        // Hint(control: .leftStick, keyContent: .text("L"), title: "浏览", isInAction: false),
-        // Hint(control: .a, keyContent: .text("A"), title: "选择", isInAction: false)
-    ]
+    private var hints: [Hint] = []
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -83,10 +80,10 @@ final class GamepadNavigationIllustrationHud: UIView {
         currentHud = hud
         hud.attach(to: window)
         
-        if let mainFrameVC = ControllerNavigator.radialMenuDelegate as? MainFrameViewController {
+        if let mainFrameVC = ControllerNavigator.radialMenuDelegate as? MainFrameViewController, ControllerNavigator.radialMenuView == nil {
             DispatchQueue.main.asyncAfter(deadline: .now()+3) {
                 let streamFrameVC = StreamFrameViewController.sharedInstance()
-                if ControllerNavigator.radialMenuView == nil, mainFrameVC.isStreaming(), !mainFrameVC.settingsExpandedInStreamView, streamFrameVC?.hasNoPresentedVC == true {
+                if ControllerNavigator.radialMenuView == nil, mainFrameVC.isStreaming(), !mainFrameVC.settingsExpandedInStreamView, streamFrameVC?.hasNoPresentedVC == true, !ControllerNavigator.controllerMouseEnabled {
                     requestHudDetachKeepingMinimumActionDuration()
                 }
             }
@@ -171,7 +168,7 @@ final class GamepadNavigationIllustrationHud: UIView {
             guard hints.indices.contains(index),
                   let rowStack = row as? UIStackView,
                   let keyView = rowStack.arrangedSubviews.first,
-                  let titleLabel = rowStack.arrangedSubviews.last as? UILabel else {
+                  let titleView = rowStack.arrangedSubviews.last else {
                 continue
             }
 
@@ -192,7 +189,7 @@ final class GamepadNavigationIllustrationHud: UIView {
                     imageView.tintColor = isInAction ? ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 1 : 1) : ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.83 : 0.83)
                 }
             }
-            titleLabel.textColor = ThemeManager.textColor.withAlphaComponent(isDark ? 0.69 : 0.6)
+            updateTitleColors(in: titleView, color: ThemeManager.textColor.withAlphaComponent(isDark ? 0.69 : 0.6))
         }
     }
 
@@ -223,7 +220,7 @@ final class GamepadNavigationIllustrationHud: UIView {
     }
 
     private func updateHints(with elements: [ControllerNavigationElement]) {
-        let nextHints = elements.compactMap { hint(for: $0) }
+        let nextHints = hints(for: elements)
         hints = nextHints.isEmpty ? [] : nextHints
         guard !hints.isEmpty else {return}
         reloadHintRows()
@@ -236,7 +233,7 @@ final class GamepadNavigationIllustrationHud: UIView {
             Hint(
                 control: hint.control,
                 keyContent: hint.keyContent,
-                title: hint.title,
+                titles: hint.titles,
                 isInAction: Self.isControlActive(hint.control)
             )
         }
@@ -252,12 +249,35 @@ final class GamepadNavigationIllustrationHud: UIView {
         hints.forEach { contentStackView.addArrangedSubview(makeRow(for: $0)) }
     }
 
-    private func hint(for navigationElement: ControllerNavigationElement) -> Hint? {
+    private func hints(for navigationElements: [ControllerNavigationElement]) -> [Hint] {
+        var groupedElements: [ControllerElement: [ControllerNavigationElement]] = [:]
+        var orderedControls: [ControllerElement] = []
+
+        for navigationElement in navigationElements {
+            if groupedElements[navigationElement.control] == nil {
+                orderedControls.append(navigationElement.control)
+                groupedElements[navigationElement.control] = []
+            }
+            groupedElements[navigationElement.control]?.append(navigationElement)
+        }
+
+        return orderedControls.flatMap { control -> [Hint] in
+            guard let elements = groupedElements[control] else { return [] }
+            if elements.count == 2 {
+                return [hint(for: elements)]
+            }
+
+            return elements.map { hint(for: [$0]) }
+        }
+    }
+
+    private func hint(for navigationElements: [ControllerNavigationElement]) -> Hint {
+        let control = navigationElements.first?.control ?? .null
         return Hint(
-            control: navigationElement.control,
-            keyContent: keyContent(for: navigationElement.control),
-            title: navigationElement.action.localized,
-            isInAction: navigationElement.isInAction || Self.isControlActive(navigationElement.control)
+            control: control,
+            keyContent: keyContent(for: control),
+            titles: navigationElements.map { $0.action.localized },
+            isInAction: navigationElements.contains(where: { $0.isInAction }) || Self.isControlActive(control)
         )
     }
 
@@ -309,20 +329,46 @@ final class GamepadNavigationIllustrationHud: UIView {
 
     private func makeRow(for hint: Hint) -> UIStackView {
         let keyView = makeKeyView(for: hint.keyContent)
+        let titleView = makeTitleView(for: hint.titles)
 
-        let titleLabel = UILabel()
-        titleLabel.text = hint.title
-        titleLabel.font = UIFont.roundedSystemFont(ofSize: 14, weight: .medium)
-        titleLabel.adjustsFontSizeToFitWidth = true
-        titleLabel.minimumScaleFactor = 0.2
-        titleLabel.numberOfLines = 1
-        titleLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
-
-        let rowStackView = UIStackView(arrangedSubviews: [keyView, titleLabel])
+        let rowStackView = UIStackView(arrangedSubviews: [keyView, titleView])
         rowStackView.axis = .horizontal
         rowStackView.alignment = .center
         rowStackView.spacing = 8
         return rowStackView
+    }
+
+    private func makeTitleView(for titles: [String]) -> UIView {
+        if titles.count == 2 {
+            let stackView = UIStackView(arrangedSubviews: titles.map { makeTitleLabel(text: $0, isMergedTitle: true) })
+            stackView.axis = .vertical
+            stackView.alignment = .leading
+            stackView.spacing = 1
+            stackView.setContentCompressionResistancePriority(.required, for: .horizontal)
+            return stackView
+        }
+
+        return makeTitleLabel(text: titles.first ?? "", isMergedTitle: false)
+    }
+
+    private func makeTitleLabel(text: String, isMergedTitle: Bool) -> UILabel {
+        let titleLabel = UILabel()
+        titleLabel.text = text
+        titleLabel.font = UIFont.roundedSystemFont(ofSize: isMergedTitle ? 12.5 : 14, weight: .medium)
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.minimumScaleFactor = isMergedTitle ? 0.55 : 0.2
+        titleLabel.numberOfLines = 1
+        titleLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return titleLabel
+    }
+
+    private func updateTitleColors(in view: UIView, color: UIColor) {
+        if let label = view as? UILabel {
+            label.textColor = color
+            return
+        }
+
+        view.subviews.forEach { updateTitleColors(in: $0, color: color) }
     }
 
     private func makeKeyView(for content: KeyContent) -> UIView {
@@ -423,7 +469,7 @@ final class GamepadNavigationIllustrationHud: UIView {
     }
 
     private static func isControlActive(_ control: ControllerElement) -> Bool {
-        !relatedControls(for: control).isDisjoint(with: activeControls)
+        !activeControls(forHintControl: control).isDisjoint(with: activeControls)
     }
 
     private static func requestActionStateEnd(for control: ControllerElement) {
@@ -486,12 +532,16 @@ final class GamepadNavigationIllustrationHud: UIView {
         }
     }
 
-    private static func relatedControls(for control: ControllerElement) -> Set<ControllerElement> {
+    private static func activeControls(forHintControl control: ControllerElement) -> Set<ControllerElement> {
         switch control {
         case .leftStick, .leftStickX, .leftStickY:
             return [.leftStick, .leftStickX, .leftStickY]
         case .rightStick, .rightStickX, .rightStickY:
             return [.rightStick, .rightStickX, .rightStickY]
+        case .dpad:
+            return [.dpad, .dpadUp, .dpadDown, .dpadLeft, .dpadRight]
+        case .abxy:
+            return [.abxy, .a, .b, .x, .y]
         default:
             return [control]
         }

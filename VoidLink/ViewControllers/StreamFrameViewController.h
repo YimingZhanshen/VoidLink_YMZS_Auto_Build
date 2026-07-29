@@ -63,5 +63,6 @@
 - (void)resetMagnifierStreamViewWithAnimated:(BOOL)animated;
 - (void)returnToMainFrame;
 - (void)bringUpToolboxMenu;
+- (void)bringUpToolboxMenuWithoutWidgetLayoutTool;
 
 @end

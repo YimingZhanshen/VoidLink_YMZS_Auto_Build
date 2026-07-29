@@ -14,6 +14,7 @@
 
 @class LayoutOnScreenControlsViewController;
 @class MainFrameViewController;
+@class MenuSectionView;
 @class MicHandler;
 @class WidgetPickerViewController;
 
@@ -105,6 +106,7 @@
 @property (weak, nonatomic) LayoutOnScreenControlsViewController *layoutOnScreenControlsVC;
 @property (nonatomic, weak) MainFrameViewController *mainFrameViewController;
 @property (strong, nonatomic) UIView *controllerNavigationHighlightOverlayView;
+@property (nonatomic, strong, readonly) MenuSectionView *touchControlSection;
 
 @property (strong, nonatomic) IBOutlet UISegmentedControl *externalDisplayModeSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *localMousePointerModeSelector;

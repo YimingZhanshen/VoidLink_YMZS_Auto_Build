@@ -69,6 +69,10 @@
 @dynamic overrideUserInterfaceStyle;
 @synthesize controllerNavigationHighlightOverlayView = _controllerNavigationHighlightOverlayView;
 
+- (MenuSectionView *)touchControlSection {
+    return touchControlSection;
+}
+
 
 //static NSString* bitrateFormat;
 static const int bitrateTable[] = {
@@ -1839,8 +1843,8 @@ BOOL isCustomResolution(int resolutionSelected) {
     [tipsAlertController setValue:attributedMessage forKey:@"attributedMessage"];
      */
     
-    UIAlertAction *readInstruction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Online Documentation"]
-                                                           style:UIAlertActionStyleDefault
+    UIAlertAction *readInstruction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Learn More"]
+                                                           style:UIAlertActionStyleCancel
                                                          handler:^(UIAlertAction *action){
         [PublicUtils openUrl:onlineDocLink];
     }];
@@ -2540,7 +2544,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     */
     
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Cancel"]
-                                                           style:UIAlertActionStyleDefault
+                                                           style:UIAlertActionStyleCancel
                                                          handler:nil];
     
     UIAlertAction *okAction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"OK"]
@@ -3342,6 +3346,9 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void) controllerMouseExpoSliderMoved:(UISlider* )sender {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.1f  ", sender.value];
+    if (@available(iOS 13.0, *)) if(!settingsViewJustLoaded) {
+        [self showControllerMouseCurvePreviewWithExpo:sender.value];
+    }
 }
 
 - (uint32_t) getScreenEdgeFromSelector {

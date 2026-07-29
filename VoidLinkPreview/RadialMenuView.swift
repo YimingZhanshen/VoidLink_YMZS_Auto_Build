@@ -25,7 +25,7 @@ import UIKit
     case more
     case navigationSettings
     case exit
-    case shortcuts
+    case toolbox
 }
 
 @objc public enum RadialMenuState:Int {

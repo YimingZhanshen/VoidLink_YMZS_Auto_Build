@@ -307,11 +307,20 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 }
 
 - (void)bringUpToolboxMenu{
+    [self bringUpToolboxMenuWithoutWidgetLayoutTool:NO];
+}
+
+- (void)bringUpToolboxMenuWithoutWidgetLayoutTool{
+    [self bringUpToolboxMenuWithoutWidgetLayoutTool:YES];
+}
+
+- (void)bringUpToolboxMenuWithoutWidgetLayoutTool:(BOOL)hideWidgetLayoutTool{
     [self prepareGameProfileSelector];
     ToolboxViewController* oldToolboxVC = toolBoxViewController;
     toolBoxViewController = [[ToolboxViewController alloc] init];
     toolBoxViewController.specialEntryDelegate = self;
-    toolBoxViewController.specialEntries = oldToolboxVC.specialEntries;
+    toolBoxViewController.specialEntries = [oldToolboxVC.specialEntries mutableCopy];
+    if(hideWidgetLayoutTool) [toolBoxViewController.specialEntries removeObject:@"widgetLayoutTool"];
     toolBoxViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     [self presentViewController:toolBoxViewController animated:YES completion:^{
         //[self->toolBoxViewController setupConstraints];

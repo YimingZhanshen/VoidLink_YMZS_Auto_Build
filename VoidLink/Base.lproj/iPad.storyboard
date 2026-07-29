@@ -2,7 +2,6 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="EVd-wq-ego">
     <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -13,7 +12,7 @@
             <objects>
                 <viewController id="wb7-af-jn8" customClass="MainFrameViewController" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" indicatorStyle="black" dataMode="prototypes" id="TZj-Lc-M9d" customClass="AppCollectionView">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="1124"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1210"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="20" minimumInteritemSpacing="20" id="f7l-kG-hJc">
@@ -3879,10 +3878,10 @@
             </objects>
             <point key="canvasLocation" x="2529.4964028776981" y="957.52066115702485"/>
         </scene>
-        <!--Profiles Table View Controller-->
+        <!--Profile Selector View Controller-->
         <scene sceneID="W0E-wz-n2b">
             <objects>
-                <viewController storyboardIdentifier="OSCProfilesTableViewController" id="Atv-Nj-0qv" customClass="OSCProfilesTableViewController" customModule="VoidLink" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ProfileSelectorViewController" id="Atv-Nj-0qv" customClass="ProfileSelectorViewController" customModule="VoidLink" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="osA-Uy-SE1"/>
                         <viewControllerLayoutGuide type="bottom" id="8ja-wQ-jbJ"/>
@@ -3890,83 +3889,11 @@
                     <view key="view" opaque="NO" contentMode="scaleToFill" id="PlJ-LJ-d1p">
                         <rect key="frame" x="0.0" y="0.0" width="1133" height="744"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <navigationBar clipsSubviews="YES" alpha="0.77500000000000002" contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="62V-DN-FUk">
-                                <rect key="frame" x="226.5" y="61" width="680" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="lQr-5u-g05"/>
-                                </constraints>
-                                <color key="barTintColor" red="0.81960784310000001" green="0.81960784310000001" blue="0.83921568629999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <textAttributes key="titleTextAttributes">
-                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle3"/>
-                                    <color key="textColor" systemColor="systemGray5Color"/>
-                                </textAttributes>
-                                <textAttributes key="largeTitleTextAttributes">
-                                    <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </textAttributes>
-                                <items>
-                                    <navigationItem id="Q2V-XF-4jq">
-                                        <leftBarButtonItems>
-                                            <barButtonItem title="ExportAll" width="70" style="plain" id="Bhn-IO-Wlt" userLabel="Export Data">
-                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <connections>
-                                                    <action selector="exportDataTapped:" destination="Atv-Nj-0qv" id="pwG-sO-9he"/>
-                                                </connections>
-                                            </barButtonItem>
-                                            <barButtonItem title="Import" width="48" style="plain" id="CpY-Sb-BDc" userLabel="Import Data">
-                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <connections>
-                                                    <action selector="importDataTapped:" destination="Atv-Nj-0qv" id="Uq0-Ct-LbS"/>
-                                                </connections>
-                                            </barButtonItem>
-                                            <barButtonItem title="Restore" width="45" style="plain" id="czn-mj-8d1">
-                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <connections>
-                                                    <action selector="restoreTapped:" destination="Atv-Nj-0qv" id="IvQ-c3-bmW"/>
-                                                </connections>
-                                            </barButtonItem>
-                                        </leftBarButtonItems>
-                                        <rightBarButtonItems>
-                                            <barButtonItem title="Duplicate" width="80" style="plain" id="P34-hO-6cX">
-                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <connections>
-                                                    <action selector="duplicateTapped:" destination="Atv-Nj-0qv" id="Ymg-8q-iIc"/>
-                                                </connections>
-                                            </barButtonItem>
-                                            <barButtonItem title="Delete" width="80" style="plain" id="egC-9E-zS4" userLabel="Delete">
-                                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <connections>
-                                                    <action selector="deleteTapped:" destination="Atv-Nj-0qv" id="UpR-VB-qez"/>
-                                                </connections>
-                                            </barButtonItem>
-                                        </rightBarButtonItems>
-                                    </navigationItem>
-                                </items>
-                            </navigationBar>
-                            <tableView opaque="NO" clearsContextBeforeDrawing="NO" alpha="0.5" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="BA3-hd-bDp">
-                                <rect key="frame" x="226.5" y="105" width="680" height="589"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </tableView>
-                        </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <constraints>
-                            <constraint firstItem="62V-DN-FUk" firstAttribute="bottom" secondItem="BA3-hd-bDp" secondAttribute="top" id="600-lH-rte"/>
-                            <constraint firstItem="62V-DN-FUk" firstAttribute="width" secondItem="PlJ-LJ-d1p" secondAttribute="width" multiplier="0.6" id="OWL-Yd-KfG"/>
-                            <constraint firstItem="BA3-hd-bDp" firstAttribute="centerX" secondItem="PlJ-LJ-d1p" secondAttribute="centerX" id="Xte-bA-pFb"/>
-                            <constraint firstItem="BA3-hd-bDp" firstAttribute="width" secondItem="PlJ-LJ-d1p" secondAttribute="width" multiplier="0.6" id="eQf-gF-6kX"/>
-                            <constraint firstItem="BA3-hd-bDp" firstAttribute="top" secondItem="PlJ-LJ-d1p" secondAttribute="top" constant="105" id="eje-7O-RaF"/>
-                            <constraint firstItem="BA3-hd-bDp" firstAttribute="bottom" secondItem="PlJ-LJ-d1p" secondAttribute="bottom" constant="-50" id="j96-Mz-xiG"/>
-                            <constraint firstItem="62V-DN-FUk" firstAttribute="centerX" secondItem="PlJ-LJ-d1p" secondAttribute="centerX" id="qmh-Pp-B9S"/>
-                        </constraints>
                     </view>
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <size key="freeformSize" width="1133" height="744"/>
-                    <connections>
-                        <outlet property="profileTableViewNavigationBar" destination="62V-DN-FUk" id="c3i-qa-4ix"/>
-                        <outlet property="profileTableViewNavigationItem" destination="Q2V-XF-4jq" id="TmF-ZM-NKC"/>
-                        <outlet property="tableView" destination="BA3-hd-bDp" id="Jzl-sP-ANp"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="K4u-Tz-tXU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

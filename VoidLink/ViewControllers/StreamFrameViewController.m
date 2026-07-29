@@ -1064,9 +1064,9 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     _layoutOnScreenControlsVC.quickSwitchEnabled = true;
     _layoutOnScreenControlsVC.toolbarStackView.hidden = true;
     _layoutOnScreenControlsVC.toolbarRootView.hidden = true;
-    OSCProfilesTableViewLoadingMode loadingMode = pickProfile ? OSCProfilesTableViewLoadingModePickProfile : OSCProfilesTableViewLoadingModeSelectProfileFromStreamView;
+    ProfileSelectorLoadingMode loadingMode = pickProfile ? ProfileSelectorLoadingModePickProfile : ProfileSelectorLoadingModeSelectProfileFromStreamView;
     [self presentViewController:_layoutOnScreenControlsVC animated:NO completion:^{
-        [self->_layoutOnScreenControlsVC presentProfilesTableViewWithLoadingMode:loadingMode animated:false];
+        [self->_layoutOnScreenControlsVC presentProfileSelectorWith:loadingMode animated:false];
     }];
 }
 

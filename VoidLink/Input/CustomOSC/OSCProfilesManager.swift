@@ -86,6 +86,10 @@ class OSCProfilesManager: NSObject {
         persistEncodedProfiles(profilesEncoded)
     }
 
+    func persistProfileOrder(_ orderedProfiles: NSMutableArray) {
+        persistProfiles(orderedProfiles)
+    }
+
     private func persistEncodedProfiles(_ profilesEncoded: NSMutableArray) {
         guard let data = try? NSKeyedArchiver.archivedData(withRootObject: profilesEncoded, requiringSecureCoding: true) else {
             return
@@ -172,13 +176,19 @@ class OSCProfilesManager: NSObject {
 
     func importEncodedProfiles(_ profilesEncoded: NSMutableArray) {
         let localProfiles = currentProfiles.mutableCopy() as? NSMutableArray ?? NSMutableArray()
+        let profilesDecoded = decodeProfiles(from: profilesEncoded)
+        let importedIncludesDefault = (profilesDecoded.firstObject as? OSCProfile)?.name == "Default"
+        let isSingleProfile = profilesEncoded.count == 1
 
-        if localProfiles.count > 0 {
+        if importedIncludesDefault && localProfiles.count > 0 {
+            localProfiles.removeObject(at: 0)
+        } else if !importedIncludesDefault,
+                  let localDefaultProfile = localProfiles.firstObject as? OSCProfile,
+                  localDefaultProfile.name == "Default" {
+            profilesDecoded.insert(localDefaultProfile, at: 0)
             localProfiles.removeObject(at: 0)
         }
-        
-        let profilesDecoded = decodeProfiles(from: profilesEncoded)
-        
+
         let localProfileNames = Set(
             localProfiles.compactMap { ($0 as? OSCProfile)?.name }
         )
@@ -202,13 +212,24 @@ class OSCProfilesManager: NSObject {
         for case let profile as Any in localProfilesToRemove {
             localProfiles.remove(profile)
         }
-        
-        var indexOffset = 0
+
+        var indexOffset = importedIncludesDefault ? 0: 0
         for profile in localProfiles {
             profilesDecoded.insert(profile, at: 1+indexOffset)
             indexOffset += 1
         }
-
+        
+        if isSingleProfile, !importedIncludesDefault {
+            for profile in profilesDecoded {
+                if let profile = profile as? OSCProfile {
+                    profile.isSelected = false
+                }
+            }
+            if let profile = profilesDecoded[profilesDecoded.count-1] as? OSCProfile {
+                profile.isSelected = true
+            }
+        }
+        
         persistEncodedProfiles(encodedProfiles(from: profilesDecoded))
     }
 

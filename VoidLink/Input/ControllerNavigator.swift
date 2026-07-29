@@ -696,7 +696,7 @@ final class ControllerNavigator: NSObject {
         
 
         
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
             let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
@@ -726,7 +726,7 @@ final class ControllerNavigator: NSObject {
             }
         }
         
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController{
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
             let horizontalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickX : .rightStickX
             ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
@@ -750,7 +750,7 @@ final class ControllerNavigator: NSObject {
             }
         }
 
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is OSCProfilesTableViewController || uiNavigationDelegate is ToolboxViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is ProfileSelectorViewController || uiNavigationDelegate is ToolboxViewController {
             let navigations = uiNavigationDelegate.getNavigationElements()
             let buttonNavigations = navigations.filter({$0.control.type == .button})
             // let stickNavigations = navigations.filter({$0.control.type == .stick || $0.control.type == .stickAxis})
@@ -1494,6 +1494,9 @@ extension ControllerCollectionNavigationDelegate {
     }
 
     func applyControllerNavigationHighlight(to cell: UICollectionViewCell, highlighted: Bool) {
+        if self is ProfileSelectorViewController {
+            return
+        }
         clearControllerNavigationHighlightBorder(in: cell)
         guard highlighted else { return }
         let highlightedView = controllerNavigationHighlightTargetView(for: cell)

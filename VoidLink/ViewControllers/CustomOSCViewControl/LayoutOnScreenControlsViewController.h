@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)profileRefresh;
 - (void)reloadOnScreenWidgetViews;
-- (void)presentProfilesTableViewWithLoadingMode:(NSInteger)loadingMode;
+- (void)presentProfileSelectorWithLoadingMode:(NSInteger)loadingMode;
 
 @end
 

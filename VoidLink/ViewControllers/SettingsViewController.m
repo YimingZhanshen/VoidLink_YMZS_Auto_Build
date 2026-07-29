@@ -3226,9 +3226,9 @@ BOOL isCustomResolution(int resolutionSelected) {
     // self.layoutOnScreenControlsVC.view.backgroundColor = [UIColor colorWithWhite:0.55 alpha:1.0];
     self.layoutOnScreenControlsVC.view.backgroundColor = UIColor.clearColor;
     self.layoutOnScreenControlsVC.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-    self.layoutOnScreenControlsVC.profileTableLoadingMode = OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame;
+    self.layoutOnScreenControlsVC.profileSelectorLoadingMode = ProfileSelectorLoadingModeSelectProfileFromMainFrame;
     [self presentViewController:self.layoutOnScreenControlsVC animated:NO completion:^{
-        [self->_layoutOnScreenControlsVC presentProfilesTableViewWithLoadingMode:OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame animated:animated];
+        [self->_layoutOnScreenControlsVC presentProfileSelectorWith:ProfileSelectorLoadingModeSelectProfileFromMainFrame animated:animated];
     }];
     _layoutOnScreenControlsVC.toolbarStackView.hidden = true;
     _layoutOnScreenControlsVC.toolbarRootView.hidden = true;

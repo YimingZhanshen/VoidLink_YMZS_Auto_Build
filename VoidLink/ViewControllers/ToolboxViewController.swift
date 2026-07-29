@@ -295,11 +295,8 @@ import UIKit
             contentView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: contentWidthMultiplier()),
             contentView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: PublicUtils.isIPhone ? 0.93 : 0.93),
             contentView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            // contentView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
             
             contentView.topAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            contentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: PublicUtils.isIPhone ? 3 : -5),
 
             toolbarView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: sideInset),
             toolbarView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -sideInset),
@@ -316,6 +313,14 @@ import UIKit
             collectionView.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: topInset),
             collectionView.bottomAnchor.constraint(equalTo: toolbarView.topAnchor, constant: -toolbarVerticalInset),
         ]
+        
+        if PublicUtils.isIPhone {
+            layoutConstraints.append(contentView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 3))
+        }
+        else {
+            layoutConstraints.append(contentView.centerYAnchor.constraint(equalTo: view.centerYAnchor))
+        }
+
         NSLayoutConstraint.activate(layoutConstraints)
 
         setupToolbarConstraints()

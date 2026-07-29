@@ -33,17 +33,44 @@ class ThemeManager: NSObject {
         _ = setPublicUIStyle()
         return _userInterfaceStyle
     }
+
+    @objc class func overrideUserInterfaceStyle() -> UIUserInterfaceStyle {
+        return _privateUserInterfaceStyle
+    }
     
     @objc class func setUserInterfaceStyle(_ style: UIUserInterfaceStyle) {
+        let oldUserInterfaceStyle = _userInterfaceStyle
         _privateUserInterfaceStyle = style
         applyUserInterfaceStyleOverride(style)
         
-        if _userInterfaceStyle == style {
+        _ = setPublicUIStyle()
+
+        if oldUserInterfaceStyle == _userInterfaceStyle {
             return
         }
         
-        _ = setPublicUIStyle()
-        
+        NotificationCenter.default.post(
+            name: Notification.Name(ThemeDidChangeNotification),
+            object: nil
+        )
+    }
+
+    @objc class func systemUserInterfaceStyleDidChange(_ style: UIUserInterfaceStyle) {
+        guard #available(iOS 13.0, *) else { return }
+
+        if _privateUserInterfaceStyle != .unspecified {
+            applyUserInterfaceStyleOverride(_privateUserInterfaceStyle)
+            return
+        }
+
+        let oldUserInterfaceStyle = _userInterfaceStyle
+        _userInterfaceStyle = style
+        applyUserInterfaceStyleOverride(.unspecified)
+
+        if oldUserInterfaceStyle == _userInterfaceStyle {
+            return
+        }
+
         NotificationCenter.default.post(
             name: Notification.Name(ThemeDidChangeNotification),
             object: nil

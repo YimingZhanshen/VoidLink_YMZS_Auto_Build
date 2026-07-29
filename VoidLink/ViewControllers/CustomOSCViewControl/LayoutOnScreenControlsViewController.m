@@ -322,14 +322,14 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(handleProfileTablViewDismiss)
-                                                 name:@"OscLayoutTableViewCloseNotification"
+                                             selector:@selector(handleProfileSelectorDismiss)
+                                                 name:@"ProfileSelectorCloseNotification"
                                                object:nil];
     
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(dummytest)
-                                                 name:@"OscLayoutProfileSelctedInTableView"   // This is a special notification for reloading the on screen keyboard buttons. which can't be executed by _oscProfilesTableViewController.needToUpdateOscLayoutTVC code block, and has to be triggered by a notification
+                                                 name:@"OscLayoutProfileSelectedNotification"   // This is a special notification for reloading the on screen keyboard buttons. It has to be triggered by a notification because it cannot be handled by the profile selector dismiss block.
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -364,7 +364,7 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
     selectedWidgetView = nil;
     selectedControllerLayer = nil;
 
-    _oscProfilesTableViewController.layoutViewBounds = self.view.bounds;
+    _profileSelectorViewController.layoutViewBounds = self.view.bounds;
     [OSCProfilesManager setLayoutViewBounds:self.view.bounds];
     [OSCProfilesManager setOnScreenWidgetViewsSet:self.onScreenWidgetViews];   // pass the keyboard button dict to profiles manager
     
@@ -1029,7 +1029,7 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
     else{
         UIAlertController * savedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [LocalizationHelper localizedStringForKey:@"Profile Default can not be overwritten"] preferredStyle:UIAlertControllerStyleAlert];
         [savedAlertController addAction:[UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Ok"] style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            [self.oscProfilesTableViewController profileViewRefresh]; // execute this will reset layout in OSC tool!
+            [self.profileSelectorViewController profileViewRefresh]; // execute this will reset layout in OSC tool!
         }]];
         if(sender) [self presentViewController:savedAlertController animated:YES completion:nil];
     }
@@ -1863,7 +1863,7 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
     return ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
 }
 
-- (void)handleProfileTablViewDismiss{
+- (void)handleProfileSelectorDismiss{
     if(_quickSwitchEnabled){
         [self clearOnScreenWidgets];
         [self dismissViewControllerAnimated:NO completion:^{
@@ -1876,28 +1876,19 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
 /* Basically the same method as loadTapped, without parameter*/
 // Make sure whenever self view controller load the selected profile and layout its buttons.
 - (void)profileRefresh{
-    UIStoryboard *storyboard;
-    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
-    if (isIPhone) {
-        storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
-    }
-    else {
-        storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
-    }
-        
-    //initialiaze _oscProfilesTableViewController
-    self->_oscProfilesTableViewController = [storyboard instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"];
+    // initialiaze _profileSelectorViewController
+    self->_profileSelectorViewController = [[ProfileSelectorViewController alloc] init];
+    self->_profileSelectorViewController.layoutViewBounds = self.view.bounds;
     
     //this part is just for registration, will not be immediately executed.
     __weak typeof(self) weakSelf = self;
-    self->_oscProfilesTableViewController.needToUpdateOscLayoutTVC = ^() {   // a block that will be called when the modally presented 'OSCProfilesTableViewController' VC is dismissed. By the time the 'OSCProfilesTableViewController' VC is dismissed the user would have potentially selected a different OSC profile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This block of code will load the profile and then hide/show and move each OSC button to their appropriate position
+    self->_profileSelectorViewController.needToUpdateOscLayoutTVC = ^() {   // a block that will be called when the modally presented 'ProfileSelectorViewController' VC is dismissed. By the time it is dismissed the user would have potentially selected a different OSC profile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This block of code will load the profile and then hide/show and move each OSC button to their appropriate position
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         [weakSelf reloadOnScreenWidgetViews];
-        strongSelf->_oscProfilesTableViewController.currentOSCButtonLayers = weakSelf.layoutOSC.OSCButtonLayerPool; //pass updated OSCLayout to OSCProfileTableView again
+        strongSelf->_profileSelectorViewController.currentOSCButtonLayers = weakSelf.layoutOSC.OSCButtonLayerPool; // pass updated OSCLayout to profile selector again
     };
     
-    [self.oscProfilesTableViewController.tableView reloadData];
     [self reloadOnScreenWidgetViews];
 
     NSLog(@"profileRefresh %f", CACurrentMediaTime());
@@ -1906,43 +1897,34 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
     // [self presentViewController:vc animated:YES completion:nil];
 }
 
-- (void) presentProfilesTableViewWithPickProfile:(bool)pickProfile{
+- (void) presentProfileSelectorWithPickProfile:(bool)pickProfile{
     [self hideStickIndicators];
     selectedWidgetView = nil;
     // if(pickProfile) [self clearOnScreenWidgets];
-    
-    UIStoryboard *storyboard;
-    BOOL isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
-    if (isIPhone) {
-        storyboard = [UIStoryboard storyboardWithName:@"iPhone" bundle:nil];
-    }
-    else {
-        storyboard = [UIStoryboard storyboardWithName:@"iPad" bundle:nil];
-    }
-    
-    _oscProfilesTableViewController = [storyboard instantiateViewControllerWithIdentifier:@"OSCProfilesTableViewController"];
-    _oscProfilesTableViewController.layoutViewBounds = self.view.bounds;
+
+    _profileSelectorViewController = [[ProfileSelectorViewController alloc] init];
+    _profileSelectorViewController.layoutViewBounds = self.view.bounds;
     
     __weak typeof(self) weakSelf = self;
-    _oscProfilesTableViewController.needToUpdateOscLayoutTVC = ^() {   // a block that will be called when the modally presented 'OSCProfilesTableViewController' VC is dismissed. By the time the 'OSCProfilesTableViewController' VC is dismissed the user would have potentially selected a different OSC ofile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This block of code will load the proffile and then hide/show and move each OSC button to their appropriate position
+    _profileSelectorViewController.needToUpdateOscLayoutTVC = ^() {   // a block that will be called when the modally presented 'ProfileSelectorViewController' VC is dismissed. By the time it is dismissed the user would have potentially selected a different OSC profile with a different layout and they want to see this layout on this 'LayoutOnScreenControlsViewController.' This block of code will load the profile and then hide/show and move each OSC button to their appropriate position
         if(!pickProfile) [weakSelf reloadOnScreenWidgetViews];
     };
 
     self.widgetPanelStack.hidden = YES;
     
-    _oscProfilesTableViewController.currentOSCButtonLayers = self.layoutOSC.OSCButtonLayerPool;
+    _profileSelectorViewController.currentOSCButtonLayers = self.layoutOSC.OSCButtonLayerPool;
     
-    // _oscProfilesTableViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
-    _oscProfilesTableViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-    // _oscProfilesTableViewController.modalPresentationStyle = UIModalPresentationPageSheet;
-    _oscProfilesTableViewController.pickProfileEnabled = pickProfile;
-    [self presentViewController:_oscProfilesTableViewController animated:NO completion:nil];
+    // _profileSelectorViewController.modalPresentationStyle = UIModalPresentationCurrentContext;
+    _profileSelectorViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    // _profileSelectorViewController.modalPresentationStyle = UIModalPresentationPageSheet;
+    _profileSelectorViewController.pickProfileEnabled = pickProfile;
+    [self presentViewController:_profileSelectorViewController animated:NO completion:nil];
 }
 
 /* Presents the view controller that lists all OSC profiles the user can choose from */
 - (IBAction) loadTapped:(id)sender {
     [self saveTapped:nil];
-    [self presentProfilesTableViewWithPickProfile:false];
+    [self presentProfileSelectorWithPickProfile:false];
 }
 
 
@@ -2081,7 +2063,7 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
     if([profilesManager getIndexOfSelectedProfile] == 0 && [self.layoutOSC.layoutChanges count] > 0){
         UIAlertController * movedAlertController = [UIAlertController alertControllerWithTitle: [NSString stringWithFormat:@""] message: [LocalizationHelper localizedStringForKey:@"Layout of the Default profile can not be changed"] preferredStyle:UIAlertControllerStyleAlert];
         [movedAlertController addAction:[UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Ok"] style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            [self.oscProfilesTableViewController profileViewRefresh];
+            [self.profileSelectorViewController profileViewRefresh];
         }]];
         [self presentViewController:movedAlertController animated:YES completion:nil];
     }

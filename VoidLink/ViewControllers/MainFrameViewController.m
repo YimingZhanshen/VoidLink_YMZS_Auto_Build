@@ -1288,13 +1288,13 @@ static NSMutableSet* hostList;
     layoutToolVC.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     
     
-    layoutToolVC.profileTableLoadingMode = OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame;
+    layoutToolVC.profileSelectorLoadingMode = ProfileSelectorLoadingModeSelectProfileFromMainFrame;
     layoutToolVC.toolbarStackView.hidden = true;
     layoutToolVC.toolbarRootView.hidden = true;
     
     self.gameProfileSelectorVC = layoutToolVC;
     [self presentViewController:layoutToolVC animated:false completion:^{
-        [layoutToolVC presentProfilesTableViewWithLoadingMode:OSCProfilesTableViewLoadingModeSelectProfileFromMainFrame animated:animated];
+        [layoutToolVC presentProfileSelectorWith:ProfileSelectorLoadingModeSelectProfileFromMainFrame animated:animated];
     }];
 }
 
@@ -1663,7 +1663,7 @@ static NSMutableSet* hostList;
     barButtonItem.tintColor = ThemeManager.appPrimaryColor;
 
     if (@available(iOS 13.0, *)) {
-        UIUserInterfaceStyle style = ThemeManager.userInterfaceStyle;
+        UIUserInterfaceStyle style = ThemeManager.overrideUserInterfaceStyle;
         UIView *customView = barButtonItem.customView;
         customView.overrideUserInterfaceStyle = style;
 
@@ -1685,7 +1685,7 @@ static NSMutableSet* hostList;
 
 - (void)applyThemeToNavigationControls {
     if (@available(iOS 13.0, *)) {
-        UIUserInterfaceStyle style = ThemeManager.userInterfaceStyle;
+        UIUserInterfaceStyle style = ThemeManager.overrideUserInterfaceStyle;
         self.overrideUserInterfaceStyle = style;
         self.view.overrideUserInterfaceStyle = style;
         self.navigationController.overrideUserInterfaceStyle = style;
@@ -1856,7 +1856,7 @@ static NSMutableSet* hostList;
         TemporarySettings* tempSettings = [dataMan getSettings];
         if(tempSettings.appTheme.intValue != UIUserInterfaceStyleUnspecified) return;
         if ([self.traitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection]) {
-            [ThemeManager setUserInterfaceStyle:self.traitCollection.userInterfaceStyle];
+            [ThemeManager systemUserInterfaceStyleDidChange:self.traitCollection.userInterfaceStyle];
         }
     }
 }
@@ -2806,8 +2806,8 @@ static NSMutableSet* hostList;
                     }];
                 }
                 else if(!self.gameProfileSelectorVC && !self.settingsViewController.layoutOnScreenControlsVC) [self openGameProfileSeletorWithAnimated:true];
-                else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
-                else if (self.settingsViewController.layoutOnScreenControlsVC) [self.settingsViewController.layoutOnScreenControlsVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
+                else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
+                else if (self.settingsViewController.layoutOnScreenControlsVC) [self.settingsViewController.layoutOnScreenControlsVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
                 break;
             case RadialMenuItemHostView:
                 [self switchToHostView];
@@ -2833,8 +2833,8 @@ static NSMutableSet* hostList;
 - (void)controllerNavigatorDidSelectGameProfiles {
     dispatch_async(dispatch_get_main_queue(), ^{
         if(!self.gameProfileSelectorVC && !self.settingsViewController.layoutOnScreenControlsVC) [self openGameProfileSeletorWithAnimated:true];
-        else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
-        else if (self.settingsViewController.layoutOnScreenControlsVC) [self.settingsViewController.layoutOnScreenControlsVC.oscProfilesTableViewController dismissViewControllerAnimated:true completion:^{}];
+        else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
+        else if (self.settingsViewController.layoutOnScreenControlsVC) [self.settingsViewController.layoutOnScreenControlsVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
     });
 }
 

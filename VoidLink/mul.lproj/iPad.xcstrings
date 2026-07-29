@@ -1647,7 +1647,7 @@
     },
     "Bhn-IO-Wlt.title" : {
       "comment" : "Class = \"UIBarButtonItem\"; title = \"ExportAll\"; ObjectID = \"Bhn-IO-Wlt\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2409,7 +2409,7 @@
     },
     "CpY-Sb-BDc.title" : {
       "comment" : "Class = \"UIBarButtonItem\"; title = \"Import\"; ObjectID = \"CpY-Sb-BDc\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2517,7 +2517,7 @@
     },
     "czn-mj-8d1.title" : {
       "comment" : "Class = \"UIBarButtonItem\"; title = \"Restore\"; ObjectID = \"czn-mj-8d1\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2848,7 +2848,7 @@
     },
     "egC-9E-zS4.title" : {
       "comment" : "Class = \"UIBarButtonItem\"; title = \"Delete\"; ObjectID = \"egC-9E-zS4\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5374,7 +5374,7 @@
     },
     "P34-hO-6cX.title" : {
       "comment" : "Class = \"UIBarButtonItem\"; title = \"Duplicate\"; ObjectID = \"P34-hO-6cX\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

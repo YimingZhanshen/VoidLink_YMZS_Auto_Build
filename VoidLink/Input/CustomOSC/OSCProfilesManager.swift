@@ -244,7 +244,8 @@ class OSCProfilesManager: NSObject {
 
         do {
             let fileData = try Data(contentsOf: URL(fileURLWithPath: filePath), options: .mappedIfSafe)
-            if let profilesEncoded = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSMutableData.self, NSMutableArray.self], from: fileData) as? NSMutableArray {
+            let profilePayloadData = try ProfileFileContainer.unpackedData(from: fileData)
+            if let profilesEncoded = try NSKeyedUnarchiver.unarchivedObject(ofClasses: [NSMutableData.self, NSMutableArray.self], from: profilePayloadData) as? NSMutableArray {
                 importEncodedProfiles(profilesEncoded)
                 if let selectedIndex = selectedIndex {
                     setProfileToSelected(selectedIndex)

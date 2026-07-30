@@ -619,9 +619,11 @@ import ObjectiveC.runtime
         self.hasSensitivityY = CommandManager.touchPadCmds.contains(self.touchPadString) && !CommandManager.stickWheels.contains(self.touchPadString)
         self.hasSlideThreshold = CommandManager.mousePads.contains(self.touchPadString)
         
-        if CommandManager.bidirectionalVerticalTouchPads.contains(self.touchPadString){
+        if CommandManager.singleDimensionActiveTouchpads.contains(self.touchPadString){
             self.sensitivityYMin = -4.0
             self.sensitivityYMax = 4.0
+            self.sensitivityXMin = -4.0
+            self.sensitivityXMax = 4.0
         }
         
         if CommandManager.mousePads.contains(self.touchPadString){
@@ -2661,7 +2663,15 @@ import ObjectiveC.runtime
                 self.updateTouchLocation(touch: touch)
             case "MOUSEWHEEL","WHEEL":
                 self.weightedDeltaY = Int(self.deltaY*7.5*self.sensitivityFactorY)
-                if firstTouchMoved {LiSendHighResScrollEvent(Int16(self.weightedDeltaY))}
+                self.weightedDeltaX = Int(self.deltaX*7.5*self.sensitivityFactorX)
+                if firstTouchMoved {
+                    if abs(weightedDeltaY)>abs(weightedDeltaX) {
+                        LiSendHighResScrollEvent(Int16(self.weightedDeltaY))
+                    }
+                    else {
+                        LiSendHighResHScrollEvent(-Int16(self.weightedDeltaX))
+                    }
+                }
                 self.updateTouchLocation(touch: touch)
             case "DISCRETEWHEEL", "DSWHEEL":
                 let currentLocation = touch.location(in: self)

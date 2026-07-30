@@ -1074,6 +1074,8 @@ BOOL isCustomResolution(int resolutionSelected) {
         self.pencilTickIntervalStack.hasDynamicLabel = YES;
         [self addSetting:self.pencilTickIntervalStack ofId:@"pencilTickIntervalStack" to:pencilSection];
 
+        [self addSetting:self.pencilTipOffsetStack ofId:@"pencilTipOffsetStack" to:pencilSection];
+
         self.pressureCurveStack.isGameProfileSetting = YES;
         [self addSetting:self.pressureCurveStack ofId:@"pressureCurveStack" to:pencilSection];
 
@@ -4069,6 +4071,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.squeezeShortcutSwitch setOn:false];
         [self.pencilPausesNativeTouchSwitch setOn:false];
         [self.disablePencilSlideGestureSwitch setOn:false];
+        [self.pencilTipOffsetSwitch setOn:false];
         
         
         NSNumber *value = notification.userInfo[@"interruption"];
@@ -4106,6 +4109,15 @@ BOOL isCustomResolution(int resolutionSelected) {
         pressureCurveVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
         self.definesPresentationContext = true;
         [self presentViewController:pressureCurveVC animated:YES completion:nil];
+    }
+}
+
+- (void)pencilTipOffsetSwitchFlipped:(UISwitch* )sender{
+    if(sender.isOn && !settingsViewJustLoaded){
+        PencilTipOffsetCalibrationViewController* calibrationVC = [[PencilTipOffsetCalibrationViewController alloc] init];
+        calibrationVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
+        self.definesPresentationContext = true;
+        [self presentViewController:calibrationVC animated:YES completion:nil];
     }
 }
 
@@ -4202,6 +4214,9 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.pencilTickIntervalSlider setValue:tempSettings.pencilTickIntervalUs.floatValue];
         [self.pencilTickIntervalSlider addTarget:self action:@selector(pencilTickIntervalSliderMoved:) forControlEvents:UIControlEventValueChanged];
         [self.pencilTickIntervalSlider sendActionsForControlEvents:UIControlEventValueChanged];
+        
+        [self.pencilTipOffsetSwitch setOn:(fabs(tempSettings.pencilTipOffsetX.floatValue) > 0.01 || fabs(tempSettings.pencilTipOffsetY.floatValue) > 0.01)];
+        [self.pencilTipOffsetSwitch addTarget:self action:@selector(pencilTipOffsetSwitchFlipped:) forControlEvents:UIControlEventValueChanged];
         
         [self.pressureCurveSwitch addTarget:self action:@selector(pressureCurveSwitchFlipped:) forControlEvents:UIControlEventValueChanged];
         [self.doubleTapShortcutSwitch addTarget:self action:@selector(doubleTapShortcutSwitchFlipped:) forControlEvents:UIControlEventValueChanged];

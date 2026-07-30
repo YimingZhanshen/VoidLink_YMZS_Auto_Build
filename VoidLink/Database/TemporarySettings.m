@@ -175,6 +175,8 @@
     // Pencil settings:
     self.pencilTickMode = settings.pencilTickMode;
     self.pencilTickIntervalUs = settings.pencilTickIntervalUs;
+    self.pencilTipOffsetX = settings.pencilTipOffsetX;
+    self.pencilTipOffsetY = settings.pencilTipOffsetY;
 
 #endif
     

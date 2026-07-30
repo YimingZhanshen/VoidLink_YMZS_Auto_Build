@@ -21,6 +21,7 @@ import UIKit
     private var manualTick: Bool
     private var pencilTickEnabled: Bool
     private var pressureCurveEnabled: Bool = false
+    @objc private(set) var pencilTipOffset: CGPoint = .zero
     private var manualHoverFlag: Bool = false
     @objc static var hoverSupported: Bool = false
     // @objc static private(set) var autoHoverTermination: Bool = false
@@ -66,6 +67,8 @@ import UIKit
         tickInterval = TimeInterval(settings.pencilTickIntervalUs.floatValue/1000000)
         manualTick = settings.pencilTickMode.intValue == PencilTickMode.ManualTick.rawValue
         pencilTickEnabled = settings.pencilTickMode.intValue != PencilTickMode.PencilTickDisabled.rawValue
+        pencilTipOffset = CGPoint(x: CGFloat(settings.pencilTipOffsetX?.floatValue ?? 0),
+                                  y: CGFloat(settings.pencilTipOffsetY?.floatValue ?? 0))
         // initialMoveEventIndexLimit = UIScreen.main.maximumFramesPerSecond > 60 ? 4 : 2
         initialMoveEventIndexLimit = 0
         super.init()
@@ -110,6 +113,7 @@ import UIKit
             IAPManager.checkPurchaseInfo(.PencilProPack) { info in
                 self.pressureCurveEnabled = self.pressureCurveEnabled && info.valid
                 self.pencilTickEnabled = self.pencilTickEnabled && info.valid
+                self.pencilTipOffset = info.valid ? self.pencilTipOffset : .zero
                 self.pencilProEnabled = info.valid
                 PencilHandler.pencilPausesNativeTouch = selectedProfile.pencilPausesNativeTouch && info.valid
                 if info.valid {
@@ -243,6 +247,7 @@ import UIKit
 
         for touch in touchBatch {
             let point = touch.preciseLocation(in: streamView)
+                .applying(CGAffineTransform(translationX: pencilTipOffset.x, y: pencilTipOffset.y))
             let azimuth = touch.azimuthAngle(in: streamView)
             let altitude = touch.altitudeAngle
             let location = self.adjustCoordinatesForVideoArea(point: point)
@@ -344,6 +349,10 @@ import UIKit
     
     @objc public func switchPencilHover(){
         manualHoverFlag = !manualHoverFlag
+    }
+
+    @objc public func updatePencilTipOffset(x: CGFloat, y: CGFloat) {
+        pencilTipOffset = CGPoint(x: x, y: y)
     }
     
     @objc public func enablePencilHover(){

@@ -32,6 +32,7 @@
 		18A765BD2ECD51FB004784AA /* ControllerUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18A765BC2ECD51FB004784AA /* ControllerUtil.swift */; };
 		18B317032EE67A3A009B62C2 /* InertialScroller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B317022EE67A39009B62C2 /* InertialScroller.swift */; };
 		18D43D7F2F050240008C326F /* PressureCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D43D7E2F050240008C326F /* PressureCurve.swift */; };
+		18D43D812F050240008C326F /* PencilTipOffsetCalibrationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18D43D802F050240008C326F /* PencilTipOffsetCalibrationViewController.swift */; };
 		18E4BCEA2E891895000A8657 /* MotionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E4BCE92E891895000A8657 /* MotionHandler.swift */; };
 		18FCADAF2ECAC23200787A96 /* PencilHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18FCADAE2ECAC23200787A96 /* PencilHandler.swift */; };
 		2A263D4A2FF3B3F800154DEA /* PublicExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A263D492FF3B3F800154DEA /* PublicExtensions.swift */; };
@@ -209,6 +210,7 @@
 		18B317022EE67A39009B62C2 /* InertialScroller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InertialScroller.swift; sourceTree = "<group>"; };
 		18BF141D2E0D7A00009DEE4F /* VoidLink v1.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "VoidLink v1.0.xcdatamodel"; sourceTree = "<group>"; };
 		18D43D7E2F050240008C326F /* PressureCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PressureCurve.swift; sourceTree = "<group>"; };
+		18D43D802F050240008C326F /* PencilTipOffsetCalibrationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilTipOffsetCalibrationViewController.swift; sourceTree = "<group>"; };
 		18E4BCE92E891895000A8657 /* MotionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionHandler.swift; sourceTree = "<group>"; };
 		18FCADAE2ECAC23200787A96 /* PencilHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilHandler.swift; sourceTree = "<group>"; };
 		2A039E562F72892B00546768 /* VoidLinkPreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoidLinkPreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -773,6 +775,7 @@
 				988FCD3F293B091B003050E2 /* KeyboardInputField.h */,
 				988FCD40293B091B003050E2 /* KeyboardInputField.m */,
 				18D43D7E2F050240008C326F /* PressureCurve.swift */,
+				18D43D802F050240008C326F /* PencilTipOffsetCalibrationViewController.swift */,
 				18FCADAE2ECAC23200787A96 /* PencilHandler.swift */,
 				18416EA32EBB3DCE00AE0124 /* UITouchUtil.swift */,
 				18B317022EE67A39009B62C2 /* InertialScroller.swift */,
@@ -1202,6 +1205,7 @@
 				187F4B282E04658A00EECC59 /* WidgetPanelStackView.m in Sources */,
 				FB4678FA1A55FFAD00377732 /* DiscoveryManager.m in Sources */,
 				18D43D7F2F050240008C326F /* PressureCurve.swift in Sources */,
+				18D43D812F050240008C326F /* PencilTipOffsetCalibrationViewController.swift in Sources */,
 				180E6E372E93BFDB0067C73A /* AlertControllerUtil.swift in Sources */,
 				98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */,
 				FB89463519F646E200339C8A /* MainFrameViewController.m in Sources */,

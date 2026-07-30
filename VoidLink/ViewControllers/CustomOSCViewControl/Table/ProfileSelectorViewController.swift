@@ -138,7 +138,7 @@ private enum ProfilePayloadCompression: UInt8 {
     }
 }
 
-private enum ProfileFileContainer {
+enum ProfileFileContainer {
     private static let magic = Array("VLPR".utf8)
     private static let version: UInt8 = 1
     private static let headerSize = 14

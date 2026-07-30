@@ -291,6 +291,9 @@
 @property (strong, nonatomic) IBOutlet UIStackView *pencilTickIntervalStack;
 @property (strong, nonatomic) IBOutlet UISlider *pencilTickIntervalSlider;
 
+@property (weak, nonatomic) IBOutlet UIStackView *pencilTipOffsetStack;
+@property (weak, nonatomic) IBOutlet UISwitch *pencilTipOffsetSwitch;
+
 @property (weak, nonatomic) IBOutlet UIStackView *doubleTapShortcutStack;
 @property (weak, nonatomic) IBOutlet UISwitch *doubleTapShortcutSwitch;
 

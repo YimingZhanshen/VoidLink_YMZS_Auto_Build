@@ -13303,6 +13303,64 @@
         }
       }
     },
+    "Pencil Tip Offset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil Tip Offset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "笔尖偏移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆尖偏移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆尖偏移"
+          }
+        }
+      }
+    },
+    "Pencil tip offset saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil tip offset saved"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "笔尖偏移已保存"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆尖偏移已儲存"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆尖偏移已儲存"
+          }
+        }
+      }
+    },
     "Pencil hover" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19111,6 +19169,35 @@
         }
       }
     },
+    "X Offset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X Offset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        }
+      }
+    },
     "Yaw factor: %.2f" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19130,6 +19217,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "偏航係數: %.2f"
+          }
+        }
+      }
+    },
+    "Y Offset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y Offset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y 偏移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y 偏移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Y 偏移"
           }
         }
       }

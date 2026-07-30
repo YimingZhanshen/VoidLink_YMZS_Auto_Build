@@ -118,6 +118,8 @@
 // Pencil settings:
 @property (nonatomic, retain) NSNumber * pencilTickMode;
 @property (nonatomic, retain) NSNumber * pencilTickIntervalUs;
+@property (nonatomic, retain) NSNumber * pencilTipOffsetX;
+@property (nonatomic, retain) NSNumber * pencilTipOffsetY;
 
 
 - (id) initFromSettings:(Settings*)settings;

@@ -1000,6 +1000,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     }
 
     CGPoint location = [self adjustCoordinatesForVideoArea:[gesture locationInView:self]];
+    PencilHandler* handler = PencilHandler.shared;
+    location = CGPointApplyAffineTransform(location, CGAffineTransformMakeTranslation(handler.pencilTipOffset.x, handler.pencilTipOffset.y));
+    
     CGSize videoSize = [self getVideoAreaSize];
     
     float distance = 0.0f;

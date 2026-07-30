@@ -154,8 +154,8 @@ import UIKit
     @objc public static let stickWheels: [String] = ["LSWHEEL", "RSWHEEL"]
     @objc public static let velocityBasedTouchPads: [String] = ["LSVPAD", "RSVPAD", "MOUSEPAD", "TRACKBALL", "LTPAD", "RTPAD", "MOUSEWHEEL", "WHEEL"]
     @objc public static let inertialTouchPads: [String] = ["LSVPAD", "RSVPAD", "TRACKBALL", "LSPAD", "RSPAD"]
-    @objc public static let verticalTouchPads: [String] = ["LTPAD", "RTPAD", "MOUSEWHEEL", "WHEEL", "DISCRETEWHEEL", "DSWHEEL"]
-    @objc public static let bidirectionalVerticalTouchPads: [String] = ["LTPAD", "RTPAD", "MOUSEWHEEL", "WHEEL", "DISCRETEWHEEL", "DSWHEEL"]
+    @objc public static let verticalTouchPads: [String] = ["LTPAD", "RTPAD", "DISCRETEWHEEL", "DSWHEEL"]
+    @objc public static let singleDimensionActiveTouchpads: [String] = ["LTPAD", "RTPAD", "MOUSEWHEEL", "WHEEL", "DISCRETEWHEEL", "DSWHEEL"]
     @objc public static let functionalButtonCmds: [String] = [
         "SETTINGS",
         "TOOLBOX",

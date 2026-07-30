@@ -1144,6 +1144,26 @@
                                     <constraint firstAttribute="width" constant="380" id="gdZ-zL-Wl7"/>
                                 </constraints>
                             </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="pTO-ff-set">
+                                <rect key="frame" x="3145" y="191" width="293.5" height="31"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pencil Tip Offset" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.64999997615814209" adjustsLetterSpacingToFitWidth="YES" adjustsFontForContentSizeCategory="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pTO-ff-lbl" userLabel="uiLabel">
+                                        <rect key="frame" x="0.0" y="0.0" width="143.5" height="31"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pTO-ff-swi">
+                                        <rect key="frame" x="163.5" y="0.0" width="132" height="31"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="130" id="pTO-ff-wid"/>
+                                        </constraints>
+                                    </switch>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="31" id="pTO-ff-hgt"/>
+                                </constraints>
+                            </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="Bp6-7U-E9H">
                                 <rect key="frame" x="3145" y="230" width="266.5" height="31"/>
                                 <subviews>
@@ -2342,6 +2362,8 @@
                         <outlet property="pencilTickIntervalStack" destination="O2s-9s-ABi" id="0kk-q4-ppy"/>
                         <outlet property="pencilTickSelector" destination="bVv-CW-kN8" id="Ymr-VI-Ilj"/>
                         <outlet property="pencilTickStack" destination="zuF-a5-GOI" id="Nn7-GA-yQM"/>
+                        <outlet property="pencilTipOffsetStack" destination="pTO-ff-set" id="pTO-ff-oSt"/>
+                        <outlet property="pencilTipOffsetSwitch" destination="pTO-ff-swi" id="pTO-ff-oSw"/>
                         <outlet property="performanceGraphStack" destination="H8p-G9-pnl" id="9RJ-uO-IpF"/>
                         <outlet property="pinchGestureStack" destination="uEq-Pc-Fum" id="68g-K6-P87"/>
                         <outlet property="pinchGestureSwitch" destination="TJy-Zp-DKM" id="Haj-ha-vNy"/>

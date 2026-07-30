@@ -338,6 +338,7 @@ final class ControllerNavigator: NSObject {
     }
 
     static func updateUINavigationDelegateState() {
+        ControllerUtil.disableSysGestures(ControllerUtil.primaryGCController)
         if uiNavigationDelegate is StreamFrameViewController {
             if radialMenuState == .mouseModeEnabled {
                 startControllerMouse()
@@ -2273,7 +2274,8 @@ extension ControllerCollectionNavigationDelegate {
 
 extension MainFrameViewController {
     func forceLaunchApp(_ app: TemporaryApp?){
-        if let currentRunningApp = self.findRunningApp(app?.host) {
+        guard let app = app else { return }
+        if let currentRunningApp = self.findRunningApp(app.host) {
             if currentRunningApp !== app {
                 self.quitRunningAppAndStart(app)
             }

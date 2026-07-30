@@ -99,6 +99,9 @@ private final class ProfileCollectionViewCell: UICollectionViewCell, ControllerN
         }
     }
 
+    override var canBecomeFocused: Bool {
+        return false
+    }
 }
 
 @objc(FileOperation)

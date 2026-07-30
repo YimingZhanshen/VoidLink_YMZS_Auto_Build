@@ -466,6 +466,18 @@ import Foundation
         
         guard GCController.controllers().count == 1 else { return }
         
+        if let mainFrameVC = delegate as? MainFrameViewController {
+            let vc = mainFrameVC.isStreaming() ? StreamFrameViewController.sharedInstance() : mainFrameVC
+            GenericUtils.handleFirstGamepadConnection(in: vc) {
+                setGCControllerToPrimary(controller)
+                return
+            }
+        }
+        
+        setGCControllerToPrimary(controller)
+    }
+    
+    private static func setGCControllerToPrimary(_ controller: GCController) {
         primaryGCController = controller
         _ = buildMapping(for: controller, swapABXY: false)
         disableSysGestures(controller)

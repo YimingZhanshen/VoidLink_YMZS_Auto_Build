@@ -47,6 +47,7 @@
 		2AC1E3832F507D80004F76C0 /* GenericUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1E3822F507D80004F76C0 /* GenericUtils.swift */; };
 		2AC1EAFB2F92260F004EDA80 /* UIStackExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */; };
 		2AC1EAFC2F922889004EDA80 /* UIStackExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */; };
+		2B7A10022FFB000100000001 /* SettingsTouchVelocityPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7A10012FFB000100000001 /* SettingsTouchVelocityPreview.swift */; };
 		3A4A3A112F0C000100000001 /* ProfileSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4A3A102F0C000100000001 /* ProfileSelectorViewController.swift */; };
 		3A4A3A132F0C000100000003 /* LayoutOnScreenControlsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4A3A122F0C000100000002 /* LayoutOnScreenControlsViewController.swift */; };
 		840751B32BF49C050096B657 /* CustomTapGestureRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 840751B22BF49C050096B657 /* CustomTapGestureRecognizer.m */; };
@@ -218,6 +219,7 @@
 		2A7114002F5A6C65001D852D /* GamepadNavigationIllustrationHud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamepadNavigationIllustrationHud.swift; sourceTree = "<group>"; };
 		2AC1E3822F507D80004F76C0 /* GenericUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericUtils.swift; sourceTree = "<group>"; };
 		2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIStackExtension.swift; sourceTree = "<group>"; };
+		2B7A10012FFB000100000001 /* SettingsTouchVelocityPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTouchVelocityPreview.swift; sourceTree = "<group>"; };
 		3A4A3A102F0C000100000001 /* ProfileSelectorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSelectorViewController.swift; sourceTree = "<group>"; };
 		3A4A3A122F0C000100000002 /* LayoutOnScreenControlsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutOnScreenControlsViewController.swift; sourceTree = "<group>"; };
 		693B3A9A218638CD00982F7B /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
@@ -864,6 +866,7 @@
 				FB89462719F646E200339C8A /* StreamFrameViewController.m */,
 				FBD3494E19FF2174002D2A60 /* SettingsViewController.h */,
 				FBD3494F19FF2174002D2A60 /* SettingsViewController.m */,
+				2B7A10012FFB000100000001 /* SettingsTouchVelocityPreview.swift */,
 				2AC1EAFA2F922602004EDA80 /* UIStackExtension.swift */,
 				FB4A23B61A9D3637004D2EF2 /* LoadingFrameViewController.h */,
 				FB4A23B71A9D3637004D2EF2 /* LoadingFrameViewController.m */,
@@ -1188,6 +1191,7 @@
 				97E20DEA2E216532000D5DCA /* SceneDelegate.m in Sources */,
 				1817B61E2E6FD04D000D938D /* SafeTimer.swift in Sources */,
 				FBD3495019FF2174002D2A60 /* SettingsViewController.m in Sources */,
+				2B7A10022FFB000100000001 /* SettingsTouchVelocityPreview.swift in Sources */,
 				843CC7F02C1E757D00BBC475 /* NativeTouchPointer.m in Sources */,
 				2A7113FD2F5A6C65001D852D /* ThemeManager.swift in Sources */,
 				FB89462C19F646E200339C8A /* HttpManager.m in Sources */,

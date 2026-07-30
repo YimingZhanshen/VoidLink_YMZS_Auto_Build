@@ -442,6 +442,34 @@ import UIKit
         return false
     }
     
+    @objc public static func isFirstConnectingGamepad() -> Bool {
+        let key = "isFirstConnectingGamepad20260730"
+        let defaults = UserDefaults.standard
+        let launchedBefore = defaults.bool(forKey: key)
+        if !launchedBefore {
+            defaults.set(true, forKey: key)
+            return true
+        }
+        return false
+    }
+    @objc public static func handleFirstGamepadConnection(in vc: UIViewController?, handler: @escaping () -> Void) {
+        if isFirstConnectingGamepad() {
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: "Tips".localized,
+                message: "controllerNavigationTip".localized,
+                withCancel: false,
+                buttonTitle: "Got it!".localized,
+                countdown: 6,
+                completion: {
+                    handler()
+                }
+            )
+        }
+    }
+
+    
+    
     @objc public static func isFirstStreamingOnMac() -> Bool {
         if !PublicUtils.isRunningOnMacAsiPadApp {return false}
         let key = "hasStreamedOnMac"

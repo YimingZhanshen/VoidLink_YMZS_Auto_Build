@@ -2411,9 +2411,17 @@ BOOL isCustomResolution(int resolutionSelected) {
 
         // pointer veloc setting, will be enable/disabled by touchMode
         [self.pointerVelocityModeDividerSlider addTarget:self action:@selector(pointerVelocityModeDividerSliderMoved:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+        if (@available(iOS 13.0, *)) {
+            [self.pointerVelocityModeDividerSlider addTarget:self action:@selector(cancelTouchVelocityPreviewDismiss) forControlEvents:UIControlEventTouchDown];
+            [self.pointerVelocityModeDividerSlider addTarget:self action:@selector(scheduleTouchVelocityPreviewDismiss) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
+        }
 
         // init pointer veloc setting,  will be enable/disabled by touchMode
         [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(touchPointerVelocityFactorSliderMoved:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+        if (@available(iOS 13.0, *)) {
+            [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(cancelTouchVelocityPreviewDismiss) forControlEvents:UIControlEventTouchDown];
+            [self.touchPointerVelocityFactorSlider addTarget:self action:@selector(scheduleTouchVelocityPreviewDismiss) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel)];
+        }
 
         // async native touch event
         // self.asyncNativeTouchPrioritySelector.selectedSegmentIndex = currentSettings.asyncNativeTouchPriority.intValue; // load old setting of asyncNativeTouchPriority
@@ -3264,10 +3272,20 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void) pointerVelocityModeDividerSliderMoved:(UISlider* )sender {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  | %d%% | %d%% |  ", (uint8_t)sender.value, 100-(uint8_t)sender.value];
+    bool hasNoPresentedVC = self.presentedViewController == nil && self.view.window != nil;
+    if (@available(iOS 13.0, *)) if(!settingsViewJustExpanded && hasNoPresentedVC) {
+        [self showTouchVelocityPreviewWithDividerPercent:sender.value
+                                         velocityPercent:[self map_velocFactorDisplay_fromSliderValue:self.touchPointerVelocityFactorSlider.value]];
+    }
 }
 
 - (void) touchPointerVelocityFactorSliderMoved:(UISlider* )sender {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)[self map_velocFactorDisplay_fromSliderValue:sender.value]]; // Update label display
+    bool hasNoPresentedVC = self.presentedViewController == nil && self.view.window != nil;
+    if (@available(iOS 13.0, *)) if(!settingsViewJustExpanded && hasNoPresentedVC) {
+        [self showTouchVelocityPreviewWithDividerPercent:self.pointerVelocityModeDividerSlider.value
+                                         velocityPercent:[self map_velocFactorDisplay_fromSliderValue:sender.value]];
+    }
 }
 
 - (void) gyroSensitivitySliderMoved:(UISlider* )sender {

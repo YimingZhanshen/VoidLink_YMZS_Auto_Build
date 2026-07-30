@@ -93,6 +93,7 @@ import UIKit
     private var controllerNavigationExecuteDismissWindowOpen = false
     private var controllerNavigationExecuteDismissToken = 0
     private var controllerNavigationExecuteSuppressNextRelease = false
+    private var pendingSpecialEntryToken = 0
     private var isEditingMode = false {
         didSet {
             if !isEditingMode {
@@ -643,10 +644,18 @@ import UIKit
 
     private func activateEntry(at indexPath: IndexPath, dismissAfterAction: Bool = true) {
         guard entries.indices.contains(indexPath.item) else { return }
+        let entryIdentifier = entries[indexPath.item].orderIdentifier
+        activateEntry(withIdentifier: entryIdentifier, fallbackIndexPath: indexPath, dismissAfterAction: dismissAfterAction)
+    }
 
-        switch entries[indexPath.item] {
+    private func activateEntry(withIdentifier identifier: String, fallbackIndexPath: IndexPath? = nil, dismissAfterAction: Bool = true) {
+        guard let item = entries.firstIndex(where: { $0.orderIdentifier == identifier }) else { return }
+        let indexPath = IndexPath(item: item, section: 0)
+        pendingSpecialEntryToken += 1
+
+        switch entries[item] {
         case .special(let id, _):
-            collectionView.deselectItem(at: indexPath, animated: false)
+            collectionView.deselectItem(at: fallbackIndexPath ?? indexPath, animated: false)
             if !isEditingMode {
                 flashCell(at: indexPath)
                 handleSpecialEntry(id: id)
@@ -670,6 +679,7 @@ import UIKit
                 sendKeyboardCommand(command)
                 if dismissAfterAction && !viewPinned {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                        guard self.presentingViewController != nil else { return }
                         self.dismiss(animated: false)
                     }
                 }
@@ -848,7 +858,11 @@ import UIKit
     }
 
     private func handleSpecialEntry(id: String) {
+        pendingSpecialEntryToken += 1
+        let token = pendingSpecialEntryToken
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            guard self.pendingSpecialEntryToken == token else { return }
             self.dismiss(animated: false)
 
             switch id {
@@ -1074,7 +1088,7 @@ extension ToolboxViewController: ControllerCollectionNavigationDelegate {
         controllerNavigationDeleteDoublePressToken += 1
         let token = controllerNavigationDeleteDoublePressToken
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self,
                   self.controllerNavigationDeleteDoublePressToken == token else {
                 return
@@ -1383,7 +1397,7 @@ private final class ToolboxCardCell: UICollectionViewCell, ControllerNavigationH
     }
 
     override var canBecomeFocused: Bool {
-        return true
+        return false
     }
 
     var controllerNavigationHighlightTargetView: UIView {

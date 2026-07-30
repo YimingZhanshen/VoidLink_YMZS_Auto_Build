@@ -10,9 +10,9 @@ import UIKit
 
 extension UIViewController {
     var hasNoPresentedVC: Bool {
-        let hasPresentedVC = self.presentedViewController == nil && self.view.window != nil
+        let hasNoPresentedVC = self.presentedViewController == nil && self.view.window != nil
         // let presentedVC = self.presentedViewController
-        return hasPresentedVC
+        return hasNoPresentedVC
     }
 }
 

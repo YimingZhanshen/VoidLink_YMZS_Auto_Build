@@ -536,6 +536,35 @@
         }
       }
     },
+    "%.0f%% velocity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.0f%% velocity"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.0f%% 移速缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.0f%% 移速縮放"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.0f%% 移速縮放"
+          }
+        }
+      }
+    },
     "%@ is currently running" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6269,6 +6298,35 @@
         }
       }
     },
+    "controllerNavigationTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink now supports global controller navigation! Go to [Settings Menu] → [Controller] section → turn [Controller Navigation] off and on again to customize radial menu buttons and controller mouse mode."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink已支持全局手柄导航！前往 [设置菜单] → [手柄] 分区 → 关闭再打开 [手柄导航]，即可自定义环形菜单按键与手柄鼠标模式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。"
+          }
+        }
+      }
+    },
     "Create" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6674,6 +6732,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在此處刪除按鈕"
+          }
+        }
+      }
+    },
+    "descendants" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "descendants"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "衍生版"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "衍生版"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "衍生版"
           }
         }
       }
@@ -7746,6 +7833,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "關閉此選項將停用螢幕控制元件與實體滑鼠。Apple Pencil 也將無法正常使用。"
+          }
+        }
+      }
+    },
+    "Enhanced Touch Control for Genshin Game Streaming" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Touch Control for Genshin Game Streaming"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原神串流增强触控"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原神串流增強觸控"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原神串流增強觸控"
           }
         }
       }
@@ -12922,6 +13038,35 @@
         }
       }
     },
+    "Originally designed & coded by True Zhuanjia with pride" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Originally designed & coded by True Zhuanjia with pride"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由 True砖家@Bilibili 自豪地原创设计并编码"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由 True砖家@Bilibili 自豪地原創設計並編碼"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由 True砖家@Bilibili 自豪地原創設計並編碼"
+          }
+        }
+      }
+    },
     "Others" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13079,6 +13224,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "配對失敗"
+          }
+        }
+      }
+    },
+    "passthrough" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passthrough"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "坐标透传"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座標透傳"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "座標透傳"
           }
         }
       }
@@ -17248,6 +17422,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自訂螢幕控制器點選手指排除區域大小：%d%%"
+          }
+        }
+      }
+    },
+    "Tap to learn more" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点击了解更多"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點擊了解更多"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點擊了解更多"
           }
         }
       }

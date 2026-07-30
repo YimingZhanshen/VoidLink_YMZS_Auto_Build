@@ -13,7 +13,7 @@ import SwiftUI
 @objc class AboutViewController: UIViewController, ControllerUINavigationDelegate {
     func getNavigationElements() -> [ControllerNavigationElement] {
         var elements: [ControllerNavigationElement] = []
-        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .x, action: "ok"))
+        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "ok"))
         return elements
     }
     

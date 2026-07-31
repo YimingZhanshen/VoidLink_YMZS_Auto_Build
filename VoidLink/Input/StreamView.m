@@ -73,7 +73,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 
     NSTimer* interactionTimer;
     BOOL hasUserInteracted;
-    
+
     NSDictionary<NSString *, NSNumber *> *dictCodes;
     CustomTapGestureRecognizer *keyboardToggleRecognizer;
     UIPanGestureRecognizer *discreteMouseWheelRecognizer;
@@ -236,6 +236,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         case NativeTouch:
             keyboardToggleRecognizer.immediateTriggering = false;
             self->touchHandler = [[NativeTouchHandler alloc] initWithView:self settings:settings profile:profile];
+            [(NativeTouchHandler* )touchHandler setAllowSingleTouchEnabled:!_streamFrameVC.singleTouchDisabled];
             break;
         case NativeTouchOnly:
             keyboardToggleRecognizer.immediateTriggering = false;
@@ -254,11 +255,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             self->touchHandler = nil;
             keyboardToggleRecognizer.immediateTriggering = false;
             break;
-
         default:
             break;
     }
     sessionTouchHandler = touchHandler;
+    if(_streamFrameVC.touchDisabled) touchHandler = nil;
 }
 
 - (void)refreshKeyboardToggleRecognizer:(uint8_t)numberOfTouches{
@@ -619,7 +620,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
 }
 
 - (CGPoint)denormalizeWidgetPosition:(CGPoint)position {
-    if(position.x < 1.0 && position.y < 1.0){
+    if(position.x < 2.01 && position.y < 2.01){
         position.x = position.x * _streamFrameTopLayerView.bounds.size.width;
         position.y = position.y * _streamFrameTopLayerView.bounds.size.height;
     }
@@ -691,9 +692,10 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     self->oscProfileMan = [OSCProfilesManager sharedManager:self->_streamFrameTopLayerView.bounds];
 
     if(!profile){
-        NSLog(@"reloadOnScreenWidgets in streamview %d", reloadWidgets);
         profile = [self->oscProfileMan getSelectedProfile]; //returns the currently selected OSCProfile
     }
+    
+    NSLog(@"reloadOnScreenWidgets in streamview %d", reloadWidgets);
     
     dispatch_async(dispatch_get_main_queue(), ^{
         MotionHandler* motionHandler = [MotionHandler sharedWithProfile:profile];
@@ -718,6 +720,11 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
             // remove all keyboard widget views first
             [self clearOnScreenWidgets];
             
+            self->_streamFrameVC.touchDisabled = false;
+            self->_streamFrameVC.singleTouchDisabled = false;
+            PencilHandler* pencilHandler = [PencilHandler shared];
+            if(pencilHandler) pencilHandler.disableTilt = false;
+
             bool sequenceGenerated = false;
             bool hasMovableWidget = false;
                         
@@ -767,6 +774,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                     widgetView.minStickOffset = buttonState.minStickOffset;
                     widgetView.dWheelWalkModeThreshold = buttonState.walkModeThreshold;
                     widgetView.buttonMode = buttonState.buttonMode;
+                    if([widgetView.cmdString isEqualToString:@"NOSINGLETOUCH"]) widgetView.buttonMode = movable;
                     widgetView.sprintKeyActionType = buttonState.sprintKeyActionType;
                     widgetView.sprintKeyThreshold = buttonState.sprintKeyThreshold;
                     widgetView.walkKeyActionType = buttonState.walkKeyActionType;
@@ -999,7 +1007,9 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         });
     }
 
-    CGPoint location = [self adjustCoordinatesForVideoArea:[gesture locationInView:self]];
+    CGPoint originalLocation = [gesture locationInView:self];
+    CGPoint location = [self adjustCoordinatesForVideoArea:originalLocation];
+    NSLog(@" location %f, %f", location.x, location.y);
     PencilHandler* handler = PencilHandler.shared;
     location = CGPointApplyAffineTransform(location, CGAffineTransformMakeTranslation(handler.pencilTipOffset.x, handler.pencilTipOffset.y));
     
@@ -1023,19 +1033,20 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
     
     
     dispatch_after(0, dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE,0), ^{// Code to execute after the delay
-        if(PencilHandler.isDrawing) return;
-        switch (PencilHandler.hoverMode) {
-            case HoverPencil:
+        if(PencilHandler.isDrawing && PencilHandler.pencilAndHoverMode == pencilOnly && PencilHandler.pencilAndHoverMode == hoverDisabled) return;
+        switch (PencilHandler.pencilAndHoverMode) {
+            case pencilOnly:
                 LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height, distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
                 break;
-            case HoverMouse:
-                [self updateCursorLocation:location isMouse:YES];
+            case pencilToMouse:
+                if(gesture.state != UIGestureRecognizerStateEnded) [self updateCursorLocation:originalLocation isMouse:NO];
                 break;
-            case HoverDisabled:
+            case hoverDisabled:
                 break;
-            case HoverBoth:
+            case pencilToTouch:
+                /*
                 LiSendPenEvent(type, LI_TOOL_TYPE_PEN, 0, location.x / videoSize.width, location.y / videoSize.height, distance, 0.0f, 0.0f, rotationAngle, tiltAngle);
-                [self updateCursorLocation:location isMouse:YES];
+                [self updateCursorLocation:location isMouse:YES]; */
                 break;
             default:
                 break;

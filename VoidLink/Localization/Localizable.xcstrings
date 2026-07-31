@@ -1121,6 +1121,35 @@
         }
       }
     },
+    "=DisableSingleTouch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚫 SingleTouch"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚫 单指触摸"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚫 單指觸摸"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🚫 單指觸摸"
+          }
+        }
+      }
+    },
     "=disableTilt" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1291,6 +1320,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "編輯"
+          }
+        }
+      }
+    },
+    "=EnableSingleTouch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🟢 SingleTouch"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🟢 单指触摸"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🟢 單指觸摸"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🟢 單指觸摸"
           }
         }
       }
@@ -2451,35 +2509,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新分頁"
-          }
-        }
-      }
-    },
-    "=noSingleTouch" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🚫SingleTouch"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "🚫单指触摸"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "🚫單指觸摸"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "🚫單指觸摸"
           }
         }
       }
@@ -10149,35 +10178,6 @@
         }
       }
     },
-    "hoverModeStackTip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When “both” is selected, you’ll get flickering cursor on host.\nThis function is available without purchasing [Drawing Toolkit]."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当选择“同时悬停”时，PC端的光标将会闪烁。\n此功能是Pencil基础功能的一部分，不属于Drawing Toolkit。 "
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "當選擇「同時懸停」時，PC 端的游標將會閃爍。\n此功能為 Pencil 基礎功能的一部分，不屬於 Drawing Toolkit。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "當選擇「同時懸停」時，PC 端的游標將會閃爍。\n此功能為 Pencil 基礎功能的一部分，不屬於 Drawing Toolkit。"
-          }
-        }
-      }
-    },
     "I'm an artist" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13303,6 +13303,52 @@
         }
       }
     },
+    "Pencil hover" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 悬停"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 懸浮"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 懸浮"
+          }
+        }
+      }
+    },
+    "Pencil Pro Pack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 专业套装"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 專業套裝"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pencil 專業套裝"
+          }
+        }
+      }
+    },
     "Pencil Tip Offset" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13361,52 +13407,6 @@
         }
       }
     },
-    "Pencil hover" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 悬停"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 懸浮"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 懸浮"
-          }
-        }
-      }
-    },
-    "Pencil Pro Pack" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 专业套装"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 專業套裝"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pencil 專業套裝"
-          }
-        }
-      }
-    },
     "pencilKeyboardCmdURL" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13432,6 +13432,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/fa3tgr/nm6l9yixu0idsybg#32535f99"
+          }
+        }
+      }
+    },
+    "pencilModeStackTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This function is available without purchasing [Drawing Toolkit]."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此功能是Pencil基础功能的一部分，不属于Drawing Toolkit。 "
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此功能為 Pencil 基礎功能的一部分，不屬於 Drawing Toolkit。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此功能為 Pencil 基礎功能的一部分，不屬於 Drawing Toolkit。"
           }
         }
       }
@@ -19123,6 +19152,35 @@
         }
       }
     },
+    "X Offset" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X Offset"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X 偏移"
+          }
+        }
+      }
+    },
     "X1" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19169,58 +19227,6 @@
         }
       }
     },
-    "X Offset" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "X Offset"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "X 偏移"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "X 偏移"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "X 偏移"
-          }
-        }
-      }
-    },
-    "Yaw factor: %.2f" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "偏航系数: %.2f"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "偏航係數: %.2f"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "偏航係數: %.2f"
-          }
-        }
-      }
-    },
     "Y Offset" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19246,6 +19252,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Y 偏移"
+          }
+        }
+      }
+    },
+    "Yaw factor: %.2f" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偏航系数: %.2f"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偏航係數: %.2f"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "偏航係數: %.2f"
           }
         }
       }

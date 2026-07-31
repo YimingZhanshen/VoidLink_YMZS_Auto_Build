@@ -2648,30 +2648,30 @@
       }
     },
     "DhB-EF-mDt.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Hover Mode\"; ObjectID = \"DhB-EF-mDt\";",
+      "comment" : "Class = \"UILabel\"; text = \"Pencil Mode\"; ObjectID = \"DhB-EF-mDt\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Hover Mode"
+            "value" : "Pencil Mode"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "悬停模式"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "懸停模式"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "懸停模式"
           }
         }
@@ -6311,31 +6311,31 @@
       }
     },
     "t12-bo-icS.segmentTitles[0]" : {
-      "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[0] = \"Disabled\"; ObjectID = \"t12-bo-icS\";",
+      "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[0] = \"Hovering Disabled\"; ObjectID = \"t12-bo-icS\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Disabled"
+            "value" : "Hovering Disabled"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关闭"
+            "value" : "关闭悬停"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "關閉"
+            "value" : "關閉懸停"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "關閉"
+            "value" : "關閉懸停"
           }
         }
       }
@@ -6401,31 +6401,31 @@
       }
     },
     "t12-bo-icS.segmentTitles[3]" : {
-      "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[3] = \"Both\"; ObjectID = \"t12-bo-icS\";",
+      "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[3] = \"Touch\"; ObjectID = \"t12-bo-icS\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Both"
+            "value" : "Touch"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同时悬停"
+            "value" : "触控"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同時懸停"
+            "value" : "觸控"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同時懸停"
+            "value" : "觸控"
           }
         }
       }

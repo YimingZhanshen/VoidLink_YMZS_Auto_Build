@@ -434,7 +434,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self.squeezeShortcutSwitch setOn:oscProfile.squeezeShorcutEnabled];
     [self.pencilPausesNativeTouchSwitch setOn:oscProfile.pencilPausesNativeTouch];
     [self.disablePencilSlideGestureSwitch setOn:oscProfile.disablePencilSlideGestures];
-    self.hoverModeSelector.selectedSegmentIndex = oscProfile.pencilHoverMode;
+    self.pencilModeSelector.selectedSegmentIndex = oscProfile.pencilAndHoverMode;
 }
 
 - (void)saveGameProfileConfigs{
@@ -472,7 +472,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                              && oscProfile.squeezeShorcutEnabled == self.squeezeShortcutSwitch.isOn
                              && oscProfile.pencilPausesNativeTouch == self.pencilPausesNativeTouchSwitch.isOn
                              && oscProfile.disablePencilSlideGestures == self.disablePencilSlideGestureSwitch.isOn
-                             && oscProfile.pencilHoverMode == self.hoverModeSelector.selectedSegmentIndex
+                             && oscProfile.pencilAndHoverMode == self.pencilModeSelector.selectedSegmentIndex
                              );
 
     if(!configNotChanged){
@@ -499,12 +499,12 @@ BOOL isCustomResolution(int resolutionSelected) {
         oscProfile.squeezeShorcutEnabled = self.squeezeShortcutSwitch.isOn;
         oscProfile.pencilPausesNativeTouch = self.pencilPausesNativeTouchSwitch.isOn;
         oscProfile.disablePencilSlideGestures = self.disablePencilSlideGestureSwitch.isOn;
-        oscProfile.pencilHoverMode = self.hoverModeSelector.selectedSegmentIndex;
+        oscProfile.pencilAndHoverMode = self.pencilModeSelector.selectedSegmentIndex;
         [oscProfileMan replaceSelectedProfileWith:oscProfile overwriteDefault:YES];
         if(PencilHandler.shared) [PencilHandler.shared setupPressureLUTWithProfile:oscProfile];
     }
     
-    if(!leftStickMinOffsetSliderNotMoved || !rightStickMinOffsetSliderNotMoved || OnScreenWidgetView.gamepadArrivalReported){
+    if(!leftStickMinOffsetSliderNotMoved || !rightStickMinOffsetSliderNotMoved || ControllerUtil.gamepadArrivalReported){
         if(OnScreenControls.shared){
             [OnScreenControls.shared clearLeftStickTouchPadFlag];
             [OnScreenControls.shared clearRightStickTouchPadFlag];
@@ -1087,9 +1087,9 @@ BOOL isCustomResolution(int resolutionSelected) {
         self.squeezeShortcutStack.hasInfoTag = YES;
         [self addSetting:self.squeezeShortcutStack ofId:@"squeezeShortcutStack" to:pencilSection];
 
-        self.hoverModeStack.isGameProfileSetting = YES;
-        self.hoverModeStack.hasInfoTag = YES;
-        [self addSetting:self.hoverModeStack ofId:@"hoverModeStack" to:pencilSection];
+        self.pencilModeStack.isGameProfileSetting = YES;
+        self.pencilModeStack.hasInfoTag = YES;
+        [self addSetting:self.pencilModeStack ofId:@"pencilModeStack" to:pencilSection];
 
         self.pencilPausesNativeTouchStack.isGameProfileSetting = YES;
         [self addSetting:self.pencilPausesNativeTouchStack ofId:@"pencilPausesNativeTouchStack" to:pencilSection];
@@ -1799,8 +1799,8 @@ BOOL isCustomResolution(int resolutionSelected) {
         tipText = [LocalizationHelper localizedStringForKey:@"asyncFrameDequeueStackTip"];
         showOnlineDocAction = false;
     }
-    if([sender.superview.accessibilityIdentifier isEqualToString: @"hoverModeStack"]){
-        tipText = [LocalizationHelper localizedStringForKey:@"hoverModeStackTip"];
+    if([sender.superview.accessibilityIdentifier isEqualToString: @"pencilModeStack"]){
+        tipText = [LocalizationHelper localizedStringForKey:@"pencilModeStackTip"];
         showOnlineDocAction = false;
     }
     if([sender.superview.accessibilityIdentifier isEqualToString: @"pencilTickStack"]){
@@ -3107,7 +3107,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                             rightButtonCaptured = true;
                             
                             if (@available(iOS 13.0, *)) {
-                                NSLog(@"custom posistion local %d , stream: %d", currentSettings.customLocalRadialMenuButtonPosition.intValue, currentSettings.customStreamingRadialMenuButtonPosition.intValue);
+                                // NSLog(@"custom posistion local %d , stream: %d", currentSettings.customLocalRadialMenuButtonPosition.intValue, currentSettings.customStreamingRadialMenuButtonPosition.intValue);
                                 
                                 ControllerNavigator.localRadialMenuButton = (ControllerElement)currentSettings.localRadialMenuButton.intValue;
                                 ControllerNavigator.customPositionForLocalRadialMenuButton = (ControllerElementPosition)currentSettings.customLocalRadialMenuButtonPosition.intValue;
@@ -3196,21 +3196,21 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, _rollToLeftStickSwitch.isOn?sender.value:0, 0, _yawPitchToRightStickSwitch.isOn?sender.value:0, 0);
-    OnScreenWidgetView.gamepadArrivalReported = true;
+    ControllerUtil.gamepadArrivalReported = true;
 }
 
 - (void)leftStickMinOffsetSliderMoved:(UISlider* )sender{
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, sender.value, 0, 0, 0);
-    OnScreenWidgetView.gamepadArrivalReported = true;
+    ControllerUtil.gamepadArrivalReported = true;
 }
 
 - (void)rightStickMinOffsetSliderMoved:(UISlider* )sender{
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d  ", (int16_t)sender.value];
     if(settingsViewJustExpanded) return;
     LiSendControllerEvent(0, 0, 0, 0, 0, sender.value, 0);
-    OnScreenWidgetView.gamepadArrivalReported = true;
+    ControllerUtil.gamepadArrivalReported = true;
 }
 
 - (void)invokeOscLayout{
@@ -4247,8 +4247,10 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     CGFloat settingsMenuOffset = _rememberFoldStateSwitch.isOn ? _scrollView.contentOffset.y : 0;
     
-    NSInteger height = self.mainFrameViewController.settingsExpandedInStreamView ? currentSettings.height.intValue : [self getChosenStreamHeight];
-    NSInteger width = self.mainFrameViewController.settingsExpandedInStreamView ? currentSettings.width.intValue : [self getChosenStreamWidth];
+    NSInteger height = self.mainFrameViewController.isStreaming ? currentSettings.height.intValue : [self getChosenStreamHeight];
+    NSInteger width = self.mainFrameViewController.isStreaming ? currentSettings.width.intValue : [self getChosenStreamWidth];
+    
+    // NSLog(@"saveSettings aspectRatio %d, %ld, %ld",self.mainFrameViewController.isStreaming, width, height);
     
     NSInteger framerate = [self getChosenFrameRate];
 

@@ -418,8 +418,8 @@ class OSCProfilesManager: NSObject {
 
     func normalizeWidgetPosition(_ position: CGPoint) -> CGPoint {
         var normalizedPosition = position
-        let originalPosition = position
-        if position.x > 1.0, position.y > 1.0 {
+        // let originalPosition = position
+        if abs(position.x) > 1.0, abs(position.y) > 1.0 {
             normalizedPosition.x = position.x / Self.layoutViewBounds.size.width
             normalizedPosition.y = position.y / Self.layoutViewBounds.size.height
         }
@@ -430,7 +430,7 @@ class OSCProfilesManager: NSObject {
 
     private func denormalizeWidgetPosition(_ position: CGPoint) -> CGPoint {
         var denormalizedPosition = position
-        if position.x < 1.0, position.y < 1.0 {
+        if abs(position.x) < 2.01, abs(position.y) < 2.01 {
             denormalizedPosition.x = position.x * Self.layoutViewBounds.size.width
             denormalizedPosition.y = position.y * Self.layoutViewBounds.size.height
         }

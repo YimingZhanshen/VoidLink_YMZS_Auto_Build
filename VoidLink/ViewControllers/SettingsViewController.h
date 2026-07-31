@@ -306,8 +306,8 @@
 @property (weak, nonatomic) IBOutlet UIStackView *disablePencilSlideGestureStack;
 @property (weak, nonatomic) IBOutlet UISwitch *disablePencilSlideGestureSwitch;
 
-@property (weak, nonatomic) IBOutlet UIStackView *hoverModeStack;
-@property (weak, nonatomic) IBOutlet UISegmentedControl *hoverModeSelector;
+@property (weak, nonatomic) IBOutlet UIStackView *pencilModeStack;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *pencilModeSelector;
 
 
 

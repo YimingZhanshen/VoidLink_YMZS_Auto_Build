@@ -88,9 +88,8 @@
         [self._dPadBackground addSublayer:self._leftButton];
     }
     
-    NSLog(@"layer name ttttttttttt============================");
     for(CALayer* buttonLayer in self.OSCButtonLayerPool){
-        NSLog(@"layer name %@", buttonLayer.name);
+        // NSLog(@"layer name %@", buttonLayer.name);
     }
     
     [self resizeControllerLayerWith:self._dPadBackground and:_dPadSizeFactor];

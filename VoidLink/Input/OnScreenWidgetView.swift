@@ -61,11 +61,11 @@ import ObjectiveC.runtime
         func alterAbsTouchDragWith(mouseButton:Int32)
         func enablePencilHover()
         func disablePencilHover()
-        func setAllowSingleTouchEnabled(_ enabled:Bool)
+        func handleDisableSingleTouchButtonUp()
         func replaceBrush(shortcut:String)
         func replaceEraser(shortcut:String)
         func presentPressureCurveVC()
-        func toggleTouch(disabled:Bool)
+        func handleTouchDisableButtonUp()
         func toggleGamepadOverlay(overlayEnabled:Bool)
         @objc(magnifierMoveStreamViewWithTranslation:)
         func magnifierMoveStreamView(translation: CGVector)
@@ -672,14 +672,15 @@ import ObjectiveC.runtime
         self.hasTrackPoint = true
         self.hasNonEditableLabel = (self.cmdString == "DISABLETOUCH"
                                     || self.cmdString == "GAMEPADOVERLAY"
-                                    || self.cmdString == "DISABLETILT")
+                                    || self.cmdString == "DISABLETILT"
+                                    || self.cmdString == "NOSINGLETOUCH")
         self.hasTemporaryLabel = CommandManager.velocityBasedTouchPads.contains(self.touchPadString) && (self.isMotionControlButton || self.buttonString == "NULL")
         || self.cmdString == "RSVPAD"
         || self.cmdString == "LSVPAD"
 
         self.mouseButtonActionDelay = self.cmdString.contains("ABSMOUSEPAD") ? 0.005 : 0
         
-        self.standardFoldingInterval = widgetType == .touchPad ? 0.05 : 0.15;
+        self.standardFoldingInterval = widgetType == .touchPad ? 0.05 : 0.085;
         
         self.isMagnifier = self.cmdString.contains("MAGNIFIER")
         
@@ -1053,13 +1054,21 @@ import ObjectiveC.runtime
         if self.hasNonEditableLabel {
             
             switch cmdString {
-            case "DISABLETOUCH":
-                self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: touchDisabledFLag ? "=EnableTouch" : "=DisableTouch" )
             case "GAMEPADOVERLAY":
-                self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: OnScreenWidgetView.gamepadOverlayFLag ? "=GamepadOverlayOn" : "=GamepadOverlayOff" )
+                self.nonEditableWidgetLabel =  OnScreenWidgetView.gamepadOverlayFLag ? "=GamepadOverlayOn".localized : "=GamepadOverlayOff".localized
+            case "DISABLETOUCH":
+                if let vc = StreamFrameViewController.sharedInstance() {
+                    self.nonEditableWidgetLabel = vc.touchDisabled ? "=EnableTouch".localized : "=DisableTouch".localized
+                }
+                else {self.nonEditableWidgetLabel = "=DisableTouch".localized}
+            case "NOSINGLETOUCH":
+                if let vc = StreamFrameViewController.sharedInstance() {
+                    self.nonEditableWidgetLabel = vc.singleTouchDisabled ? "=EnableSingleTouch".localized : "=DisableSingleTouch".localized
+                }
+                else {self.nonEditableWidgetLabel = "=DisableSingleTouch".localized}
             case "DISABLETILT":
                 if let pencilHandler = PencilHandler.shared {
-                    self.nonEditableWidgetLabel = LocalizationHelper.localizedString(forKey: pencilHandler.disableTilt ? "=enableTilt" : "=disableTilt" )
+                    self.nonEditableWidgetLabel = pencilHandler.disableTilt ? "=enableTilt".localized : "=disableTilt".localized
                 }
                 else {self.nonEditableWidgetLabel = "=disableTilt".localized}
             default:
@@ -1690,7 +1699,7 @@ import ObjectiveC.runtime
         
         // legacy keyboard button combo connected by "+"
         if !OnScreenWidgetView.editMode && self.cmdString.contains("+") && !self.cmdString.contains("-"){
-            if buttonMode == .movable, moveableButtonLongPressed() {return}
+            if buttonMode == .movable, firstTouchMoved {return}
             if leaveNonSkillButtonAlone {return}
             self.buttonDownVisualEffect()
             if var autoReleaseComboButtons = CommandManager.shared.extractAutoReleaseButtonStrings(from: self.cmdString) {
@@ -1874,7 +1883,7 @@ import ObjectiveC.runtime
             self.onScreenControls?.sendRightStickTouchPadEvent(stickOffsetVector.dx, stickOffsetVector.dy)
         }
         self.motionHandler?.mixOnScreenRightStickAndGyroInput(x: targetX, y: targetY)
-        if !OnScreenWidgetView.gamepadArrivalReported {OnScreenWidgetView.gamepadArrivalReported = true}
+        if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = true}
     }
     
     private func sendLeftStickTouchPadEvent(weightedTouchX:CGFloat, weightedTouchY:CGFloat, circulate:Bool=false){
@@ -1889,7 +1898,7 @@ import ObjectiveC.runtime
             self.onScreenControls?.sendLeftStickTouchPadEvent(stickOffsetVector.dx, stickOffsetVector.dy)
         }
         self.motionHandler?.mixOnScreenLeftStickAndGyroInput(x: targetX, y: targetY)
-        if !OnScreenWidgetView.gamepadArrivalReported {OnScreenWidgetView.gamepadArrivalReported = true}
+        if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = true}
     }
      
     private func sendLeftTriggerTouchPadEvent(inputY: CGFloat){
@@ -1963,7 +1972,7 @@ import ObjectiveC.runtime
         DispatchQueue.global(qos: .userInteractive).async {
             if CommandManager.oscButtonMappings.keys.contains(realButtonString) {
                 self.sendOscButtonDownEvent(oscString: realButtonString)
-                if !OnScreenWidgetView.gamepadArrivalReported {OnScreenWidgetView.gamepadArrivalReported = true}
+                if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = true}
             }
             if CommandManager.keyboardButtonMappings.keys.contains(realButtonString) {
                 LiSendKeyboardEvent(CommandManager.keyboardButtonMappings[realButtonString]!,Int8(KEY_ACTION_DOWN), 0)
@@ -2249,8 +2258,10 @@ import ObjectiveC.runtime
             
             if self.widgetType == WidgetTypeEnum.button && (self.buttonMode == .movable || self.temporarilyMovable) {
                 movableButtonReleased = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    OnScreenWidgetView.updateStreamViewGuidelines(for: self)
+                if false {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        OnScreenWidgetView.updateStreamViewGuidelines(for: self)
+                    }
                 }
             }
         }
@@ -2341,8 +2352,10 @@ import ObjectiveC.runtime
             layoutUpdateDelegate?.updateGuidelinesForOnScreenWidget(self)
         }
         else {
-            if self.widgetType == .button {superview?.bringSubviewToFront(self)}
-            OnScreenWidgetView.updateStreamViewGuidelines(for: self)
+            // if self.widgetType == .button {superview?.bringSubviewToFront(self)}
+            if false {
+                OnScreenWidgetView.updateStreamViewGuidelines(for: self)
+            }
         }
     }
     
@@ -2486,7 +2499,10 @@ import ObjectiveC.runtime
 
             if (self.buttonMode == .movable || self.temporarilyMovable) && self.moveableButtonLongPressed() {
                 if let touch = touches.first {
+                    CATransaction.begin()
+                    CATransaction.setDisableActions(true)
                     self.moveByTouch(touch: touch)
+                    CATransaction.commit()
                 }
             }
         }
@@ -2825,10 +2841,10 @@ import ObjectiveC.runtime
         switch self.motionControlButtonString {
         case "GYRO":
             self.motionHandler?.startMotionControlByOnScreenButton(self, yawFactor: yawFactor, pitchFactor: pitchFactor, rollFactor: rollFactor)
-            if !OnScreenWidgetView.gamepadArrivalReported {OnScreenWidgetView.gamepadArrivalReported = oscProfile.mapGyroTo == .mapGyroToControllerStick}
+            if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = oscProfile.mapGyroTo == .mapGyroToControllerStick}
         case "GYROPAUSE":
             self.motionHandler?.stopMotionUpdate(interruptNoneGyroInput:false)
-            if !OnScreenWidgetView.gamepadArrivalReported {OnScreenWidgetView.gamepadArrivalReported = oscProfile.mapGyroTo == .mapGyroToControllerStick}
+            if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = oscProfile.mapGyroTo == .mapGyroToControllerStick}
             break
         case "ACCEL":
             break
@@ -2888,9 +2904,6 @@ import ObjectiveC.runtime
         case "PENCILHOVER":
             if !self.isPencilProEnabled() {break}
             self.functionalWidgetDelegate?.enablePencilHover()
-        case "NOSINGLETOUCH":
-            if !self.isPencilProEnabled() {break}
-            self.functionalWidgetDelegate?.setAllowSingleTouchEnabled(false)
         default:
             break
         }
@@ -2898,29 +2911,24 @@ import ObjectiveC.runtime
     
     private var movableButtonReleased:Bool = true
     private func moveableButtonLongPressed() -> Bool{
-        return !movableButtonReleased && CACurrentMediaTime() - self.touchTapTimeStamp > 0.3
+        return !movableButtonReleased && CACurrentMediaTime() - self.touchTapTimeStamp > 0.05
     }
-    
-    private var singleTouchEnabled:Bool = true
-    
+        
     private func handleFunctionalButtonUp(event: UIEvent? = nil){
         // print("handleFunctionalButtonUp \(self.widgetLabel), event Empty: \(String(describing: event)), \(CACurrentMediaTime())")
         if autoDockIsDocked {return}
+        if firstTouchMoved {return}
+        /*
         if buttonMode == .movable {
             if moveableButtonLongPressed() && !UITouchUtil.touches(in: self, from: event).isEmpty {return}
             switch self.functionalButtonString {
             // case "FOLDER":
             //    self.folded = !self.folded
             //    OnScreenWidgetView.set(folded: self.folded, for: self)
-            case "NOSINGLETOUCH":
-                if !self.isPencilProEnabled() {break}
-                singleTouchEnabled = !singleTouchEnabled
-                self.functionalWidgetDelegate?.setAllowSingleTouchEnabled(singleTouchEnabled)
-                return
             default:
                 break
             }
-        }
+        } */
 
         switch self.functionalButtonString {
         case "FOLDER":
@@ -2962,16 +2970,28 @@ import ObjectiveC.runtime
             self.functionalWidgetDelegate?.bringUpSoftKeyboard()
         case "ABSTCHDRAG":
             self.functionalWidgetDelegate?.alterAbsTouchDragWith(mouseButton:BUTTON_LEFT)
-        case "DISABLETOUCH":
-            self.handleTouchDisableButtonUp()
         case "GAMEPADOVERLAY":
             self.gamepadOverlayButtonUp()
         case "PENCILHOVER":
             if !self.isPencilProEnabled() {break}
             self.functionalWidgetDelegate?.disablePencilHover()
+
+        case "DISABLETOUCH":
+            if let streamFrameVC = StreamFrameViewController.sharedInstance() {
+                streamFrameVC.touchDisabled = !streamFrameVC.touchDisabled
+                self.functionalWidgetDelegate?.handleTouchDisableButtonUp()
+            }
         case "NOSINGLETOUCH":
             if !self.isPencilProEnabled() {break}
-            self.functionalWidgetDelegate?.setAllowSingleTouchEnabled(true)
+            if let streamFrameVC = StreamFrameViewController.sharedInstance() {
+                streamFrameVC.singleTouchDisabled = !streamFrameVC.singleTouchDisabled
+                self.functionalWidgetDelegate?.handleDisableSingleTouchButtonUp()
+            }
+        case "DISABLETILT":
+            if !self.isPencilProEnabled() {break}
+            if let pencilHandler = PencilHandler.shared {
+                pencilHandler.disableTilt = !pencilHandler.disableTilt
+            }
         case "BRUSH":
             if !self.isPencilProEnabled() {break}
             var brushShortcut = self.cmdString.replacingOccurrences(of: "BRUSH+", with: "")
@@ -2982,12 +3002,6 @@ import ObjectiveC.runtime
             var eraserShortcut = self.cmdString.replacingOccurrences(of: "ERASER+", with: "")
             eraserShortcut = eraserShortcut.replacingOccurrences(of: "ERASER", with: "")
             self.functionalWidgetDelegate?.replaceEraser(shortcut: eraserShortcut)
-        case "DISABLETILT":
-            if !self.isPencilProEnabled() {break}
-            if let pencilHandler = PencilHandler.shared {
-                pencilHandler.disableTilt = !pencilHandler.disableTilt
-                self.setupAtrributedText()
-            }
         case "PRESSURECURVE":
             if ["com.voidlink.iOS"
                 , "com.voidlinkextreme.iOS"
@@ -2998,15 +3012,12 @@ import ObjectiveC.runtime
         default:
             break
         }
+        
+        if self.hasNonEditableLabel {
+            self.setupAtrributedText()
+        }
     }
-    
-    private var touchDisabledFLag:Bool = false
-    private func handleTouchDisableButtonUp(){
-        touchDisabledFLag = !touchDisabledFLag
-        self.setupAtrributedText()
-        self.functionalWidgetDelegate?.toggleTouch(disabled: touchDisabledFLag)
-    }
-    
+        
     @objc static var gamepadOverlayFLag:Bool = false
     private func gamepadOverlayButtonUp(){
         self.relocatedDuringStreaming = true
@@ -3806,10 +3817,20 @@ import ObjectiveC.runtime
     @objc static var enableFolderAnimation:Bool = true
     private static func setCollection(folded:Bool, for folder:OnScreenWidgetView, exception:OnScreenWidgetView? = nil, recursive:Bool = false, isExclusiveFolderAction:Bool = false) {
         guard folder.isFolder else {return}
+        
+        if !OnScreenWidgetView.enableFolderAnimation, folder.parentSequence == -1 {
+            folder.buttonDownVisualEffect()
+            folder.buttonDownVisualEffectLayer.isHidden = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                folder.buttonDownVisualEffectLayer.isHidden = true
+            }
+        }
+        
         // guard folder.folded != hidden else { return }
         folder.folded = folded
         folder.setupAtrributedText()
         folder.reverseColorPhase(reversed: !folder.folded)
+        
         if folded {
             for sequence in folder.sequenceSet {
                 guard let widget = OnScreenWidgetView.mapping[sequence], widget != exception else {continue}
@@ -3897,8 +3918,16 @@ import ObjectiveC.runtime
         }
     }
     
+    @objc static func disableFolderAnimation(for duration: TimeInterval){
+        enableFolderAnimation = false
+        DispatchQueue.global().asyncAfter(deadline: .now() + duration) {
+            enableFolderAnimation = true
+        }
+    }
+    
     @objc static func set(folded:Bool, for folder:OnScreenWidgetView) { // folder综合逻辑
         guard folder.isFolder else {return}
+        
         if !folded {
             OnScreenWidgetView.deepestButton = OnScreenWidgetView.getDeepestButton()
         }
@@ -4129,7 +4158,6 @@ import ObjectiveC.runtime
         return OnScreenWidgetView.mapping.keys.max() ?? -1
     }
 
-    @objc static var gamepadArrivalReported: Bool = false
     override func didMoveToSuperview() {
         super.didMoveToSuperview()
         OnScreenWidgetView.installAutoDockIfNeeded()
@@ -4141,14 +4169,14 @@ import ObjectiveC.runtime
             label.alpha = 1
             autoDockRestoreOriginalAlpha()
             if self.motionControlButtonString == "GYRO" {
-                if OnScreenWidgetView.gamepadArrivalReported {self.motionHandler?.stopMotionUpdate(interruptNoneGyroInput: true)}
+                if ControllerUtil.gamepadArrivalReported {self.motionHandler?.stopMotionUpdate(interruptNoneGyroInput: true)}
                 self.motionHandler?.motionStarter = nil
             }
             if self.motionControlButtonString == "ACCEL" {}
             if self.motionControlButtonString == "MOTION" {}
             
             if self.widgetType == WidgetTypeEnum.button && !OnScreenWidgetView.editMode {
-                if OnScreenWidgetView.gamepadArrivalReported {self.sendComboButtonsUpEvent(comboStrings: self.comboButtonStrings)}
+                if ControllerUtil.gamepadArrivalReported {self.sendComboButtonsUpEvent(comboStrings: self.comboButtonStrings)}
                 self.functionalWidgetDelegate?.alterAbsTouchDragWith(mouseButton:BUTTON_LEFT)
             }
             buttonDownVisualEffectLayer.removeFromSuperlayer()
@@ -4167,7 +4195,7 @@ import ObjectiveC.runtime
             stickWheelLayer.removeFromSuperlayer()
             stickWheelLayerSmall.removeFromSuperlayer()
             self.inertialScroller.timer?.clean()
-            if OnScreenWidgetView.gamepadArrivalReported {
+            if ControllerUtil.gamepadArrivalReported {
                 self.clearLeftStickTouchPadFlag()
                 self.clearRightStickTouchPadFlag()
             }
@@ -4255,7 +4283,7 @@ import ObjectiveC.runtime
     }
     
 deinit {
-        print("onScreenWidgetView deinit \(self.widgetLabel))")
+        // print("onScreenWidgetView deinit \(self.widgetLabel))")
     }
 }
 

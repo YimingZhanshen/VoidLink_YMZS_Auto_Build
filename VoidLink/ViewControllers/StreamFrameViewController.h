@@ -47,6 +47,9 @@
 @property (nonatomic, assign) CGPoint streamViewMagnifierContentOffset;
 @property (nonatomic, assign) CGFloat streamViewMagnifierZoomScale;
 
+@property(nonatomic, assign) bool touchDisabled;
+@property(nonatomic, assign) bool singleTouchDisabled;
+
 
 + (StreamFrameViewController *)sharedInstance;
 

@@ -274,7 +274,7 @@ private extension UInt64 {
 }
 
 @objc enum ProfileSelectorLoadingMode: Int {
-    case selectProfile  
+    case selectProfileFromLayoutTool  
     case selectProfileFromStreamView
     case selectProfileFromMainFrame
     case pickProfile
@@ -287,15 +287,15 @@ final class ProfileSelectorViewController: UIViewController, UICollectionViewDat
     var currentFileOperation: FileOperation = .importOperation
     private var currentExportScope: ProfileExportScope = .allProfiles
     var needToUpdateOscLayoutTVC: (() -> Void)?
-    var loadingMode: ProfileSelectorLoadingMode = .selectProfile
+    var loadingMode: ProfileSelectorLoadingMode = .selectProfileFromLayoutTool
     @nonobjc var pickedProfileDataHandler: ((OSCProfile) -> Void)?
     weak var currentOSCButtonLayers: NSMutableSet?
     var layoutViewBounds: CGRect = .zero
 
     private var profilesManager: OSCProfilesManager!
     private var horizontalConstraintsConfigured = false
-    private var profiles: NSMutableArray = []
-    private var selectedProfileIndex = 0
+    private(set) var profiles: NSMutableArray = []
+    private(set) var selectedProfileIndex = 0
     private var profilesLoadGeneration = 0
     private var profileCollectionView: UICollectionView!
     private let contentView = UIView()
@@ -448,8 +448,9 @@ final class ProfileSelectorViewController: UIViewController, UICollectionViewDat
         }
         if profiles.count > 0 {
             scrollToSelectedProfile(animated: true)
+            notifyProfileViewDidRefresh()
         } else {
-            reloadProfilesAsync(scrollToSelected: true)
+            reloadProfilesAsync(scrollToSelected: true, notify: true)
         }
         
         if (loadingMode == .selectProfileFromMainFrame || loadingMode == .selectProfileFromStreamView)
@@ -748,7 +749,7 @@ final class ProfileSelectorViewController: UIViewController, UICollectionViewDat
         if loadingMode != .selectProfileFromStreamView
             && loadingMode != .pickProfile
             && loadingMode != .pickProfileData
-            && loadingMode != .selectProfile
+            && loadingMode != .selectProfileFromLayoutTool
         {
             guard let selectedProfileIndex = validProfileIndex(selectedProfileIndex) else { return }
             NotificationCenter.default.post(name: Notification.Name("GameProfileSelectedNotification"), object: self.profiles[selectedProfileIndex])
@@ -1189,7 +1190,7 @@ final class ProfileSelectorViewController: UIViewController, UICollectionViewDat
     }
 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        if (loadingMode != .selectProfile
+        if (loadingMode != .selectProfileFromLayoutTool
             && loadingMode != .selectProfileFromMainFrame
             && loadingMode != .selectProfileFromStreamView
             ),

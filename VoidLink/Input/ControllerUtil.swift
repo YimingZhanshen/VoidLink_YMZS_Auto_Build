@@ -389,6 +389,8 @@ import Foundation
     
     @objc static var swapABXY:Bool = false
     
+    @objc static var gamepadArrivalReported: Bool = false
+    
     @objc static func string(for element: ControllerElement) -> String {
         return element.displayName
     }

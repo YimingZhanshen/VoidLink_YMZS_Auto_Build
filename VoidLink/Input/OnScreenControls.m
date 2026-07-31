@@ -360,7 +360,7 @@ static float L3_Y;
 }
 
 - (CGPoint) denormalizeWidgetPosition:(CGPoint)position {
-    if(position.x < 1.0 && position.y < 1.0) {
+    if(position.x < 1.01 && position.y < 1.01) {
         position.x = position.x * _view.bounds.size.width;
         position.y = position.y * _view.bounds.size.height;
         // NSLog(@"denormalizing position: %f, %f", position.x, position.y);

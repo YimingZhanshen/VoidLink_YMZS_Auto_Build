@@ -22,11 +22,11 @@ typedef NS_ENUM(NSInteger, MapGyroTo) {
     driftCorrection
 };
 
-typedef NS_ENUM(NSInteger, PencilHoverMode) {
-    HoverDisabled,
-    HoverPencil,
-    HoverMouse,
-    HoverBoth
+typedef NS_ENUM(NSInteger, PencilAndHoverMode) {
+    hoverDisabled,
+    pencilOnly,
+    pencilToMouse,
+    pencilToTouch
 };
 
 
@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, PencilHoverMode) {
 @property NSString *squeezeEndShortcut;
 @property (nonatomic, assign) bool pencilPausesNativeTouch;
 @property (nonatomic, assign) bool disablePencilSlideGestures;
-@property (nonatomic, assign) PencilHoverMode pencilHoverMode;
+@property (nonatomic, assign) PencilAndHoverMode pencilAndHoverMode;
 
 
 

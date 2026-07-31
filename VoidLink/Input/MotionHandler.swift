@@ -404,8 +404,8 @@ import CoreMotion
 }
     
     private func clearGyroInput(interruptNonGyroInput:Bool){
-        // guard let onScreenControls = onScreenControls else { return }
-
+        guard ControllerUtil.gamepadArrivalReported else { return }
+        
         if yawPitchToRightStick{
             onScreenControls?.sendRightStickTouchPadEvent(rightStickPhysicalInputX+rightStickTouchInputX-yawBias, rightStickPhysicalInputY+rightStickTouchInputY-pitchBias)
         }

@@ -74,7 +74,7 @@
     [encoder encodeObject:self.squeezeEndShortcut forKey:@"squeezeEndShortcut"];
     [encoder encodeBool:self.pencilPausesNativeTouch forKey:@"pencilPausesNativeTouch"];
     [encoder encodeBool:self.disablePencilSlideGestures forKey:@"disablePencilSlideGestures"];
-    [encoder encodeInt64:self.pencilHoverMode forKey:@"pencilHoverMode"];
+    [encoder encodeInt64:self.pencilAndHoverMode forKey:@"pencilHoverMode"];
 }
 
 - (id) initWithCoder:(NSCoder*)decoder {
@@ -201,7 +201,7 @@
 
         self.pencilPausesNativeTouch = [decoder containsValueForKey:@"pencilPausesNativeTouch"] ? [decoder decodeBoolForKey:@"pencilPausesNativeTouch"] : false;
         self.disablePencilSlideGestures = [decoder containsValueForKey:@"disablePencilSlideGestures"] ? [decoder decodeBoolForKey:@"disablePencilSlideGestures"] : false;
-        self.pencilHoverMode = [decoder containsValueForKey:@"pencilHoverMode"] ? [decoder decodeInt64ForKey:@"pencilHoverMode"] : HoverPencil;
+        self.pencilAndHoverMode = [decoder containsValueForKey:@"pencilHoverMode"] ? [decoder decodeInt64ForKey:@"pencilHoverMode"] : pencilOnly;
     }
     
     return self;
@@ -253,7 +253,7 @@
     copy.squeezeEndShortcut = [self.squeezeEndShortcut mutableCopy]; // NSString → NSMutableString
     copy.pencilPausesNativeTouch = self.pencilPausesNativeTouch;
     copy.disablePencilSlideGestures = self.disablePencilSlideGestures;
-    copy.pencilHoverMode = self.pencilHoverMode;
+    copy.pencilAndHoverMode = self.pencilAndHoverMode;
     return copy;
 }
 

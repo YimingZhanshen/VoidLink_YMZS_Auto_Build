@@ -41,6 +41,7 @@
 @interface AVDisplayCriteria()
 @property(readonly) int videoDynamicRange;
 @property(readonly, nonatomic) float refreshRate;
+
 - (id)initWithRefreshRate:(float)arg1 videoDynamicRange:(int)arg2;
 @end
 
@@ -127,6 +128,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     MicHandler* micHandler;
     MotionHandler *_motionHandler;
 
+    
 #else
     UITapGestureRecognizer *_menuTapGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
@@ -857,12 +859,15 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     viewIsBeingResized = false;
     _magnifierViewportInteractionActive = false;
     
+    _touchDisabled = false;
+    _singleTouchDisabled = false;
+    
     [super viewDidLoad];
-
+    
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
     [UIApplication sharedApplication].idleTimerDisabled = YES;
-        
+    
     _settings = [[[DataManager alloc] init] getSettings];  //StreamFrameViewController retrieve the settings here.
     
     _stageLabel = [[UILabel alloc] init];
@@ -898,9 +903,9 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     
     toolBoxViewController = [[ToolboxViewController alloc] init];
     toolBoxViewController.specialEntryDelegate = self;
-
+    
     _isRestoringFromPiP = NO;
-
+    
     /*
      _settings.externalDisplayMode.intValue:
      0 - stage manager
@@ -915,12 +920,12 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [self reConfigStreamViewRealtime]; // call this method again to make sure all gestures are configured & added to the superview(self.view), including the gestures added from inside the streamview.
     
     if([self isFirstStreaming] || GenericUtils.isFirstStreamingOnMac) [self popFirstStreamingTip];
-
+    
 #if TARGET_OS_TV
     if (!_menuTapGestureRecognizer || !_menuDoubleTapGestureRecognizer || !_playPauseTapGestureRecognizer) {
         _menuTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPauseButtonPressed:)];
         _menuTapGestureRecognizer.allowedPressTypes = @[@(UIPressTypeMenu)];
-
+        
         _playPauseTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(controllerPlayPauseButtonPressed:)];
         _playPauseTapGestureRecognizer.allowedPressTypes = @[@(UIPressTypePlayPause)];
         
@@ -933,7 +938,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [self.view addGestureRecognizer:_menuTapGestureRecognizer];
     [self.view addGestureRecognizer:_menuDoubleTapGestureRecognizer];
     [self.view addGestureRecognizer:_playPauseTapGestureRecognizer];
-
+    
 #else
     //[self configSwipeGestures]; // swipe & exit gesture configured here
     //[self configOscLayoutTool]; //_oscLayoutTapRecoginizer will be added or removed to the view here
@@ -978,7 +983,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
                                              selector:@selector(gameProfileSelectorClosed)
                                                  name:@"GameProfileSelectorCloseNotification"
                                                object:nil];
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleStreamAspectRatioChanged:)
                                                  name:@"StreamAspectRatioChanged"
@@ -1008,13 +1013,13 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [self.view addSubview:_stageLabel];
     [self.view addSubview:_spinner];
     [self.view addSubview:_tipLabel];
-
+    
     if ([_settings.renderingBackend intValue] == RENDER_METAL) {
         // Metal view for video
         Log(LOG_I, @"StreamFrameViewController creating MetalViewController");
         self.metalViewController = [[MetalViewController alloc] initWithFrame:self.view.bounds
                                                                     framerate:[self->_settings.framerate floatValue]
-                                                                    settings:self->_settings
+                                                                     settings:self->_settings
                                                                metricsHandler:self.imguiView.metricsHandler];
         self.metalViewController.view.userInteractionEnabled = NO;
         [self addChildViewController:self.metalViewController];
@@ -1022,14 +1027,10 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
         [self.view insertSubview:self.metalViewController.view atIndex:0];
         [self.metalViewController didMoveToParentViewController:self];
     }
-        
-    OnScreenWidgetView.gamepadArrivalReported = false;
     
-    OnScreenWidgetView.enableFolderAnimation = false;
-    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC));
-    dispatch_after(delay, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        OnScreenWidgetView.enableFolderAnimation = true;
-    });
+    ControllerUtil.gamepadArrivalReported = false;
+    
+    [OnScreenWidgetView disableFolderAnimationFor:2];
 }
 
 - (void)keyboardWillShow:(NSNotification *)notification{
@@ -1074,6 +1075,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     _layoutOnScreenControlsVC.toolbarStackView.hidden = true;
     _layoutOnScreenControlsVC.toolbarRootView.hidden = true;
     ProfileSelectorLoadingMode loadingMode = pickProfile ? ProfileSelectorLoadingModePickProfile : ProfileSelectorLoadingModeSelectProfileFromStreamView;
+    _layoutOnScreenControlsVC.profileSelectorLoadingMode = loadingMode;
     [self presentViewController:_layoutOnScreenControlsVC animated:NO completion:^{
         [self->_layoutOnScreenControlsVC presentProfileSelectorWith:loadingMode animated:false];
     }];
@@ -1198,6 +1200,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     // [self->_streamView reloadLegacyWidgets];
     [self reConfigStreamViewRealtimeAndReloadSettings:NO reloadOnscreenWidgets:_settings.onscreenControls.intValue == OnScreenControlsLevelCustom];
     // [self->_streamView reloadGameProfile:nil reloadWidgets:true]; //update keyboard buttons here
+    [OnScreenWidgetView disableFolderAnimationFor:2];
 }
 
 - (void)handleStreamAspectRatioChanged:(NSNotification *)notification {
@@ -2111,8 +2114,8 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [_streamView disablePencilHover];
 }
 
-- (void)setAllowSingleTouchEnabled:(BOOL)enabled{
-    [_streamView setAllowSingleTouchEnabled:enabled];
+- (void)handleDisableSingleTouchButtonUp {
+    [_streamView setAllowSingleTouchEnabled:!_singleTouchDisabled];
 }
 
 - (void)replaceBrushWithShortcut:(NSString *)shortcut{
@@ -2127,8 +2130,8 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     }
 }
 
-- (void)toggleTouchWithDisabled:(BOOL)disabled{
-    [_streamView toggleTouchDisabled:disabled];
+- (void)handleTouchDisableButtonUp {
+    [_streamView toggleTouchDisabled:self.touchDisabled];
 }
 
 - (void)presentPressureCurveVC{

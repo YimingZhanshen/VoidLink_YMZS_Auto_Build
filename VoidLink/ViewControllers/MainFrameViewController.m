@@ -1904,6 +1904,11 @@ static NSMutableSet* hostList;
     Settings* settings = [dataMan retrieveSettings];
     settings.touchMoveEventInterval = @(0);
     settings.localMousePointerMode = @(0);
+    
+    settings.controllerMouseStick = @(ControllerElementRightStick);
+    settings.controllerMouseLeftButton = @(ControllerElementDpadRight);
+    settings.controllerMouseRightButton = @(ControllerElementDpadUp);
+
     if (@available(iOS 14.0, tvOS 14.0, *)) nil;
     else settings.appTheme = @(UIUserInterfaceStyleDark);
     [dataMan saveData];

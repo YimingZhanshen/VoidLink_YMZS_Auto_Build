@@ -68,7 +68,8 @@ import UIKit
     
     @objc public static func needUpdatePartialSettings() -> Bool {
         // let key = "needUpdateDefaultSettings20260226-1"
-        let key = "needUpdatePartialSettings20260620"
+        // let key = "needUpdatePartialSettings20260620"
+        let key = "needUpdatePartialSettings20260801"
         guard !UserDefaults.standard.bool(forKey: key) else {
             return false
         }

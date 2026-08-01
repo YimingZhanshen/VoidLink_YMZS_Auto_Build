@@ -92,9 +92,17 @@ import ObjectiveC.runtime
     
     @objc static public var editMode: Bool = false
     @objc static public var buttonVisualFeedbackEnabled: Bool = true
+    
     @objc public var widgetLabel: String
     private var nonEditableWidgetLabel: String = ""
     @objc public var cmdString: String
+    @objc public var showCmdStringLabel: Bool {
+        if let parent = OnScreenWidgetView.mapping[self.parentSequence] {
+            return parent.cmdString.contains("LABELEDFOLDER")
+        }
+        return false
+    }
+    
     @objc public var sequence: Int16 = -1
     private var buttonString: String = ""
     @objc var functionalButtonString: String = ""
@@ -268,7 +276,7 @@ import ObjectiveC.runtime
 
     @objc public var isMagnifier: Bool = false
     @objc public var animatesTransition: Bool = true
-
+    
     // for all stick pads
     @objc public var minStickOffset: CGFloat = 0
     public let stickMaxOffset: CGFloat = 0x7FFE
@@ -389,7 +397,9 @@ import ObjectiveC.runtime
     
     // key / button label
     private let label: UILabel
-    
+    private let cmdLabel: UILabel
+    private let labelStackView: UIStackView
+
     // first touch location within the button or pad view (self)
     @objc public var touchBeganLocation: CGPoint = .zero
     
@@ -446,7 +456,11 @@ import ObjectiveC.runtime
     @objc public var revealMode: RevealMode = .coexist
     @objc public var bulkMoveEnabled: Bool = false
     @objc public var sequenceSet: Set<Int16> = Set()
-    @objc public var parentSequence: Int16 = -1
+    @objc public var parentSequence: Int16 = -1 {
+        didSet {
+            setupAtrributedText()
+        }
+    }
     @objc public var standardFoldingInterval: TimeInterval = 0.05
     static weak var capturer: OnScreenWidgetView?
     @objc static weak var deepestButton: OnScreenWidgetView?
@@ -497,6 +511,8 @@ import ObjectiveC.runtime
         self.widgetLabel = buttonLabel
         self.shape = shape
         self.label = UILabel()
+        self.cmdLabel = UILabel()
+        self.labelStackView = UIStackView()
         // self.originalBackgroundColor = UIColor(white: 0.2, alpha: 0.7)
         // self.widthFactor = 1.0
         // self.heightFactor = 1.0
@@ -549,7 +565,7 @@ import ObjectiveC.runtime
             if self.cmdString.contains("ERASER"){
                 self.functionalButtonString = "ERASER"
             }
-            if self.cmdString.contains("FOLDER") {
+            if self.cmdString.contains("FOLDER") || self.cmdString.contains("LABELEDFOLDER") {
                 self.functionalButtonString = "FOLDER"
             }
             if self.isFunctionalButton {
@@ -680,7 +696,7 @@ import ObjectiveC.runtime
 
         self.mouseButtonActionDelay = self.cmdString.contains("ABSMOUSEPAD") ? 0.005 : 0
         
-        self.standardFoldingInterval = widgetType == .touchPad ? 0.05 : 0.085;
+        self.standardFoldingInterval = widgetType == .touchPad ? 0.05 : 0.065;
         
         self.isMagnifier = self.cmdString.contains("MAGNIFIER")
         
@@ -985,17 +1001,17 @@ import ObjectiveC.runtime
         }
         
         NSLayoutConstraint.activate(self.shape == "round" ? [
-            label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 13), // set up label size contrain within UIView
-            label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -13),
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),]
+            labelStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 13), // set up label size contrain within UIView
+            labelStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -13),
+            labelStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            labelStackView.centerYAnchor.constraint(equalTo: centerYAnchor),]
             : [
-            label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10), // set up label size contrain within UIView
-            label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
-            label.topAnchor.constraint(equalTo: self.topAnchor, constant: 8), // set up label size contrain within UIView
-            label.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -8),
-            label.centerXAnchor.constraint(equalTo: centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: centerYAnchor),])
+            labelStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10), // set up label size contrain within UIView
+            labelStackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -10),
+            labelStackView.topAnchor.constraint(greaterThanOrEqualTo: self.topAnchor, constant: 8), // set up label size contrain within UIView
+            labelStackView.bottomAnchor.constraint(lessThanOrEqualTo: self.bottomAnchor, constant: -8),
+            labelStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            labelStackView.centerYAnchor.constraint(equalTo: centerYAnchor),])
         
         if self.shape != "round"{
             self.setSquareWidgetCornerRadius()
@@ -1036,6 +1052,38 @@ import ObjectiveC.runtime
         }
         return false
     }
+
+    private func cleanedCmdStringLabelText() -> String {
+        let trimmedCmdString = cmdString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedCmdString.isEmpty else { return "" }
+
+        guard trimmedCmdString.contains("-") else {
+            let cmdText = trimmedCmdString
+            return cmdText.hasSuffix("+") ? String(cmdText.dropLast()) : cmdText
+        }
+
+        let parts = trimmedCmdString
+            .split(separator: "-")
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .compactMap { part -> String? in
+                guard !part.isEmpty else { return nil }
+
+                let uppercasedPart = part.uppercased()
+                if part.contains("+") || uppercasedPart.hasSuffix("MS") {
+                    return nil
+                }
+
+                let cleanedPart = part.replacingOccurrences(
+                    of: #"\.\d+"#,
+                    with: "",
+                    options: .regularExpression
+                )
+                return cleanedPart.isEmpty ? nil : cleanedPart
+            }
+
+        let cmdText = parts.joined(separator: "-")
+        return cmdText.hasSuffix("+") ? String(cmdText.dropLast()) : cmdText
+    }
     
     @objc func reverseColorPhase(reversed: Bool){
         backgroundAlpha = reversed ? (originalBackgroundAlpha.sign == .minus ? 0.5 : -0.5) : originalBackgroundAlpha
@@ -1045,6 +1093,8 @@ import ObjectiveC.runtime
     }
     
     @objc func setupAtrributedText(){
+        setupLabelFonts()
+        
         var text = self.widgetLabel.contains("#") ? "\(self.widgetLabel.split(separator: "#").first ?? "")" : LocalizationHelper.localizedString(forKey: self.widgetLabel)
         
         if !OnScreenWidgetView.editMode, self.widgetType == .touchPad, !self.hasTemporaryLabel {
@@ -1093,14 +1143,54 @@ import ObjectiveC.runtime
         label.attributedText = attr
         label.textAlignment = .center
         label.baselineAdjustment = .alignCenters
+        setupCmdLabel()
     }
     
-    private func setupView() {
-        // label.text = self.widgetLabel
-        // label.font = UIFont.boldSystemFont(ofSize: 19)
-        // label.font = UIFont.systemFont(ofSize: 19, weight: .medium, design: .rounded)
+    @objc func setupCmdLabel() {
+        setupLabelFonts()
+        guard canShowCmdLabel else {
+            cmdLabel.isHidden = true
+            return
+        }
+        guard showCmdStringLabel else {
+            cmdLabel.isHidden = true
+            return
+        }
+        let cmdText = cleanedCmdStringLabelText()
+        let labelText = label.text ?? label.attributedText?.string ?? ""
+        let duplicatesLabelText = cmdText.uppercased() == labelText.uppercased()
         
-        let baseFont = UIFont.boldSystemFont(ofSize: self.shape == "round" ? 22 : 19)
+        let cmdAttr = NSAttributedString(
+            string: cmdText,
+            attributes: [
+                .foregroundColor: UIColor(white:labelAlpha>0 ? 1.0 : 0, alpha: abs(labelAlpha)),
+                .strokeColor: (labelAlpha>0 ? UIColor.black : UIColor.white).withAlphaComponent(abs(labelAlpha)*0.43),
+                .strokeWidth: widgetType == .touchPad ? 7 : (containsNonLatin(cmdText) ? -1 : -4)
+            ]
+        )
+        cmdLabel.attributedText = cmdAttr
+        cmdLabel.textAlignment = .center
+        cmdLabel.baselineAdjustment = .alignCenters
+        cmdLabel.isHidden = cmdText.isEmpty || duplicatesLabelText
+    }
+
+    private var canShowCmdLabel: Bool {
+        !self.hasNonEditableLabel
+        && self.widgetType == .button
+        && self.functionalButtonString.isEmpty
+        && !self.isFolder
+    }
+
+    private func setupLabelFonts() {
+        let baseFontSize: CGFloat
+        let usesCompactCmdLabelLayout = PublicUtils.isIPhone && showCmdStringLabel && canShowCmdLabel
+        if usesCompactCmdLabelLayout {
+            baseFontSize = self.shape == "round" ? 17 : 15
+        } else {
+            baseFontSize = self.shape == "round" ? 22 : 19
+        }
+
+        let baseFont = UIFont.boldSystemFont(ofSize: baseFontSize)
         if #available(iOS 13.0, *) {
             if let desc = baseFont.fontDescriptor.withDesign(.rounded) {
                 label.font = UIFont(descriptor: desc, size: 0)
@@ -1110,11 +1200,43 @@ import ObjectiveC.runtime
         } else {
             label.font = baseFont
         }
+
+        let cmdLabelFontSize: CGFloat = PublicUtils.isIPhone ? 8 : 12
+        if #available(iOS 13.0, tvOS 13.0, *) {
+            cmdLabel.font = UIFont.monospacedSystemFont(ofSize: cmdLabelFontSize, weight: .medium)
+        } else {
+            cmdLabel.font = UIFont.systemFont(ofSize: cmdLabelFontSize, weight: .medium)
+        }
+
+        label.minimumScaleFactor = usesCompactCmdLabelLayout ? 0.62 : 0.1
+        cmdLabel.minimumScaleFactor = PublicUtils.isIPhone ? 0.6 : 0.6
+    }
+    
+    private func setupView() {
+        // label.text = self.widgetLabel
+        // label.font = UIFont.boldSystemFont(ofSize: 19)
+        // label.font = UIFont.systemFont(ofSize: 19, weight: .medium, design: .rounded)
+        
+        setupLabelFonts()
         
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.1  // Adjust the scale factor as needed
         label.textAlignment = .center
+
+        cmdLabel.translatesAutoresizingMaskIntoConstraints = false
+        cmdLabel.adjustsFontSizeToFitWidth = true
+        cmdLabel.textAlignment = .center
+        cmdLabel.numberOfLines = 1
+
+        labelStackView.translatesAutoresizingMaskIntoConstraints = false
+        labelStackView.axis = .vertical
+        labelStackView.alignment = .fill
+        labelStackView.distribution = .fill
+        labelStackView.spacing = 1
+        labelStackView.isUserInteractionEnabled = false
+        labelStackView.addArrangedSubview(label)
+        labelStackView.addArrangedSubview(cmdLabel)
 
         // label.textColor = UIColor(white: 1.0, alpha: labelAlpha)
         // label.shadowColor = .black
@@ -1172,7 +1294,7 @@ import ObjectiveC.runtime
         // self.layer.shadowRadius = 8
         // self.layer.shadowOpacity = 0.5
         
-        addSubview(label)
+        addSubview(labelStackView)
         _ = installCustomContentIfNeeded()
         
         if(OnScreenWidgetView.editMode) {self.changeAndActivateContraints()}
@@ -3870,6 +3992,7 @@ import ObjectiveC.runtime
                     widget.capturedTouches.removeAllObjects()
                     widget.center = folder.storedCenter
                     widget.isHidden = false
+                    widget.setupCmdLabel()
                     if (widget.widgetType == .touchPad
                         || abs(widget.backgroundAlpha) < 0.1
                         || widget.hasTemporaryLabel){

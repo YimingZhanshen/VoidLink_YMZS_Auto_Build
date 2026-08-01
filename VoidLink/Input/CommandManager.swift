@@ -171,6 +171,7 @@ import UIKit
         "SOFTKEYBOARD",
         "ABSTCHDRAG",
         "FOLDER",
+        "LABELEDFOLDER",
         "PRESSURECURVE",
         "PENCILHOVER",
         "BRUSH",
@@ -200,6 +201,7 @@ import UIKit
         "BRUSH": 0xFF,
         "ERASER": 0xFF,
         "FOLDER": 0xFF,
+        "LABELEDFOLDER": 0xFF,
     ]
     
     @objc public static let keyboardButtonMappings: [String: Int16] = [

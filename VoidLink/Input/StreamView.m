@@ -801,8 +801,6 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                     widgetView.componentSizeFactor = buttonState.componentSizeFactor;
                     widgetView.touchPointAnchored = buttonState.touchPointAnchored;
                     widgetView.stickIndicatorOffset = buttonState.stickIndicatorOffset;
-
-                    [widgetView setupAtrributedText];
                     
                     if(widgetView.isFolder && widgetView.parentSequence<0 && widgetView.autoDockIdleDuration>0) {
                         [widgetView setAutoDockWithEnabled:true];
@@ -819,6 +817,8 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
                     }
                     
                     [widgetView accessWidgetAttributes];
+                    
+                    [widgetView setupAtrributedText]; // rely on "labeledFolder cmd"
                 }
                 else if(buttonState.widgetType == LegacyOnScreenControls) hasLegacyWidget = true;
             }

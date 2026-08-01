@@ -624,6 +624,16 @@ struct WidgetPickerView: View {
             forcedComboMode: nil
         ),
         FunctionalButtonOption(
+            localizationKey: "=labeledFolder",
+            cmd: "LABELEDFOLDER",
+            tip: LocalizationHelper.localizedString(forKey: "A folder whose collected buttons show command labels."),
+            allowsKeyboardCombination: true,
+            allowsGamepadCombination: true,
+            allowsSkillCombo: true,
+            allowsShortcutCombo: true,
+            forcedComboMode: nil
+        ),
+        FunctionalButtonOption(
             localizationKey: "=toolbox",
             cmd: "TOOLBOX",
             tip: LocalizationHelper.localizedString(forKey: "Activate toolbox menu during streaming"),

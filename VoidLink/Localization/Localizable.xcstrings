@@ -6675,25 +6675,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VoidLink now supports global controller navigation! Go to [Settings Menu] → [Controller] section → turn [Controller Navigation] off and on again to customize radial menu buttons and controller mouse mode."
+            "value" : "VoidLink now supports global controller navigation! Go to [Settings Menu] → [Controller] section → turn [Controller Navigation] off and on again to customize radial menu buttons and controller mouse mode. \nRadial menu button is by default:\n[RT], and long pressing [Start] during streaming.\n"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VoidLink已支持全局手柄导航！前往 [设置菜单] → [手柄] 分区 → 关闭再打开 [手柄导航]，即可自定义环形菜单按键与手柄鼠标模式。"
+            "value" : "VoidLink已支持全局手柄导航！前往 [设置菜单] → [手柄] 分区 → 关闭再打开 [手柄导航]，即可自定义环形菜单按键与手柄鼠标模式。\n默认环形菜单按键为 [右板机]，串流状态下为长按 [Start] 键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。"
+            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。\n預設環形選單按鍵為 [右扳機]，串流狀態下為長按 [Start] 鍵。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。"
+            "value" : "VoidLink 已支援全域手把導航！前往 [設定選單] → [手把] 分區 → 關閉再開啟 [手把導航]，即可自訂環形選單按鍵與手把滑鼠模式。\n預設環形選單按鍵為 [右扳機]，串流狀態下為長按 [Start] 鍵。"
           }
         }
       }

@@ -1063,35 +1063,6 @@
         }
       }
     },
-    "=deselect" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deselect"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消选择"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消選取"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消選取"
-          }
-        }
-      }
-    },
     "=del" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1117,6 +1088,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "刪除"
+          }
+        }
+      }
+    },
+    "=deselect" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deselect"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消选择"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消選取"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消選取"
           }
         }
       }
@@ -1672,35 +1672,6 @@
         }
       }
     },
-    "=labeledFolder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Labeled Folder"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "带标签的控件夹"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "帶標籤的控制項夾"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "帶標籤的控制項夾"
-          }
-        }
-      }
-    },
     "=functions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1726,35 +1697,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "功能鍵"
-          }
-        }
-      }
-    },
-    "=groupLayers" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Group Layers"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "组合图层"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "群組圖層"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "群組圖層"
           }
         }
       }
@@ -1842,6 +1784,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "🎮 疊加 開關"
+          }
+        }
+      }
+    },
+    "=groupLayers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Group Layers"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "组合图层"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "群組圖層"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "群組圖層"
           }
         }
       }
@@ -2136,6 +2107,35 @@
         }
       }
     },
+    "=labeledFolder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Labeled Folder"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "带标签的控件夹"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帶標籤的控制項夾"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帶標籤的控制項夾"
+          }
+        }
+      }
+    },
     "=lang" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2190,6 +2190,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雷射"
+          }
+        }
+      }
+    },
+    "=lasso" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasso"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "套索"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "套索"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "套索"
           }
         }
       }
@@ -2277,35 +2306,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "舊版控制項"
-          }
-        }
-      }
-    },
-    "=lasso" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lasso"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "套索"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "套索"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "套索"
           }
         }
       }
@@ -2513,35 +2513,6 @@
         }
       }
     },
-    "=move" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移动"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移動"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移動"
-          }
-        }
-      }
-    },
     "=mouseM" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2654,6 +2625,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "滾輪"
+          }
+        }
+      }
+    },
+    "=move" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動"
           }
         }
       }
@@ -2919,35 +2919,6 @@
         }
       }
     },
-    "=pencilHover" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hover"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "手动悬浮"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "手動懸浮"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "手動懸浮"
-          }
-        }
-      }
-    },
     "=pen" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2973,6 +2944,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鋼筆"
+          }
+        }
+      }
+    },
+    "=pencilHover" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hover"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手动悬浮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "手動懸浮"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "手動懸浮"
           }
         }
       }
@@ -5305,6 +5305,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最低: 50 ms, 輸入 0 關閉. 單位：ms 秒, s秒, m分鐘. ⏎ 儲存."
+          }
+        }
+      }
+    },
+    "awdlTipLink" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/fa3tgr/hpxq8qrp141nd79t"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/fa3tgr/kb1zrydulh8uweca"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/fa3tgr/kb1zrydulh8uweca"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/fa3tgr/kb1zrydulh8uweca"
           }
         }
       }
@@ -9724,25 +9753,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- The on-screen widget layout (including the virtual gamepad, virtual buttons, etc.), as well as the options in the settings menu marked with a [gamepad icon] (such as motion control settings), are all saved in the game profile.\n\n- To switch game profile during streaming, swipe inward from the %@ edge of the screen by %@ of screen width, open [Switch Game Profile] in the toolbox menu"
+            "value" : "- Long press a game profile to reorder.\n\n- The on-screen widget layout (including the virtual gamepad, virtual buttons, etc.), as well as the options in the settings menu marked with a [gamepad icon] (such as motion control settings), are all saved in the game profile.\n\n- To switch game profile during streaming, swipe inward from the %@ edge of the screen by %@ of screen width, open [Switch Game Profile] in the toolbox menu"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 屏显控件布局(包含虚拟手柄、虚拟按键等)，以及设置菜单中标记 [手柄图标] 的选项(如体感控制参数)，皆保存在游戏配置中。\n\n- 串流过程中, 由屏幕 %@ 边缘向内滑动 %@ 屏宽，即可在工具箱菜单中打开 [切换游戏配置]"
+            "value" : "- 长按可以重新排序游戏配置。\n\n- 屏显控件布局(包含虚拟手柄、虚拟按键等)，以及设置菜单中标记 [手柄图标] 的选项(如体感控制参数)，皆保存在游戏配置中。\n\n- 串流过程中, 由屏幕 %@ 边缘向内滑动 %@ 屏宽，即可在工具箱菜单中打开 [切换游戏配置]。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 螢幕控制項佈局（包含虛擬手把、虛擬按鍵等），以及設定選單中標記 [手把圖示] 的選項（如體感控制參數），皆保存在遊戲配置中。\n\n- 串流過程中，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，即可在工具箱選單中開啟［切換遊戲配置］"
+            "value" : "- 長按可以重新排序遊戲設定檔。\n\n- 螢幕控制項佈局（包含虛擬手把、虛擬按鍵等），以及設定選單中標記 [手把圖示] 的選項（如體感控制參數），皆保存在遊戲配置中。\n\n- 串流過程中，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，即可在工具箱選單中開啟［切換遊戲配置］"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 螢幕控制項佈局（包含虛擬手把、虛擬按鍵等），以及設定選單中標記 [手把圖示] 的選項（如體感控制參數），皆保存在遊戲配置中。\n\n- 串流過程中，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，即可在工具箱選單中開啟［切換遊戲配置］"
+            "value" : "- 長按可以重新排序遊戲設定檔。\n\n- 螢幕控制項佈局（包含虛擬手把、虛擬按鍵等），以及設定選單中標記 [手把圖示] 的選項（如體感控制參數），皆保存在遊戲配置中。\n\n- 串流過程中，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，即可在工具箱選單中開啟［切換遊戲配置］"
           }
         }
       }
@@ -10216,6 +10245,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏應用程式"
+          }
+        }
+      }
+    },
+    "highBitrateTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have just set a high streaming bitrate.\nHigh-bitrate streaming requires the following essential conditions to achieve the best streaming experience:\n\n1. Separate the 2.4GHz and 5GHz Wi-Fi networks to ensure that your device connects to 5GHz Wi-Fi.\n\n2. Connect the PC host to a wired LAN connection.\n\n3. If connecting the PC to wired Ethernet is not possible, you can still achieve a good streaming experience in non-gaming scenarios such as drawing and office work. However, please lower the bitrate to avoid exceeding the wireless duplex throughput capacity of your Wi-Fi AP/router.\n\n4. If you are unfamiliar with how Apple Wireless Direct Link may cause streaming stuttering, click \"Learn More\"."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "您刚刚设置了较高的串流码率。高码率串流需要满足以下必要条件，以期获得最佳串流体验：\n\n1. 将 2.4GHz 与 5GHz 热点分开，以确保设备连接 5GHz Wi-Fi。 \n\n2. PC主机接入有线局域网。 \n\n3. 如果PC没有接入网线的条件， 您依然可以在绘画、办公等非游戏类场景下获得良好串流体验，但请降低码率避免超出 WiFi AP/路由器 的无线双工吞吐能力。 \n\n4. 如果您不了解 Apple Wireless Direct Link 可能造成的串流卡顿，请点击“了解更多”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您剛剛設定了較高的串流位元速率。\n高位元速率串流需要滿足以下必要條件，以期獲得最佳串流體驗：\n\n1. 將 2.4GHz 與 5GHz Wi-Fi 網路分開，以確保裝置連接至 5GHz Wi-Fi。\n\n2. 將 PC 主機接入有線區域網路。\n\n3. 如果 PC 無法接入網線，您仍然可以在繪畫、辦公等非遊戲類場景下獲得良好的串流體驗，但請降低位元率，避免超出 Wi-Fi AP／路由器的無線雙工吞吐能力。\n\n4. 如果您不了解 Apple Wireless Direct Link 可能造成串流卡頓的原因，請點擊「了解更多」。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您剛剛設定了較高的串流位元速率。\n高位元速率串流需要滿足以下必要條件，以期獲得最佳串流體驗：\n\n1. 將 2.4GHz 與 5GHz Wi-Fi 網路分開，以確保裝置連接至 5GHz Wi-Fi。\n\n2. 將 PC 主機接入有線區域網路。\n\n3. 如果 PC 無法接入網線，您仍然可以在繪畫、辦公等非遊戲類場景下獲得良好的串流體驗，但請降低位元率，避免超出 Wi-Fi AP／路由器的無線雙工吞吐能力。\n\n4. 如果您不了解 Apple Wireless Direct Link 可能造成串流卡頓的原因，請點擊「了解更多」。"
           }
         }
       }
@@ -12569,6 +12627,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新螢幕控制項"
+          }
+        }
+      }
+    },
+    "newToolboxTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the Toolbox edit mode and long press a card to reorder it. Controller users can follow the on-screen instructions in the bottom-right corner."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进入工具箱编辑模式后，长按即可重新排序卡片。手柄用户请直接按右下角提示操作。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進入工具箱編輯模式後，長按即可重新排序卡片。手把使用者請直接依照右下角提示操作。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進入工具箱編輯模式後，長按即可重新排序卡片。手把使用者請直接依照右下角提示操作。"
           }
         }
       }

@@ -467,8 +467,57 @@ import UIKit
             )
         }
     }
-
     
+    @objc public static func isFirstSettingHighBitrate() -> Bool {
+        let key = "isFirstSettingHighBitrate123"
+        let defaults = UserDefaults.standard
+        let launchedBefore = defaults.bool(forKey: key)
+        if !launchedBefore {
+            defaults.set(true, forKey: key)
+            return true
+        }
+        return false
+    }
+    @objc public static func handleFirstSettingHighBitrate(in vc: UIViewController?, handler: @escaping () -> Void) {
+        if isFirstSettingHighBitrate() {
+            AlertControllerUtil.cancelButtonString = "Learn More".localized
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: "Tips".localized,
+                message: "highBitrateTip".localized,
+                withCancel: true,
+                buttonTitle: "Got it!".localized,
+                countdown: 6,
+                completion: {
+                    handler()
+                }
+            )
+        }
+    }
+
+    @objc public static func isFirstOpeningNewToolbox() -> Bool {
+        let key = "isFirstOpeningNewToolbox6"
+        let defaults = UserDefaults.standard
+        let launchedBefore = defaults.bool(forKey: key)
+        if !launchedBefore {
+            defaults.set(true, forKey: key)
+            return true
+        }
+        return false
+    }
+    @objc public static func handleFirstOpeningNewToolbox(in vc: UIViewController?, handler: @escaping () -> Void) {
+        AlertControllerUtil.showAlert(
+            in: vc,
+            title: "Tips".localized,
+            message: "newToolboxTip".localized,
+            withCancel: false,
+            buttonTitle: "Got it!".localized,
+            countdown: 4,
+            completion: {
+                handler()
+            }
+        )
+    }
     
     @objc public static func isFirstStreamingOnMac() -> Bool {
         if !PublicUtils.isRunningOnMacAsiPadApp {return false}

@@ -316,17 +316,20 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [self bringUpToolboxMenuWithoutWidgetLayoutTool:YES];
 }
 
-- (void)bringUpToolboxMenuWithoutWidgetLayoutTool:(BOOL)hideWidgetLayoutTool{
+- (void)bringUpToolboxMenuWithoutWidgetLayoutTool:(BOOL)hideWidgetLayoutToolEntry{
     [self prepareGameProfileSelector];
     ToolboxViewController* oldToolboxVC = toolBoxViewController;
     toolBoxViewController = [[ToolboxViewController alloc] init];
     toolBoxViewController.specialEntryDelegate = self;
     toolBoxViewController.specialEntries = [oldToolboxVC.specialEntries mutableCopy];
-    if(hideWidgetLayoutTool) [toolBoxViewController.specialEntries removeObject:@"widgetLayoutTool"];
+    if(hideWidgetLayoutToolEntry) [toolBoxViewController.specialEntries removeObject:@"widgetLayoutTool"];
     toolBoxViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-    [self presentViewController:toolBoxViewController animated:YES completion:^{
-        //[self->toolBoxViewController setupConstraints];
-    }];
+    if([GenericUtils isFirstOpeningNewToolbox]){
+        [GenericUtils handleFirstOpeningNewToolboxIn:self handler:^{
+            [self presentViewController:self->toolBoxViewController animated:YES completion:^{}];
+        }];
+    }
+    else [self presentViewController:toolBoxViewController animated:YES completion:^{}];
 }
 
 - (void)configGestures{

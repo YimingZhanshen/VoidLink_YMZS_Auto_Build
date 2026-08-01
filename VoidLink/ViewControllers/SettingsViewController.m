@@ -129,7 +129,6 @@ static const int bitrateTable[] = {
     48000,
     49000,
     50000,
-    50000,
     51000,
     52000,
     53000,
@@ -4340,7 +4339,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     BOOL globeAsEscape = self.globeAsEscapeSwitch.isOn;
     CGFloat streamingRadialMenuDelay = self.streamingRadialMenuDelaySlider.value;
     NSInteger backgroundSessionTimer = self.backgroundSessionTimerSlider.value == self.backgroundSessionTimerSlider.maximumValue ? (uint32_t) INT16_MAX : (uint32_t)self.backgroundSessionTimerSlider.value;
-    
+
     [dataMan saveSettings:currentSettings
                          withBitrate:_bitrate
                            framerate:framerate
@@ -4419,6 +4418,17 @@ BOOL isCustomResolution(int resolutionSelected) {
                       globeAsEscape:globeAsEscape
            streamingRadialMenuDelay:streamingRadialMenuDelay
               backgroundSessionTimer:backgroundSessionTimer];
+    
+    if(_bitrate >= 50000) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [GenericUtils handleFirstSettingHighBitrateIn:self handler:^{
+                if(AlertControllerUtil.actionCancelled){
+                    [PublicUtils openUrl:[LocalizationHelper localizedStringForKey:@"awdlTipLink"]];
+                }
+            }];
+        });
+    }
+
 }
 
 - (void)didReceiveMemoryWarning {

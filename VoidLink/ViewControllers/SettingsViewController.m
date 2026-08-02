@@ -3236,15 +3236,17 @@ BOOL isCustomResolution(int resolutionSelected) {
         return;
     }
 
+
     // self.layoutOnScreenControlsVC.view.backgroundColor = [UIColor colorWithWhite:0.55 alpha:1.0];
+    
     self.layoutOnScreenControlsVC.view.backgroundColor = UIColor.clearColor;
     self.layoutOnScreenControlsVC.modalPresentationStyle = UIModalPresentationOverCurrentContext;
     self.layoutOnScreenControlsVC.profileSelectorLoadingMode = ProfileSelectorLoadingModeSelectProfileFromMainFrame;
     [self presentViewController:self.layoutOnScreenControlsVC animated:NO completion:^{
         [self->_layoutOnScreenControlsVC presentProfileSelectorWith:ProfileSelectorLoadingModeSelectProfileFromMainFrame animated:animated];
     }];
-    _layoutOnScreenControlsVC.toolbarStackView.hidden = true;
-    _layoutOnScreenControlsVC.toolbarRootView.hidden = true;
+    self->_layoutOnScreenControlsVC.toolbarStackView.hidden = true;
+    self->_layoutOnScreenControlsVC.toolbarRootView.hidden = true;
 }
 
 - (LayoutOnScreenControlsViewController *)instantiateOscLayoutViewController {

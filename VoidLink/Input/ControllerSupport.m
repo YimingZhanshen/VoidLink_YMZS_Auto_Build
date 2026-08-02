@@ -1211,7 +1211,8 @@ double rc_expo(double x, double expo) {
     if(![StreamFrameViewController sharedInstance]) return;
     MainFrameViewController* mainFrameVC =(MainFrameViewController* )ControllerUtil.delegate;
     if(mainFrameVC.settingsExpandedInStreamView) return;
-    [ControllerUtil stopListeningPrimaryControllerWithStopListenToRadialMenuButton:false];
+    [ControllerUtil stopListeningPrimaryControllerWithStopListenToRadialMenuButton:true];
+    if (@available(iOS 13.0, *)) [ControllerNavigator listenToRadialMenuButton];
     [self listenToGCController: ControllerUtil.primaryGCController];
     if (@available(iOS 13.0, *)){
         NSLog(@"ControllerUtil setUINavigationDelegate %f",CACurrentMediaTime());

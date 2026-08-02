@@ -229,9 +229,14 @@ import UIKit
     }
 
     @objc public static func controllerMouseMoveVector(stickX: CGFloat, stickY: CGFloat, velocity: CGFloat, expo: CGFloat) -> CGVector {
+        let hypot = hypot(stickX, stickY)
+        guard hypot > 0 else {return CGVector(dx: 0, dy: 0)}
+        let targetHypot = controllerMouseExpoMappedOffset(hypot, expo: expo)
+        let targetX = targetHypot * (stickX/hypot)
+        let targetY = targetHypot * (stickY/hypot)
         return CGVector(
-            dx: velocity * controllerMouseExpoMappedOffset(stickX, expo: expo),
-            dy: -velocity * controllerMouseExpoMappedOffset(stickY, expo: expo)
+            dx: targetX * velocity,
+            dy: -targetY * velocity
         )
     }
 

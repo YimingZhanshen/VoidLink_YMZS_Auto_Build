@@ -35,6 +35,12 @@ public extension CGPoint {
     }
 }
 
+public extension CGVector {
+    var isNotZero: Bool {
+        dx != 0 && dx != 0
+    }
+}
+
 public extension Array where Element: Equatable {
     @discardableResult
     mutating func appendIfNotContains(_ newElement: Element) -> Bool {

@@ -1908,6 +1908,8 @@ static NSMutableSet* hostList;
     settings.controllerMouseStick = @(ControllerElementRightStick);
     settings.controllerMouseLeftButton = @(ControllerElementDpadRight);
     settings.controllerMouseRightButton = @(ControllerElementDpadUp);
+    settings.controllerMouseExpo = @(1.8);
+    settings.controllerMousePointerVelocity = @(15.0);
 
     if (@available(iOS 14.0, tvOS 14.0, *)) nil;
     else settings.appTheme = @(UIUserInterfaceStyleDark);
@@ -2809,12 +2811,12 @@ static NSMutableSet* hostList;
                                            countdown:6
                                               action:^{}
                                           completion:^{
-                        if(!self.gameProfileSelectorVC && !self.settingsViewController.layoutOnScreenControlsVC) [self openGameProfileSeletorWithAnimated:true];
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self openGameProfileSeletorWithAnimated:false];
+                        });
                     }];
                 }
-                else if(!self.gameProfileSelectorVC && !self.settingsViewController.layoutOnScreenControlsVC) [self openGameProfileSeletorWithAnimated:true];
-                else if (self.gameProfileSelectorVC) [self.gameProfileSelectorVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
-                else if (self.settingsViewController.layoutOnScreenControlsVC) [self.settingsViewController.layoutOnScreenControlsVC.profileSelectorViewController dismissViewControllerAnimated:true completion:^{}];
+                else [self openGameProfileSeletorWithAnimated:true];
                 break;
             case RadialMenuItemHostView:
                 [self switchToHostView];

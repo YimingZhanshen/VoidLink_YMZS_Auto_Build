@@ -34,13 +34,6 @@ private let settingsExcludedControllerNavigationSectionIdentifiers: Set<String> 
 ]
 
 @available(iOS 13.0, *)
-private final class ControllerMouseDisplayLinkTarget: NSObject {
-    @objc func displayLinkDidFire() {
-        ControllerNavigator.controllerMouseDisplayLinkDidFire()
-    }
-}
-
-@available(iOS 13.0, *)
 private final class ControllerMouseCurvePreviewView: UIView {
     var expo: CGFloat = 1.0 {
         didSet {
@@ -256,8 +249,7 @@ final class ControllerNavigator: NSObject {
     @objc static var customPositionForStreamingRadialMenuButton: ControllerElementPosition = .left
     @objc static var streamingRadialMenuDelay: TimeInterval = 0
     
-    private static let controllerMouseDisplayLinkTarget = ControllerMouseDisplayLinkTarget()
-    private static var controllerMouseDisplayLink: CADisplayLink?
+    private static var controllerMouseTimer: SafeTimer?
     @objc static var controllerMouseStick: ControllerElement = .rightStick
     @objc static var controllerMouseLeftButton: ControllerElement = .dpadRight
     @objc static var controllerMouseRightButton: ControllerElement = .dpadDown
@@ -386,7 +378,7 @@ final class ControllerNavigator: NSObject {
     @objc static func startControllerMouse() {
         controllerMouseInputX = 0
         controllerMouseInputY = 0
-        startControllerMouseDisplayLink(frameRate: controllerMouseFrameRate)
+        startControllerMouseTimer(frameRate: controllerMouseFrameRate)
         ControllerUtil.stopListeningPrimaryController()
         listenToControllerMouse()
         DispatchQueue.main.async {
@@ -410,86 +402,45 @@ final class ControllerNavigator: NSObject {
         )
     }
 
-    /*
-    @objc static func stopControllerMouse() {
-        controllerMouseEnabledFlag = false
-        stopControllerMouseDisplayLink()
-    }
-
-    @objc static func setControllerMouseEnabled(_ enabled: Bool) {
-        controllerMouseEnabledFlag = mapControllerToMouse && enabled
-        if !controllerMouseEnabledFlag {
-        }
-    }
-
-    @objc static func isControllerMouseEnabled() -> Bool {
-        return controllerMouseEnabledFlag
-    }
-    */
- 
-
-    fileprivate static func controllerMouseDisplayLinkDidFire() {
-        guard radialMenuState == .mouseModeEnabled,
-              let displayLink = controllerMouseDisplayLink else {
+    private static func startControllerMouseTimer(frameRate: Int) {
+        guard radialMenuState == .mouseModeEnabled else {
             return
         }
 
-        // print("controllerMouseDisplayLinkDidFire \(CACurrentMediaTime())")
-        
-        let delay = 0.5 / Double(max(displayLink.preferredFramesPerSecond, 1))
-        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + delay) {
-            guard radialMenuState == .mouseModeEnabled else { return }
-            let moveVector = PublicUtils.controllerMouseMoveVector(
-                stickX: controllerMouseInputX,
-                stickY: controllerMouseInputY,
-                velocity: controllerMouseVelocity,
-                expo: controllerMouseExpo
-            )
-            if moveVector.dx != 0 || moveVector.dy != 0 {
+        controllerMouseTimer = SafeTimer(interval: 1/TimeInterval(frameRate)) {
+            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.002) {
+                guard radialMenuState == .mouseModeEnabled else { return }
+                let moveVector = PublicUtils.controllerMouseMoveVector(
+                    stickX: controllerMouseInputX,
+                    stickY: controllerMouseInputY,
+                    velocity: controllerMouseVelocity,
+                    expo: controllerMouseExpo
+                )
+                
                 LiSendMouseMoveEvent(clampedInt16(moveVector.dx), clampedInt16(moveVector.dy))
-            }
 
-            let scrollVector = PublicUtils.controllerMouseScrollVector(
-                stickX: controllerMouseWheelInputX,
-                stickY: controllerMouseWheelInputY,
-                multiplier: 15
-            )
-            if abs(scrollVector.dy) > abs(scrollVector.dx) {
-                LiSendHighResScrollEvent(clampedInt16(scrollVector.dy))
-            }
-            else {
-                LiSendHighResHScrollEvent(clampedInt16(scrollVector.dx))
+                let scrollVector = PublicUtils.controllerMouseScrollVector(
+                    stickX: controllerMouseWheelInputX,
+                    stickY: controllerMouseWheelInputY,
+                    multiplier: 15
+                )
+                if abs(scrollVector.dy) > abs(scrollVector.dx) {
+                    LiSendHighResScrollEvent(clampedInt16(scrollVector.dy))
+                }
+                else {
+                    LiSendHighResHScrollEvent(clampedInt16(scrollVector.dx))
+                }
             }
         }
+        
+        controllerMouseTimer?.restart()
     }
 
-    private static func startControllerMouseDisplayLink(frameRate: Int) {
-        stopControllerMouseDisplayLink()
-
-        let displayLink = CADisplayLink(
-            target: controllerMouseDisplayLinkTarget,
-            selector: #selector(ControllerMouseDisplayLinkTarget.displayLinkDidFire)
-        )
-        if #available(iOS 15.0, tvOS 15.0, *) {
-            displayLink.preferredFrameRateRange = CAFrameRateRange(
-                minimum: Float(frameRate),
-                maximum: Float(frameRate),
-                preferred: Float(frameRate)
-            )
-        } else {
-            displayLink.preferredFramesPerSecond = frameRate
-        }
-        displayLink.add(to: .main, forMode: .common)
-        controllerMouseDisplayLink = displayLink
-    }
-
-    private static func stopControllerMouseDisplayLink() {
+    private static func stopControllerMouseTimer() {
         controllerMouseInputX = 0
         controllerMouseInputY = 0
-        controllerMouseDisplayLink?.invalidate()
-        controllerMouseDisplayLink = nil
+        controllerMouseTimer?.clean()
     }
-
 
     private static func swappedFaceButtonIfNeeded(_ button: ControllerElement, swapABXY: Bool) -> ControllerElement {
         guard swapABXY else { return button }
@@ -602,7 +553,7 @@ final class ControllerNavigator: NSObject {
                 updateRadialMenu()
             }
             else {
-                stopControllerMouseDisplayLink()
+                stopControllerMouseTimer()
                 radialMenuState = .main
                 updateRadialMenu()
             }
@@ -737,7 +688,7 @@ final class ControllerNavigator: NSObject {
     private static var radialMenuButtonPressed: Bool = false
     private static var radialMenuDelayTimer: SafeTimer?
     private static var radialMenuState: RadialMenuState = .main
-    private static func listenToRadialMenuButton() {
+    @objc static func listenToRadialMenuButton() {
         guard enabled else {return}
         guard let mainFrameVC = radialMenuDelegate as? MainFrameViewController else {return}
         radialMenuState = .main

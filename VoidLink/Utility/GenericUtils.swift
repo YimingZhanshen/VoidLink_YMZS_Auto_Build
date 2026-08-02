@@ -109,7 +109,7 @@ import UIKit
     }
     
     @objc public static func isFirstTappingGameProfileSelectorFromMainFrame() -> Bool {
-        let key = "hasTappedGameProfileSelectorFromMainFrame-202600801"
+        let key = "hasTappedGameProfileSelectorFromMainFrame-202600801-2"
         let defaults = UserDefaults.standard
         let launchedBefore = defaults.bool(forKey: key)
         if !launchedBefore {

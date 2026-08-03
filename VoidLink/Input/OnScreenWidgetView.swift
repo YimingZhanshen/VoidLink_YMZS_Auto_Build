@@ -1208,7 +1208,7 @@ import ObjectiveC.runtime
             cmdLabel.font = UIFont.systemFont(ofSize: cmdLabelFontSize, weight: .medium)
         }
 
-        label.minimumScaleFactor = usesCompactCmdLabelLayout ? 0.62 : 0.1
+        label.minimumScaleFactor = usesCompactCmdLabelLayout ? 0.1 : 0.1
         cmdLabel.minimumScaleFactor = PublicUtils.isIPhone ? 0.6 : 0.6
     }
     

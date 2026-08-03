@@ -1828,7 +1828,7 @@ import ObjectiveC.runtime
                 autoReleaseComboButtons.removeAll{
                     Set(CommandManager.pencilProButtonCmds).contains($0)
                 }
-                CommandManager.shared.sendAutoReleaseComboCommand(cmdStrings: autoReleaseComboButtons) // send multi-key command
+                CommandManager.shared.sendAutoReleaseComboCommand(cmdStrings: autoReleaseComboButtons, delay: 0.1) // send multi-key command
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.buttonUpVisualEffect()

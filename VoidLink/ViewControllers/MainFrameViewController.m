@@ -1016,6 +1016,7 @@ static NSMutableSet* hostList;
 
 - (void)quitApp:(TemporaryApp* )app{
     if(!app) return;
+    if(![PublicUtils hasNoPresentedVC:self]) return;
     [self showLoadingFrame: ^{
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             HttpResponse* quitResponse = [self requestToQuitApp:app];

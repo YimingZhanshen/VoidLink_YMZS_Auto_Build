@@ -609,8 +609,8 @@ final class ControllerNavigator: NSObject {
                 RadialMenuOverlayView.menuSectors.removeAll()
                 
                 if radialMenuState == .disconnectAndQuit {
-                    RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "Disconnect".localized, subtitle: "", symbol: PublicUtils.disconnectSymbol(), item: .disconnect))
                     RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "Quit App".localized, subtitle: "", symbol: PublicUtils.quitSymbol(), item: .quitApp))
+                    RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "Disconnect".localized, subtitle: "", symbol: PublicUtils.disconnectSymbol(), item: .disconnect))
                     radialMenuView = RadialMenuOverlayView.presentInKeyWindow()
                     listenToRadialMenuStick()
                     return
@@ -651,7 +651,7 @@ final class ControllerNavigator: NSObject {
                     }
                 }
                 
-                if !mainFrameVC.settingsViewExpanded {RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "More".localized, subtitle: "", symbol: "ellipsis.circle", item: .more))}
+                if !mainFrameVC.settingsViewExpanded {RadialMenuOverlayView.menuSectors.append(RadialMenuSector(title: "=more".localized, subtitle: "", symbol: "ellipsis.circle", item: .more))}
 
                 if !mainFrameVC.isStreaming() || radialMenuState == .moreOptions { RadialMenuOverlayView.menuSectors.appendIfNotContains(gameProfileItem)
                 }
@@ -1029,7 +1029,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             })
         }
         controllerMouseCurvePreviewDismissWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: workItem)
     }
 
     @objc func restoreControllerNavigationHighlight() {

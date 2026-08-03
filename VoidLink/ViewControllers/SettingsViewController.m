@@ -633,8 +633,9 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     if(!settingsViewAlreadyAppeared) {
         if(![self contentOffsetRestored]) _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, tempSettings.settingsMenuOffset.floatValue);
-        if(@available(iOS 13.0, *)) if(ControllerUtil.primaryGCController) [self restoreControllerNavigationHighlight];
     }
+    if(@available(iOS 13.0, *)) if(ControllerUtil.primaryGCController) [self restoreControllerNavigationHighlight];
+    
     _scrollView.hidden = false;
     
     settingsViewJustExpanded = false;

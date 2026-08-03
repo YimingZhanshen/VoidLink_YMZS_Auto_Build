@@ -377,7 +377,7 @@ private struct RadialMenuCenterView: View {
                 .padding(.bottom, centerIconTitleSpacing)
 
             Text(item?.title ?? "")
-                .font(.system(size: max(diameter * 0.047, 13), weight: .medium))
+                .font(.system(size: max(diameter * 0.047, 13), weight: .semibold))
                 .foregroundColor(style.titleColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.62)
@@ -400,7 +400,7 @@ private struct RadialMenuCenterView: View {
     }
 
     private var centerTextSpacing: CGFloat {
-        max(diameter * 0.018, 4)
+        max(diameter * 0.013, 3.3)
     }
 
     private var centerIconTitleSpacing: CGFloat {
@@ -408,7 +408,7 @@ private struct RadialMenuCenterView: View {
             return centerTextSpacing
         }
 
-        return max(diameter * 0.034, 8)
+        return 3.6
     }
 }
 

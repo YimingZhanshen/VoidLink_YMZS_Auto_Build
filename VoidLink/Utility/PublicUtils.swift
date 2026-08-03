@@ -209,6 +209,11 @@ import UIKit
         return rootViewController
     }
     
+    @objc public static func hasNoPresentedVC(_ vc: UIViewController) -> Bool {
+        let hasNoPresentedVC = vc.presentedViewController == nil && vc.view.window != nil
+        return hasNoPresentedVC
+    }
+    
     public static func runOnMain(_ work: @escaping () -> Void) {
         if Thread.isMainThread {
             work()

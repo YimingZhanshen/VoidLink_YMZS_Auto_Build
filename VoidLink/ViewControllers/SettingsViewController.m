@@ -1933,7 +1933,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (@available(iOS 13.0, *)) {
             if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
-            [GamepadNavigationIllustrationHud updateHud];
+            [GamepadNavigationIllustrationHud updateHudWithForceDisplay:false];
             if(ControllerUtil.primaryGCController){
                 [ControllerNavigator restoreSettingsModeSwitchHighlight];
             };
@@ -1957,7 +1957,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (@available(iOS 13.0, *)){
             if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
-            [GamepadNavigationIllustrationHud updateHud];
+            [GamepadNavigationIllustrationHud updateHudWithForceDisplay:false];
             if(ControllerUtil.primaryGCController){
                 [ControllerNavigator restoreSettingsModeSwitchHighlight];
             };
@@ -2968,7 +2968,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                                 if (@available(iOS 13.0, *)) [ControllerNavigator updateHudForCustomRadialMenuButtonPosition];
                                 return;
                             }
-                            AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the same or a different button for controller navigation during streaming."];
+                            AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"streamingRadialMenuButtonTip"];
                             
                             return;
                         }
@@ -3001,7 +3001,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                             
                             if(!metRadialButtonWithUndefinedPosition){
                                 if (@available(iOS 13.0, *)) [GamepadNavigationIllustrationHud clearHud];
-                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"Press the same or a different button for controller navigation during streaming."];
+                                AlertControllerUtil.alertController.message = [LocalizationHelper localizedStringForKey:@"streamingRadialMenuButtonTip"];
                                 return;
                             }
                         }

@@ -14636,29 +14636,6 @@
         }
       }
     },
-    "Press the same or a different button for controller navigation during streaming." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请按下相同或不同的按键，作为串流时的手柄导航键。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "請按下相同或不同的按鍵，作為串流時的手掣導覽鍵。"
-          }
-        }
-      }
-    },
     "Pressed for %dms" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15293,25 +15270,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please choose and press one of [Select, Start, bumpers, triggers, the Home button, or Xbox back paddles] as the radial menu button.\n\nNote: if you want to designate the Home button, double tap to pass it through to VoidLink app on iOS 26+."
+            "value" : "Please choose and press one of [Select, Start, bumpers, triggers, Xbox back paddles] as the radial menu button."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请在 [Select, Start, 肩键, 板机, Home键, Xbox背键] 之中，选择并按下作为手柄导航键。\n\n注意：如果需要指定 Home 键，在 iOS 26+ 系统上需要双击将该按键透传至 VoidLink。"
+            "value" : "请在 [Select, Start, 肩键, 板机, Xbox背键] 之中，选择并按下作为手柄导航键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "請在 [Select、Start、LB/RB、LT/RT、Home 鍵、Xbox 背鍵] 之中，選擇並按下作為手把導覽鍵。\n\n注意：如果需要指定 Home 鍵，在 iOS 26+ 系統上需要雙擊將該按鍵透傳至 VoidLink。"
+            "state" : "translated",
+            "value" : "請在 [Select、Start、LB/RB、LT/RT、Xbox 背鍵] 之中，選擇並按下作為手把導覽鍵。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請在 [Select、Start、LB/RB、LT/RT、Home 鍵、Xbox 背鍵] 之中，選擇並按下作為手把導覽鍵。\n\n注意：如果需要指定 Home 鍵，在 iOS 26+ 系統上需要雙擊將該按鍵透傳至 VoidLink。"
+            "value" : "請在 [Select、Start、LB/RB、LT/RT、Xbox 背鍵] 之中，選擇並按下作為手把導覽鍵。"
           }
         }
       }
@@ -17627,6 +17604,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這是一個左搖桿方向輪。建議在使用前先查看教學。"
+          }
+        }
+      }
+    },
+    "streamingRadialMenuButtonTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press the same or a different button for controller navigation during streaming. [Home] button is also available.\n\nNote: if you want to designate the Home button, double tap to pass it through to VoidLink app on iOS 26+."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请按下相同或不同的按键，作为串流时的手柄导航键。\n您也可以指定 [Home] 鍵。\n\n注意：iOS 26+ 系统中，需要双击Home键才能将该按键透传至 VoidLink。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。"
           }
         }
       }

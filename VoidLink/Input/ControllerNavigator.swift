@@ -603,8 +603,9 @@ final class ControllerNavigator: NSObject {
         ControllerUtil.stopListeningPrimaryController()
         if let mainFrameVC = radialMenuDelegate as? MainFrameViewController {
             let streamFrameVC = StreamFrameViewController.sharedInstance()
-            let showRadiaMenu = mainFrameVC.isStreaming() ? streamFrameVC?.hasNoPresentedVC == true : mainFrameVC.hasNoPresentedVC
-            if showRadiaMenu {
+            let showRadialMenu = mainFrameVC.isStreaming() ? streamFrameVC?.hasNoPresentedVC == true : (mainFrameVC.hasNoPresentedVC || mainFrameVC.presentedViewController is LoadingFrameViewController)
+            
+            if showRadialMenu {
                 radialMenuView?.removeFromSuperview()
                 RadialMenuOverlayView.menuSectors.removeAll()
                 
@@ -685,9 +686,10 @@ final class ControllerNavigator: NSObject {
         }
     }
     
-    private static var radialMenuButtonPressed: Bool = false
+    @objc static var radialMenuButtonPressed: Bool = false
     private static var radialMenuDelayTimer: SafeTimer?
     private static var radialMenuState: RadialMenuState = .main
+    private static var radialMenuPressDownTimestamp: TimeInterval = 0.0
     @objc static func listenToRadialMenuButton() {
         guard enabled else {return}
         guard let mainFrameVC = radialMenuDelegate as? MainFrameViewController else {return}
@@ -696,9 +698,10 @@ final class ControllerNavigator: NSObject {
         ControllerUtil.listenPrimaryControllerButton(radialMenuButton) { pressed in
             GamepadNavigationIllustrationHud.updateActionState(for: radialMenuButton, isInAction: pressed)
             if pressed {
+                radialMenuPressDownTimestamp = CACurrentMediaTime()
+                radialMenuDelayTimer?.clean()
                 radialMenuButtonPressed = true
-                let delayRadialMenu = (mainFrameVC.isStreaming() && !mainFrameVC.settingsExpandedInStreamView) ||
-                streamingRadialMenuDelay < 0.03
+                let delayRadialMenu = (mainFrameVC.isStreaming() && !mainFrameVC.settingsExpandedInStreamView) || streamingRadialMenuDelay < 0.03
                 streamingRadialMenuDelay = max(streamingRadialMenuDelay, 0.032)
                 
                 if delayRadialMenu {
@@ -718,6 +721,9 @@ final class ControllerNavigator: NSObject {
                 }
             }
             else {
+                guard CACurrentMediaTime() - radialMenuPressDownTimestamp > 0.035 else {
+                    return
+                }
                 radialMenuButtonPressed = false
                 radialMenuDelayTimer?.clean()
                 stickReleasedInRadialMenu = false

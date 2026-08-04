@@ -108,13 +108,13 @@ final class GamepadNavigationIllustrationHud: UIView {
         }
     }
     
-    @objc static func updateHud() {
+    @objc static func updateHud(forceDisplay: Bool = false) {
         let elements = ControllerNavigator.uiNavigationDelegate?.getNavigationElements() ?? []
         /*
         for element in elements {
             print("element \(element.action)")
         } */
-        updateNavigationElements(elements)
+        updateNavigationElements(elements, forceDisplay: forceDisplay)
     }
 
     static func updateActionState(for control: ControllerElement, isInAction: Bool) {
@@ -157,7 +157,7 @@ final class GamepadNavigationIllustrationHud: UIView {
 
         backgroundColor = isDark
             ? UIColor(red: 28.0 / 255.0, green: 28.0 / 255.0, blue: 30.0 / 255.0, alpha: 0.62)
-            : UIColor.white.withAlphaComponent(0.6)
+            : (PublicUtils.isIPhone ? UIColor.white.withAlphaComponent(0.75) : UIColor.white.withAlphaComponent(0.6))
         layer.borderColor = (isDark ? UIColor.white.withAlphaComponent(0.10) : UIColor.black.withAlphaComponent(0.06)).cgColor
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = isDark ? 0.34 : 0.12
@@ -419,7 +419,7 @@ final class GamepadNavigationIllustrationHud: UIView {
             keyLabel.translatesAutoresizingMaskIntoConstraints = false
             keyLabel.text = text
             keyLabel.textAlignment = .center
-            keyLabel.font = UIFont.roundedSystemFont(ofSize: 12, weight: .medium)
+            keyLabel.font = UIFont.roundedSystemFont(ofSize: 12, weight: PublicUtils.isIPhone ? .semibold : .medium)
             keyLabel.adjustsFontSizeToFitWidth = true
             keyLabel.minimumScaleFactor = 0.2
             keyLabel.numberOfLines = 1

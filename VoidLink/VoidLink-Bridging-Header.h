@@ -5,6 +5,7 @@
 #include <Limelight.h>
 #import "SettingsViewController.h"
 #import "MainFrameViewController.h"
+#import "LoadingFrameViewController.h"
 #import "StreamFrameViewController.h"
 #import "ControllerSupport.h"
 #import "OnScreenControls.h"

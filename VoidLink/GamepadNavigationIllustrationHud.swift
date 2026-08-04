@@ -176,7 +176,7 @@ final class GamepadNavigationIllustrationHud: UIView {
             let keyBorderView = keyView.viewWithTag(Self.keyBorderViewTag) ?? keyView
             let keyContentView = keyView.viewWithTag(Self.keyContentViewTag) ?? keyView
             let keyBackgroundColor = isInAction
-                ? ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.2 : 0.13)
+                ? ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.5 : 0.5)
                 : ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.09 : 0.05)
             keyView.backgroundColor = .clear
             keyBorderView.layer.borderColor = ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.69 : 0.6).cgColor
@@ -184,7 +184,7 @@ final class GamepadNavigationIllustrationHud: UIView {
             keyView.transform = .identity
             for subview in keyContentView.subviews {
                 if let keyLabel = subview as? UILabel {
-                    keyLabel.textColor = isInAction ? ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 1 : 1) : ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.83 : 0.83)
+                    keyLabel.textColor = isInAction ? .white.withAlphaComponent(isDark ? 0.8 : 0.8) : ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.83 : 0.83)
                 } else if let imageView = subview as? UIImageView {
                     imageView.tintColor = isInAction ? ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 1 : 1) : ThemeManager.appPrimaryColor.withAlphaComponent(isDark ? 0.83 : 0.83)
                 }

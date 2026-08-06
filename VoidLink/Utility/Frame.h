@@ -4,6 +4,7 @@
 @interface Frame : NSObject
 @property (nonatomic) int frameNumber;
 @property (nonatomic) int frameType;
+@property (nonatomic) BOOL isInterpolated;
 @property (nonatomic) CFTimeInterval decodedAt;
 @property (nonatomic) CMTime pts90;
 @property (nonatomic) CMTime duration90;

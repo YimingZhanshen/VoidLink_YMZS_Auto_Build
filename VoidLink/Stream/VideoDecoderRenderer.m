@@ -22,6 +22,7 @@
 #import "PlatformThreads.h"
 #import "MetalViewController.h"
 #import "ImGuiPlots.h"
+#import "VoidLink-Swift.h"
 
 #include <libavcodec/avcodec.h>
 #include <libavcodec/cbs.h>
@@ -33,6 +34,8 @@
 
 // Define for extra logging related to frame pacing
 //#define DISPLAYLINK_VERBOSE
+
+static BOOL kEnableFrameInterpolation = false;
 
 // Private libavformat API for writing the AV1 Codec Configuration Box
 extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
@@ -48,6 +51,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     int _videoFormat;
     int _frameRate;
     BOOL _fullRange;
+    BOOL _request10BitCodec;
 
     NSMutableArray *_parameterSetBuffers;
     NSData *_masteringDisplayColorVolume;
@@ -55,6 +59,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     CMVideoFormatDescriptionRef _formatDesc;
     CMVideoFormatDescriptionRef _formatDescImageBuffer;
     VTDecompressionSessionRef _decompressionSession;
+    FrameInterpolator *_frameInterpolator;
 
     CADisplayLink *_displayLink;
     NSInteger _maxRefreshRate;
@@ -66,6 +71,10 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         
     // CMTime playTime;
     // NSTimeInterval previousLinkTime;
+}
+
++ (void)setFrameInterpolationEnabled:(bool)enabled {
+    kEnableFrameInterpolation = enabled;
 }
 
 - (void)reinitializeDisplayLayer
@@ -185,11 +194,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 
 # pragma mark DisplayLink vsync callback
 
-- (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate fullRange:(BOOL)fullRange
+- (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate fullRange:(BOOL)fullRange request10BitCodec:(BOOL)request10BitCodec
 {
     self->_videoFormat = videoFormat;
     self->_frameRate = frameRate;
     self->_fullRange = fullRange;
+    self->_request10BitCodec = request10BitCodec;
 
     // reset plot data in case we've already used it for a previous renderer
     [[ImGuiPlots sharedInstance] clearData];
@@ -197,6 +207,11 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     DataManager* dataMan = [[DataManager alloc] init];
     if ([[dataMan getSettings].renderingBackend integerValue] == RENDER_AVSB) {
         _renderingBackend = RENDER_AVSB;
+
+        if (kEnableFrameInterpolation) {
+            _frameInterpolator = [[FrameInterpolator alloc] init];
+            _frameInterpolator.isEnabled = YES;
+        }
         
         // Choose the appropriate selector based on frame pacing mode
         SEL displayLinkSelector;
@@ -213,11 +228,16 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:displayLinkSelector];
 
+        NSInteger targetFrameRate = self->_frameRate;
+        if (self->_frameInterpolator != nil) {
+            targetFrameRate = MIN(self->_frameRate * 2, self->_maxRefreshRate);
+        }
+
         if (@available(iOS 15.0, tvOS 15.0, *)) {
-            _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->_frameRate, self->_frameRate, self->_frameRate);
+            _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
         }
         else {
-            _displayLink.preferredFramesPerSecond = self->_frameRate;
+            _displayLink.preferredFramesPerSecond = targetFrameRate;
         }
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     } else {
@@ -227,7 +247,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 }
 
 
-- (void)setupDecompressionSessionWithAttributes:(NSDictionary *)destinationPixelBufferAttributes {
+- (OSStatus)setupDecompressionSessionWithAttributes:(NSDictionary *)destinationPixelBufferAttributes {
     // This method is called from within synchronized block, so no additional sync needed here
     if (_decompressionSession != NULL) {
         VTDecompressionSessionInvalidate(_decompressionSession);
@@ -235,15 +255,16 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         _decompressionSession = nil;
     }
 
-    int status = VTDecompressionSessionCreate(kCFAllocatorDefault,
-                                              _formatDesc,
-                                              nil,
-                                              (__bridge CFDictionaryRef)destinationPixelBufferAttributes,
-                                              nil,
-                                              &_decompressionSession);
+    OSStatus status = VTDecompressionSessionCreate(kCFAllocatorDefault,
+                                                   _formatDesc,
+                                                   nil,
+                                                   (__bridge CFDictionaryRef)destinationPixelBufferAttributes,
+                                                   nil,
+                                                   &_decompressionSession);
     if (status != noErr) {
         Log(LOG_E, @"Failed to create VTDecompressionSession, status %d", status);
     }
+    return status;
 }
 
 - (void)setupDecompressionSession {
@@ -256,11 +277,20 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         },
     } mutableCopy];
 #else
-    NSNumber *pixelFormat = nil;
+    NSNumber *nativePixelFormat = nil;
     if (self->_videoFormat & VIDEO_FORMAT_MASK_YUV444) {
-        pixelFormat = self->_fullRange ? @(kCVPixelFormatType_444YpCbCr10BiPlanarFullRange) : @(kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange);
+        NSNumber *frFormat = _request10BitCodec ? @(kCVPixelFormatType_444YpCbCr10BiPlanarFullRange) : @(kCVPixelFormatType_444YpCbCr8BiPlanarFullRange);
+        NSNumber *vrFormat = _request10BitCodec ? @(kCVPixelFormatType_444YpCbCr10BiPlanarVideoRange) : @(kCVPixelFormatType_444YpCbCr8BiPlanarVideoRange);
+        nativePixelFormat = self->_fullRange ? frFormat : vrFormat;
     } else {
-        pixelFormat = self->_fullRange ? @(kCVPixelFormatType_420YpCbCr10BiPlanarFullRange) : @(kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange);
+        NSNumber *frFormat = _request10BitCodec ? @(kCVPixelFormatType_420YpCbCr10BiPlanarFullRange) : @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange);
+        NSNumber *vrFormat = _request10BitCodec ? @(kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) : @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
+        nativePixelFormat = self->_fullRange ? frFormat : vrFormat;
+    }
+    BOOL interpolationRequested = self->_frameInterpolator != nil;
+    NSNumber *pixelFormat = interpolationRequested ? @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) : nativePixelFormat;
+    if (interpolationRequested) {
+        LogOnce(LOG_I, @"Frame interpolation enabled; requesting 420v output from VTDecompressionSession");
     }
     NSMutableDictionary *destinationPixelBufferAttributes = [@{
         (id)kCVPixelBufferPixelFormatTypeKey : pixelFormat
@@ -272,7 +302,31 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         destinationPixelBufferAttributes[(id)kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata] = @YES;
     }
 
-    return [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+#if !TARGET_OS_SIMULATOR
+    if (!interpolationRequested) {
+        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+        return;
+    }
+
+    OSStatus status = [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+    if (status != noErr) {
+        Log(LOG_W, @"Falling back from 420v frame-interpolation decode output to native pixel format %@", nativePixelFormat);
+        [self->_frameInterpolator reset];
+        self->_frameInterpolator = nil;
+        destinationPixelBufferAttributes[(id)kCVPixelBufferPixelFormatTypeKey] = nativePixelFormat;
+        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+
+        NSInteger targetFrameRate = MIN(self->_frameRate, self->_maxRefreshRate);
+        if (@available(iOS 15.0, tvOS 15.0, *)) {
+            self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
+        } else {
+            self->_displayLink.preferredFramesPerSecond = targetFrameRate;
+        }
+    }
+#else
+    [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+#endif
+    return;
 }
 
 - (void) checkDisplayLayer {
@@ -476,6 +530,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                 CFRelease(self->_decompressionSession);
                 self->_decompressionSession = nil;
             }
+        }
+        if (self->_frameInterpolator != nil) {
+            [self->_frameInterpolator reset];
         }
     });
 }
@@ -1073,6 +1130,37 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                         frame = [[Frame alloc] initWithPixelBufffer:pixelBuffer frameNumber:frameNumber frameType:frameType pts:presentationTimestamp];
                         [frame setFormatDesc:self->_formatDesc];
                     }
+
+                    if (self->_frameInterpolator != nil) {
+                        [self->_frameInterpolator processFrame:frame completion:^(NSArray *frames) {
+                            dispatch_async(self->_vtq, ^{
+                                int framesDropped = 0;
+                                for (Frame *outputFrame in (NSArray<Frame *> *)frames) {
+                                    framesDropped += [self->_frameQueue enqueue:outputFrame withSlackSize:3];
+                                }
+
+                                if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+                                    static PlotMetrics frameQueueMetrics = {};
+                                    [[ImGuiPlots sharedInstance] observeFloatReturnMetrics:PLOT_QUEUED_FRAMES value:[self->_frameQueue count] plotMetrics:&frameQueueMetrics];
+                                    [self safeCopyMetricsTo:&self->_frameQueueMetrics from:&frameQueueMetrics];
+
+                                    [[ImGuiPlots sharedInstance] observeFloat:PLOT_DROPPED value:framesDropped];
+
+                                    static CFTimeInterval lastHostFrame = 0.0f;
+                                    if (lastHostFrame != 0) {
+                                        [[ImGuiPlots sharedInstance] observeFloat:PLOT_HOST_FRAMETIME value:(frame.pts - lastHostFrame) * 1000.0];
+                                    }
+                                    lastHostFrame = frame.pts;
+
+                                    static PlotMetrics decodeMetrics = {};
+                                    [[ImGuiPlots sharedInstance] observeFloatReturnMetrics:PLOT_DECODE value:(CACurrentMediaTime() - decodeStartTime) * 1000.0 plotMetrics:&decodeMetrics];
+                                    [self safeCopyMetricsTo:&self->_decodeMetrics from:&decodeMetrics];
+                                }
+                            });
+                        }];
+                        return;
+                    }
+
                     int framesDropped = [self->_frameQueue enqueue:frame withSlackSize:3];
 
                     if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {

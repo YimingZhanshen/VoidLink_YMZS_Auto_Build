@@ -16,6 +16,7 @@
 #import "OSCProfile.h"
 #import "LayoutOnScreenControls.h"
 #import "ToolBarContainerView.h"
+#import "Frame.h"
 #import "opus.h"
 #import "opus_defines.h"
 // #import "RelativeTouchHandler.h"

@@ -1798,7 +1798,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
         _micStreamInitialized = false;
     }
     
-    // 8bit 444 degration workaround
+    /*
     if(strcmp(stageName, "video stream establishment")==0){
         NSLog(@"sendAutoReleaseComboCommandWithCmdStrings %f", CACurrentMediaTime());
         if(!_settings.enableHdr
@@ -1818,6 +1818,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
             });
         }
     }
+    */
 }
 
 - (void) stageFailed:(const char*)stageName withError:(int)errorCode portTestFlags:(int)portTestFlags {

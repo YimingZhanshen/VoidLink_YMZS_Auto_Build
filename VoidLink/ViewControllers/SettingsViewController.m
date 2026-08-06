@@ -877,8 +877,8 @@ BOOL isCustomResolution(int resolutionSelected) {
     self.yuv444Stack.hasInfoTag = YES;
     [self addSetting:self.yuv444Stack ofId:@"yuv444Stack" to:videoSection];
 
-    self.sdrPerformanceWorkaroundStack.hasInfoTag = YES;
-    [self addSetting:self.sdrPerformanceWorkaroundStack ofId:@"sdrPerformanceWorkaroundStack" to:videoSection];
+    // self.sdrPerformanceWorkaroundStack.hasInfoTag = YES;
+    // [self addSetting:self.sdrPerformanceWorkaroundStack ofId:@"sdrPerformanceWorkaroundStack" to:videoSection];
 
     self.framePacingStack.hasInfoTag = YES;
     [self addSetting:self.framePacingStack ofId:@"framePacingStack" to:videoSection];
@@ -3592,6 +3592,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void)muteInBackgroundSwitchFlipped:(UISwitch* )sender{
     Connection.muteInBackground = sender.isOn;
+    // [VideoDecoderRenderer setFrameInterpolationEnabled:sender.isOn];
 }
 
 - (void)redirectMicSwitchFlipped:(UISwitch* )sender{

@@ -26,7 +26,8 @@
 
 - (id)initWithView:(UIView*)view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio;
 
-- (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate fullRange:(BOOL)fullRange;
+- (void)setupWithVideoFormat:(int)videoFormat width:(int)videoWidth height:(int)videoHeight frameRate:(int)frameRate fullRange:(BOOL)fullRange request10BitCodec:(BOOL)enableHdr;
+
 - (void)renderFrame:(Frame *)frame atTime:(CMTime)targetTime;
 - (void)cleanup;
 - (void)setHdrMode:(BOOL)enabled;
@@ -47,5 +48,6 @@
                         decodeStartTime:(CFTimeInterval)decodeStartTime;
 
 - (void)invalidateDecompressionSession;
++ (void)setFrameInterpolationEnabled:(bool)enabled;
 
 @end

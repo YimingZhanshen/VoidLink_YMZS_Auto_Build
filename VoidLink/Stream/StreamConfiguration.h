@@ -22,6 +22,8 @@
 @property BOOL enableYUV444;
 @property BOOL enablePIP;
 @property BOOL fullColorRange;
+@property BOOL enableHdr;
+@property BOOL sdrPerformanceWorkaround;
 @property int width;
 @property int height;
 @property int frameRate;

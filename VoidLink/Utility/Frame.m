@@ -1,10 +1,24 @@
 #import <CoreVideo/CVImageBuffer.h>
+#import <objc/runtime.h>
 #import "Frame.h"
 #import "Logger.h"
 #include <Limelight.h>
 
 @implementation Frame {
     CFDictionaryRef _formatDescExt;
+}
+
+static char FrameInterpolatedKey;
+
+- (BOOL)isInterpolated {
+    return [objc_getAssociatedObject(self, &FrameInterpolatedKey) boolValue];
+}
+
+- (void)setIsInterpolated:(BOOL)isInterpolated {
+    objc_setAssociatedObject(self,
+                             &FrameInterpolatedKey,
+                             isInterpolated ? @YES : nil,
+                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (instancetype)initWithPixelBufffer:(CVPixelBufferRef)pixelBuffer

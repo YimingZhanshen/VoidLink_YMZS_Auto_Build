@@ -4041,7 +4041,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)preSavingActions{
-    if(self.mainFrameViewController.settingsExpandedInStreamView){
+    if(self.mainFrameViewController.isStreaming){
         [self.mainFrameViewController requestForBitrate:(uint32_t)_bitrate];
     }
     

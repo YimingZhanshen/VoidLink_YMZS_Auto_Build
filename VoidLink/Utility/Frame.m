@@ -21,6 +21,16 @@ static char FrameInterpolatedKey;
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+- (CVPixelBufferRef)imageBuffer {
+    if (_pixelBuffer) {
+        return _pixelBuffer;
+    }
+    if (_sampleBuffer) {
+        return CMSampleBufferGetImageBuffer(_sampleBuffer);
+    }
+    return nil;
+}
+
 - (instancetype)initWithPixelBufffer:(CVPixelBufferRef)pixelBuffer
                          frameNumber:(int)frameNumber
                            frameType:(int)frameType

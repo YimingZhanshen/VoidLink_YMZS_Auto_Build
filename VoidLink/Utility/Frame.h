@@ -11,6 +11,7 @@
 @property (nonatomic, assign) CMVideoFormatDescriptionRef formatDesc;
 @property (nonatomic) CMSampleBufferRef sampleBuffer;
 @property (nonatomic) CVPixelBufferRef pixelBuffer;
+@property (nonatomic, readonly) CVPixelBufferRef imageBuffer;
 
 - (instancetype)initWithPixelBufffer:(CVPixelBufferRef)pixelBuffer frameNumber:(int)frameNumber frameType:(int)frameType pts:(CMTime)pts;
 - (instancetype)initWithSampleBuffer:(CMSampleBufferRef)sampleBuffer frameNumber:(int)frameNumber frameType:(int)frameType;

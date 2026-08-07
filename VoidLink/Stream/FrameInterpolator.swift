@@ -94,11 +94,8 @@ final class FrameInterpolator: NSObject {
             return
         }
 
-        guard
-            let currentSampleBuffer = frame.sampleBuffer,
-            let currentPixelBuffer = CMSampleBufferGetImageBuffer(currentSampleBuffer)
-        else {
-            logOnce("missing-image-buffer", "input CMSampleBuffer has no CVPixelBuffer")
+        guard let currentPixelBuffer = frame.imageBuffer else {
+            logOnce("missing-image-buffer", "input Frame has no CVPixelBuffer")
             previousFrame = frame
             completion([frame])
             drainPendingFrames()
@@ -123,11 +120,7 @@ final class FrameInterpolator: NSObject {
             return
         }
 
-        guard
-            let previousFrame,
-            let previousSampleBuffer = previousFrame.sampleBuffer,
-            let previousPixelBuffer = CMSampleBufferGetImageBuffer(previousSampleBuffer)
-        else {
+        guard let previousFrame, let previousPixelBuffer = previousFrame.imageBuffer else {
             previousFrame = frame
             completion([frame])
             drainPendingFrames()

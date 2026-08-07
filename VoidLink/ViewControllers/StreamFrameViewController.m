@@ -89,6 +89,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     NSTimer *_inactivityTimer;
     NSTimer *_statsUpdateTimer;
     PaddedLabel *_overlayView;
+    PaddedLabel *_transientHUDView;
     UITapGestureRecognizer *_menuTapGestureRecognizer;
     UITapGestureRecognizer *_menuDoubleTapGestureRecognizer;
     UITapGestureRecognizer *_playPauseTapGestureRecognizer;
@@ -1353,6 +1354,11 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
         // We set our bounds to the maximum width in order to work around a bug where
         // sizeToFit interacts badly with the UITextView's line breaks, causing the
         // width to get smaller and smaller each time as more line breaks are inserted.
+        //sdfdsf;
+        if (_overlayView.superview == nil) {
+            [self.view addSubview:_overlayView];
+        }
+
         [_overlayView setBounds:CGRectMake(self.view.frame.origin.x,
                                            _overlayView.frame.origin.y,
                                            self.view.frame.size.width,
@@ -1365,6 +1371,47 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     else {
         [_overlayView setHidden:YES];
     }
+}
+
+- (void)updateTransientHUDText:(NSString*)text {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self updateTransientHUDText:text];
+        });
+        return;
+    }
+
+    if (text == nil) {
+        _transientHUDView.hidden = YES;
+        return;
+    }
+
+    if (_transientHUDView == nil) {
+        _transientHUDView = [[PaddedLabel alloc] initWithFrame:CGRectZero];
+        _transientHUDView.translatesAutoresizingMaskIntoConstraints = NO;
+        _transientHUDView.textInsets = UIEdgeInsetsMake(10, 14, 10, 14);
+        _transientHUDView.numberOfLines = 0;
+        _transientHUDView.textAlignment = NSTextAlignmentLeft;
+        _transientHUDView.textColor = [UIColor.whiteColor colorWithAlphaComponent:0.7];
+        _transientHUDView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.5];
+        _transientHUDView.font = [UIFont systemFontOfSize:PublicUtils.isIPhone ? 18 : 22
+                                                  weight:UIFontWeightSemibold];
+        _transientHUDView.layer.cornerRadius = 8;
+        _transientHUDView.layer.masksToBounds = YES;
+        _transientHUDView.userInteractionEnabled = NO;
+
+        [self.view addSubview:_transientHUDView];
+        UILayoutGuide *safeArea = self.view.safeAreaLayoutGuide;
+        [NSLayoutConstraint activateConstraints:@[
+            [_transientHUDView.leadingAnchor constraintEqualToAnchor:safeArea.leadingAnchor constant:35],
+            [_transientHUDView.topAnchor constraintEqualToAnchor:safeArea.topAnchor constant:12],
+            [_transientHUDView.widthAnchor constraintLessThanOrEqualToAnchor:safeArea.widthAnchor multiplier:0.8]
+        ]];
+    }
+
+    _transientHUDView.text = text;
+    _transientHUDView.hidden = NO;
+    [self.view bringSubviewToFront:_transientHUDView];
 }
 
 - (void)returnToMainFrame {

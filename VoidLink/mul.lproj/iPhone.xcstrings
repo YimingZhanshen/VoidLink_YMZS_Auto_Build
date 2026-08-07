@@ -1891,6 +1891,36 @@
         }
       }
     },
+    "CC6-pu-Uoh.segmentTitles[3]" : {
+      "comment" : "Class = \"UISegmentedControl\"; CC6-pu-Uoh.segmentTitles[3] = \"×2 Interpolation\"; ObjectID = \"CC6-pu-Uoh\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "×2 Interpolation"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "×2 插帧"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "x2 影格插補"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "x2 影格插補"
+          }
+        }
+      }
+    },
     "CEd-Wx-Gml.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Duck Other Apps\"; ObjectID = \"CEd-Wx-Gml\";",
       "extractionState" : "extracted_with_value",
@@ -2060,7 +2090,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "needs_review",
-            "value" : "帧步进控制"
+            "value" : "帧步调"
           }
         },
         "zh-Hant" : {

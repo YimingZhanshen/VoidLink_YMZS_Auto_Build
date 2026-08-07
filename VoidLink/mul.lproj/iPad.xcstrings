@@ -163,6 +163,36 @@
         }
       }
     },
+    "2Dp-Qg-chi.segmentTitles[3]" : {
+      "comment" : "Class = \"UISegmentedControl\"; 2Dp-Qg-chi.segmentTitles[3] = \"×2 Interpolation\"; ObjectID = \"2Dp-Qg-chi\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "×2 Interpolation"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "×2 插帧"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "x2 影格插補"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "x2 影格插補"
+          }
+        }
+      }
+    },
     "2TR-Kd-ro4.normalTitle" : {
       "comment" : "Class = \"UIButton\"; normalTitle = \"Button\"; ObjectID = \"2TR-Kd-ro4\";",
       "extractionState" : "extracted_with_value",
@@ -4598,8 +4628,8 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "帧步进控制"
+            "state" : "needs_review",
+            "value" : "帧步调"
           }
         },
         "zh-Hant" : {

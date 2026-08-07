@@ -174,7 +174,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _asyncFrameDequeue = tempSettings.asyncFrameDequeue;
     NSLog(@"_asyncFrameDequeue %d", _asyncFrameDequeue);
     _enableTimebase = false;
-    _queueSize = tempSettings.frameQueueSize.intValue;
+    _queueSize = kEnableFrameInterpolation ? 4 : tempSettings.frameQueueSize.intValue;
     _needRequeuing = _queueSize>0;
 
     _frameQueue = [FrameQueue sharedInstance];
@@ -205,9 +205,10 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     [[ImGuiPlots sharedInstance] clearData];
 
     DataManager* dataMan = [[DataManager alloc] init];
-    if ([[dataMan getSettings].renderingBackend integerValue] == RENDER_AVSB) {
+    TemporarySettings* settings = [dataMan getSettings];
+    if ([settings.renderingBackend integerValue] == RENDER_AVSB) {
         _renderingBackend = RENDER_AVSB;
-
+        
         if (kEnableFrameInterpolation) {
             _frameInterpolator = [[FrameInterpolator alloc] init];
             _frameInterpolator.isEnabled = YES;
@@ -297,6 +298,55 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     } mutableCopy];
 #endif
 
+#if !TARGET_OS_SIMULATOR
+    if (interpolationRequested) {
+        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(_formatDesc);
+        NSDictionary *interpolationSourceAttributes =
+            [FrameInterpolator sourcePixelBufferAttributesForDimensions:dimensions];
+        CFDictionaryRef resolvedAttributes = NULL;
+        CVReturn resolveStatus = kCVReturnInvalidArgument;
+
+        if (interpolationSourceAttributes != nil) {
+            NSArray *attributeRequirements = @[
+                destinationPixelBufferAttributes,
+                interpolationSourceAttributes
+            ];
+            resolveStatus = CVPixelBufferCreateResolvedAttributesDictionary(
+                kCFAllocatorDefault,
+                (__bridge CFArrayRef)attributeRequirements,
+                &resolvedAttributes);
+        }
+
+        if (resolveStatus == kCVReturnSuccess && resolvedAttributes != NULL) {
+            destinationPixelBufferAttributes =
+                [(__bridge NSDictionary *)resolvedAttributes mutableCopy];
+            CFRelease(resolvedAttributes);
+        } else {
+            if (resolvedAttributes != NULL) {
+                CFRelease(resolvedAttributes);
+            }
+            Log(LOG_W,
+                @"Unable to resolve frame-interpolation source attributes for %dx%d (status %d); using native decode output",
+                dimensions.width,
+                dimensions.height,
+                resolveStatus);
+            [self->_frameInterpolator reset];
+            self->_frameInterpolator = nil;
+            interpolationRequested = NO;
+            destinationPixelBufferAttributes = [@{
+                (id)kCVPixelBufferPixelFormatTypeKey : nativePixelFormat
+            } mutableCopy];
+
+            NSInteger targetFrameRate = MIN(self->_frameRate, self->_maxRefreshRate);
+            if (@available(iOS 15.0, tvOS 15.0, *)) {
+                self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
+            } else {
+                self->_displayLink.preferredFramesPerSecond = targetFrameRate;
+            }
+        }
+    }
+#endif
+
     if (@available(iOS 17.0, tvOS 17.0, *)) {
         destinationPixelBufferAttributes[(id)kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder] = @YES;
         destinationPixelBufferAttributes[(id)kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata] = @YES;
@@ -313,7 +363,13 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         Log(LOG_W, @"Falling back from 420v frame-interpolation decode output to native pixel format %@", nativePixelFormat);
         [self->_frameInterpolator reset];
         self->_frameInterpolator = nil;
-        destinationPixelBufferAttributes[(id)kCVPixelBufferPixelFormatTypeKey] = nativePixelFormat;
+        destinationPixelBufferAttributes = [@{
+            (id)kCVPixelBufferPixelFormatTypeKey : nativePixelFormat
+        } mutableCopy];
+        if (@available(iOS 17.0, tvOS 17.0, *)) {
+            destinationPixelBufferAttributes[(id)kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder] = @YES;
+            destinationPixelBufferAttributes[(id)kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata] = @YES;
+        }
         [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
 
         NSInteger targetFrameRate = MIN(self->_frameRate, self->_maxRefreshRate);

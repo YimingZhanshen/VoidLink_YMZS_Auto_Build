@@ -10,6 +10,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreMedia/CoreMedia.h>
 #import "DiscoveryManager.h"
 #import "PairManager.h"
 #import "StreamConfiguration.h"
@@ -49,7 +50,7 @@
 
 - (NSInteger)requestForBitrate:(NSInteger)bitrateKbps;
 #endif
-- (void)fillResolutionTable:(CGSize*)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode;
+- (void)fillResolutionTable:(CMVideoDimensions *)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode;
 - (void)setNeedsUpdateAllowedOrientation;
 
 @end

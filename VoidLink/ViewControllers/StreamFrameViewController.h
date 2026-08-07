@@ -67,5 +67,7 @@
 - (void)returnToMainFrame;
 - (void)bringUpToolboxMenu;
 - (void)bringUpToolboxMenuWithoutWidgetLayoutTool;
+- (void)updateOverlayText:(NSString*)text;
+- (void)updateTransientHUDText:(NSString*)text;
 
 @end

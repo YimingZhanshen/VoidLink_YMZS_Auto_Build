@@ -1,3 +1,11 @@
+//
+//  FrameInterpolator.swift
+//  VoidLink
+//
+//  Created by True砖家 on 2026/8/6.
+//  Copyright © 2026 True砖家 @ Bilibili. All rights reserved.
+//
+
 import AVFoundation
 import CoreVideo
 import ObjectiveC.runtime
@@ -19,12 +27,14 @@ final class FrameInterpolator: NSObject {
     private var previousFrame: Frame?
     private var pendingFrames: [PendingFrame] = []
     private var isProcessing = false
+    private var resetRequested = false
     private var width = 0
     private var height = 0
     private var slowUntil = CFTimeInterval(0)
     private var completedProcessingCount = 0
     private var consecutiveSlowFrames = 0
     private var loggedEvents = Set<String>()
+    private var overlayGeneration = 0
 
     var isEnabled = false {
         didSet {
@@ -45,20 +55,179 @@ final class FrameInterpolator: NSObject {
         return false
         #endif
     }()
+    
+    static var dimensionLimitsAreKnown: Bool = {
+        #if targetEnvironment(simulator)
+        return false
+        #else
+        if #available(iOS 26.0, tvOS 26.0, *) {
+            let limits = VTLowLatencyFrameInterpolationConfiguration
+                .runtimeDimensionLimits(spatialScaleFactor: 1)
+            guard
+                let maximumDimension = limits.maximumDimension,
+                let maximumPixelCount = limits.maximumPixelCount,
+                maximumDimension > 0,
+                maximumPixelCount > 0
+            else {return false}
+            return true
+        }
+        else {
+            return false
+        }
+        #endif
+    }()
+
+    static func interpolatableDimensionsBy(_ dimensions: CMVideoDimensions) -> CMVideoDimensions {
+        guard deviceSupportsInterpolation else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+#if targetEnvironment(simulator)
+        return CMVideoDimensions(width: 0, height: 0)
+#else
+        guard #available(iOS 26.0, tvOS 26.0, *) else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+        
+        let limits = VTLowLatencyFrameInterpolationConfiguration
+            .runtimeDimensionLimits(spatialScaleFactor: 1)
+        guard
+            let maximumDimension = limits.maximumDimension,
+            let maximumPixelCount = limits.maximumPixelCount,
+            maximumDimension > 0,
+            maximumPixelCount > 0
+        else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+        return constrainedDimensions(
+            dimensions,
+            maximumDimension: maximumDimension,
+            maximumPixelCount: maximumPixelCount
+        )
+        #endif
+    }
+
+    static func interpolatableDimensionsBy1080p(_ dimensions: CMVideoDimensions) -> CMVideoDimensions {
+        guard deviceSupportsInterpolation else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+        return constrainedDimensions(
+            dimensions,
+            maximumDimension: 1920,
+            maximumPixelCount: 1920 * 1080
+        )
+    }
+    
+    static func interpolatableDimensionsBy720p(_ dimensions: CMVideoDimensions) -> CMVideoDimensions {
+        guard deviceSupportsInterpolation else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+        return constrainedDimensions(
+            dimensions,
+            maximumDimension: 1280,
+            maximumPixelCount: 1280 * 720
+        )
+    }
+
+    @objc(sourcePixelBufferAttributesForDimensions:)
+    static func sourcePixelBufferAttributes(for dimensions: CMVideoDimensions) -> NSDictionary? {
+        #if targetEnvironment(simulator)
+        return nil
+        #else
+        guard
+            #available(iOS 26.0, tvOS 26.0, *),
+            dimensions.width > 0,
+            dimensions.height > 0,
+            VTLowLatencyFrameInterpolationConfiguration.isSupported,
+            let configuration = VTLowLatencyFrameInterpolationConfiguration(
+                frameWidth: Int(dimensions.width),
+                frameHeight: Int(dimensions.height),
+                numberOfInterpolatedFrames: 1
+            )
+        else {
+            return nil
+        }
+
+        return configuration.sourcePixelBufferAttributes as NSDictionary
+        #endif
+    }
+
+    private static func constrainedDimensions(
+        _ dimensions: CMVideoDimensions,
+        maximumDimension: Int,
+        maximumPixelCount: Int
+    ) -> CMVideoDimensions {
+        guard
+            dimensions.width > 0,
+            dimensions.height > 0,
+            maximumDimension > 0,
+            maximumPixelCount > 0
+        else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+        let width = Int(dimensions.width)
+        let height = Int(dimensions.height)
+        let (sourcePixelCount, pixelCountOverflow) = width.multipliedReportingOverflow(by: height)
+        let fullHDWidth = 1920
+        let fullHDHeight = 1080
+        let fullHDPixelCount = fullHDWidth * fullHDHeight
+        let isSixteenByNine = width * 9 == height * 16
+        if !pixelCountOverflow,
+           isSixteenByNine,
+           sourcePixelCount > fullHDPixelCount,
+           maximumDimension >= fullHDWidth,
+           maximumPixelCount >= fullHDPixelCount {
+            return CMVideoDimensions(width: Int32(fullHDWidth), height: Int32(fullHDHeight))
+        }
+
+        if !pixelCountOverflow,
+           max(width, height) <= maximumDimension,
+           sourcePixelCount <= maximumPixelCount {
+            return dimensions
+        }
+        
+        let sourceWidth = Double(width)
+        let sourceHeight = Double(height)
+        let dimensionScale = Double(maximumDimension) / max(sourceWidth, sourceHeight)
+        let pixelCountScale = sqrt(Double(maximumPixelCount) / (sourceWidth * sourceHeight))
+        let scale = min(dimensionScale, pixelCountScale)
+        
+        let scaledWidth = Int((sourceWidth * scale).rounded(.down)) & ~(31)
+        let scaledHeight = Int((sourceHeight * scale).rounded(.down)) & ~(31)
+        guard
+            scaledWidth > 0,
+            scaledHeight > 0,
+            scaledWidth <= Int(Int32.max),
+            scaledHeight <= Int(Int32.max)
+        else {
+            return CMVideoDimensions(width: 0, height: 0)
+        }
+
+        return CMVideoDimensions(width: Int32(scaledWidth), height: Int32(scaledHeight))
+    }
 
     var isAvailable: Bool {
         isEnabled && Self.deviceSupportsInterpolation
     }
 
     func reset() {
-        queue.async { [weak self] in
-            self?.resetLocked()
+        queue.async {
+            self.requestResetLocked()
         }
     }
 
     func processFrame(_ frame: Frame, completion: @escaping Completion) {
         queue.async { [weak self] in
             guard let self else {
+                completion([frame])
+                return
+            }
+
+            guard !self.resetRequested else {
                 completion([frame])
                 return
             }
@@ -181,14 +350,16 @@ final class FrameInterpolator: NSObject {
 
         isProcessing = true
         let startedAt = CACurrentMediaTime()
-        processor.process(parameters: parameters) { [weak self] _, error in
-            guard let self else {
-                completion([frame])
-                return
-            }
-
+        processor.process(parameters: parameters) { [self] _, error in
             self.queue.async {
                 self.isProcessing = false
+
+                if self.resetRequested {
+                    self.resetLocked()
+                    completion([frame])
+                    return
+                }
+
                 self.previousFrame = frame
 
                 let elapsed = CACurrentMediaTime() - startedAt
@@ -201,15 +372,24 @@ final class FrameInterpolator: NSObject {
                     )
                 else {
                     if let error {
-                        self.logOnce("process-error-\((error as NSError).code)", "processing failed: \(error)")
+                        self.logOnce("process-error", error: error)
                     } else {
-                        self.logOnce("sample-buffer-failed", "processing completed but the interpolated CMSampleBuffer could not be created")
+                        self.logOnce(
+                            "sample-buffer-failed",
+                            "processing completed but the interpolated CMSampleBuffer could not be created",
+                            overlayText: "Interpolation failed for an unknown reason.".localized
+                        )
                     }
                     completion([frame])
                     self.drainPendingFrames()
                     return
                 }
 
+                self.logOnce(
+                    "first-interpolated-frame",
+                    "produced the first interpolated frame",
+                    overlayText: "Interpolator started.".localized
+                )
                 self.completedProcessingCount += 1
                 if sourceFrameInterval.isFinite, sourceFrameInterval > 0, elapsed >= sourceFrameInterval {
                     self.consecutiveSlowFrames += 1
@@ -221,7 +401,8 @@ final class FrameInterpolator: NSObject {
                     self.consecutiveSlowFrames = 0
                     self.logOnce(
                         "sustained-overrun",
-                        "processing repeatedly exceeded the source-frame interval; temporarily falling back to original frames"
+                        "processing repeatedly exceeded the source-frame interval; temporarily falling back to original frames",
+                        overlayText: "Interpolation overhead is too high. Falling back to normal mode.".localized
                     )
                 }
 
@@ -262,6 +443,40 @@ final class FrameInterpolator: NSObject {
         }
 
         let inputPixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
+        var extendedLeft = 0
+        var extendedRight = 0
+        var extendedTop = 0
+        var extendedBottom = 0
+        CVPixelBufferGetExtendedPixels(
+            pixelBuffer,
+            &extendedLeft,
+            &extendedRight,
+            &extendedTop,
+            &extendedBottom
+        )
+        logOnce(
+            "input-layout-\(width)x\(height)",
+            "input pixel buffer layout for \(width)x\(height): " +
+            "extended left=\(extendedLeft), right=\(extendedRight), " +
+            "top=\(extendedTop), bottom=\(extendedBottom)"
+        )
+        let runtimeLimits = VTLowLatencyFrameInterpolationConfiguration
+            .runtimeDimensionLimits(spatialScaleFactor: 1)
+        logOnce(
+            "runtime-limits-\(width)x\(height)",
+            "runtime limits for spatial scale 1: minimum=\(String(describing: runtimeLimits.minimumDimensions)), " +
+            "legacyMaximum=\(String(describing: runtimeLimits.maximumDimensions)), " +
+            "maximumDimension=\(String(describing: runtimeLimits.maximumDimension)), " +
+            "maximumPixelCount=\(String(describing: runtimeLimits.maximumPixelCount))"
+        )
+        logOnce(
+            "source-attributes-\(width)x\(height)",
+            "source pixel buffer attributes for \(width)x\(height): \(configuration.sourcePixelBufferAttributes)"
+        )
+        logOnce(
+            "destination-attributes-\(width)x\(height)",
+            "destination pixel buffer attributes for \(width)x\(height): \(configuration.destinationPixelBufferAttributes)"
+        )
         if !configuration.supportedPixelFormats.contains(inputPixelFormat) {
             let supportedFormats = configuration.supportedPixelFormats
                 .map(pixelFormatName)
@@ -289,6 +504,7 @@ final class FrameInterpolator: NSObject {
             &pool
         )
         guard status == kCVReturnSuccess, let pool else {
+            processor.endSession()
             logOnce("pool-error-\(status)", "failed to create destination pixel buffer pool: \(status)")
             return false
         }
@@ -366,11 +582,51 @@ final class FrameInterpolator: NSObject {
         CMTimeAdd(first, CMTimeMultiplyByFloat64(CMTimeSubtract(second, first), multiplier: 0.5))
     }
 
-    private func logOnce(_ event: String, _ message: String) {
-        guard loggedEvents.insert(event).inserted else {
+    private func logOnce(_ event: String, _ message: String, overlayText: String? = nil) {
+        guard loggedEvents.insert(event).inserted || event == "sustained-overrun" else {
             return
         }
-        NSLog("[FrameInterpolator] %@", message)
+        if let overlayText {
+            showTransientHUDText(overlayText)
+            NSLog("[FrameInterpolator] %@", message)
+        }
+    }
+
+    private func logOnce(_ event: String, error: Error) {
+        let nsError = error as NSError
+        logOnce(
+            event,
+            "processing failed: \(error)",
+            overlayText: "\("Interpolator error:".localized) \(nsError.localizedDescription)"
+        )
+    }
+
+    private func showTransientHUDText(_ text: String) {
+        overlayGeneration &+= 1
+
+        let generation = overlayGeneration
+
+        DispatchQueue.main.async {
+            guard let streamFrameVC = StreamFrameViewController.sharedInstance() else {
+                return
+            }
+
+            streamFrameVC.updateTransientHUDText(text)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self, weak streamFrameVC] in
+                guard let self, let streamFrameVC else {
+                    return
+                }
+
+                self.queue.async {
+                    guard self.overlayGeneration == generation else {
+                        return
+                    }
+                    DispatchQueue.main.async {
+                        streamFrameVC.updateTransientHUDText(nil)
+                    }
+                }
+            }
+        }
     }
 
     private func pixelFormatName(_ pixelFormat: OSType) -> String {
@@ -384,12 +640,30 @@ final class FrameInterpolator: NSObject {
         return "\(fourCC) (\(pixelFormat))"
     }
 
+    private func requestResetLocked() {
+        pendingFrames.removeAll()
+        guard !isProcessing else {
+            resetRequested = true
+            return
+        }
+
+        resetLocked()
+    }
+
     private func resetLocked(keepPendingFrames: Bool = false) {
+        #if !targetEnvironment(simulator)
+        if #available(iOS 26.0, tvOS 26.0, *),
+           let processor = processor as? VTFrameProcessor {
+            processor.endSession()
+        }
+        #endif
+
         processor = nil
         pixelBufferPool = nil
         formatDescription = nil
         previousFrame = nil
         isProcessing = false
+        resetRequested = false
         width = 0
         height = 0
         slowUntil = 0
@@ -485,6 +759,5 @@ extension VTLowLatencyFrameInterpolationConfiguration {
         let supported = limits.supports(width: 1920, height: 1080)
         print("1920x1080 supported:", supported)
     }
-    
 }
 #endif

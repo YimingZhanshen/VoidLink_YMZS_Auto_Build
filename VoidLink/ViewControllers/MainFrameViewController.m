@@ -837,7 +837,7 @@ static NSMutableSet* hostList;
 - (void) reloadStreamConfig {
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* streamSettings = [dataMan getSettings];
-    
+    [VideoDecoderRenderer setFrameInterpolationEnabled: streamSettings.framePacingMode.intValue == FramePacingModeInterpolation];
     _streamConfig.frameRate = [streamSettings.framerate intValue];
     if (@available(iOS 10.3, *)) {
         UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
@@ -854,6 +854,8 @@ static NSMutableSet* hostList;
     
     _streamConfig.height = [streamSettings.height intValue];
     _streamConfig.width = [streamSettings.width intValue];
+    
+    NSLog(@"saveSettings.width %d, %d", _streamConfig.width, _streamConfig.height);
 #if TARGET_OS_TV
     // Don't allow streaming 4K on the Apple TV HD
     struct utsname systemInfo;
@@ -2099,7 +2101,7 @@ static NSMutableSet* hostList;
 //    });
 //}
 
--(void) fillResolutionTable:(CGSize*)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode{
+-(void) fillResolutionTable:(CMVideoDimensions *)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode{
     UIWindow *window = self.view.window;
     NSLog(@" window %@", window);
 
@@ -2117,35 +2119,46 @@ static NSMutableSet* hostList;
     
     bool needSwapWidthAndHeight = appWindowWidth < appWindowHeight;
     
-    resolutionTable[0] = CGSizeMake(1280, 720);
-    resolutionTable[1] = CGSizeMake(1920, 1080);
-    resolutionTable[2] = CGSizeMake(3840, 2160);
+    resolutionTable[0] = (CMVideoDimensions){ .width = 1280, .height = 720 };
+    resolutionTable[1] = (CMVideoDimensions){ .width = 1920, .height = 1080 };
+    resolutionTable[2] = (CMVideoDimensions){ .width = 3840, .height = 2160 };
     
     for(uint8_t i=0;i<6;i++){
-        CGFloat longSideLen = resolutionTable[i].height > resolutionTable[i].width ? resolutionTable[i].height : resolutionTable[i].width;
-        CGFloat shortSideLen = resolutionTable[i].height < resolutionTable[i].width ? resolutionTable[i].height : resolutionTable[i].width;
-        if(needSwapWidthAndHeight) resolutionTable[i] = CGSizeMake(shortSideLen, longSideLen);
-        else resolutionTable[i] = CGSizeMake(longSideLen, shortSideLen);
+        int32_t longSideLen = MAX(resolutionTable[i].width, resolutionTable[i].height);
+        int32_t shortSideLen = MIN(resolutionTable[i].width, resolutionTable[i].height);
+        if(needSwapWidthAndHeight) resolutionTable[i] = (CMVideoDimensions){ .width = shortSideLen, .height = longSideLen };
+        else resolutionTable[i] = (CMVideoDimensions){ .width = longSideLen, .height = shortSideLen };
     }
 
     // add app window resolution and not swap width and height
-    resolutionTable[3] = CGSizeMake(safeAreaWidth, appWindowHeight);
-    resolutionTable[4] = CGSizeMake(appWindowWidth, appWindowHeight);
+    resolutionTable[3] = (CMVideoDimensions){ .width = (int32_t)safeAreaWidth, .height = (int32_t)appWindowHeight };
+    resolutionTable[4] = (CMVideoDimensions){ .width = (int32_t)appWindowWidth, .height = (int32_t)appWindowHeight };
 }
 
 -(void) updateResolutionAccordingly {
     DataManager* dataMan = [[DataManager alloc] init];
     Settings *currentSettings = [dataMan retrieveSettings];
 
-    CGSize tempResolutionTable[6] = {0};
-    tempResolutionTable[5] = CGSizeMake(currentSettings.width.intValue, currentSettings.height.intValue);
+    CMVideoDimensions tempResolutionTable[6] = {0};
+    tempResolutionTable[5] = (CMVideoDimensions){
+        .width = (int32_t)currentSettings.width.intValue,
+        .height = (int32_t)currentSettings.height.intValue,
+    };
     [self fillResolutionTable:tempResolutionTable externalDisplayMode:currentSettings.externalDisplayMode.intValue];
 
     int selectedIndex = currentSettings.resolutionSelected.intValue;
     if (selectedIndex >= 0 && selectedIndex < 6) {
-        CGSize selectedSize = tempResolutionTable[selectedIndex];
-        currentSettings.width = @(selectedSize.width);
-        currentSettings.height = @(selectedSize.height);
+        CMVideoDimensions originalDimensions = tempResolutionTable[selectedIndex];
+        
+        CMVideoDimensions targetDimensions;
+        if(currentSettings.framePacingMode.intValue == FramePacingModeInterpolation) {
+            targetDimensions = [FrameInterpolator interpolatableDimensionsBy:originalDimensions];
+            if(!(targetDimensions.width>0 && targetDimensions.height>0)) targetDimensions = [FrameInterpolator interpolatableDimensionsBy720p:originalDimensions];
+        }
+        else targetDimensions = originalDimensions;
+        
+        currentSettings.width = @(targetDimensions.width);
+        currentSettings.height = @(targetDimensions.height);
         NSLog(@"Updated resolution to: %@ x %@", currentSettings.width, currentSettings.height);
     }
 

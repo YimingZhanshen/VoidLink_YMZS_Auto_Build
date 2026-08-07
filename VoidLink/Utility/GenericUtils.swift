@@ -533,11 +533,14 @@ import UIKit
     }
 
     @objc public static func handleLegacyFramePacingTip(in vc: UIViewController?, with selector: UISegmentedControl, passAlert: Bool = false, uiAction: (() -> Void)? = nil) {
-        if passAlert || selector.selectedSegmentIndex == FramePacingMode.queue.rawValue {
+        if passAlert
+            || selector.selectedSegmentIndex == FramePacingMode.queue.rawValue
+            || selector.selectedSegmentIndex == FramePacingMode.interpolation.rawValue{
             uiAction?()
             return
         }
-        if selector.previousSelectedSegmentIndex != FramePacingMode.queue.rawValue {
+        if selector.previousSelectedSegmentIndex != FramePacingMode.queue.rawValue
+            && selector.previousSelectedSegmentIndex != FramePacingMode.interpolation.rawValue {
             uiAction?()
             return
         }

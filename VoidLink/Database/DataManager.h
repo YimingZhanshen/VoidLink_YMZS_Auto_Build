@@ -59,7 +59,8 @@ typedef NS_ENUM(NSInteger, ControllerMouseStick) {
 typedef NS_ENUM(NSInteger, FramePacingMode) {
     FramePacingModeOff,
     FramePacingModeLegacy,
-    FramePacingModeQueue
+    FramePacingModeQueue,
+    FramePacingModeInterpolation
 };
 
 typedef NS_ENUM(NSInteger, SettingsMenuMode) {

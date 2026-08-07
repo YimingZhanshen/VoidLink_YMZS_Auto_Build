@@ -206,7 +206,7 @@ static const int bitrateTable[] = {
 
 const int RESOLUTION_TABLE_SIZE = 6;
 const int RESOLUTION_TABLE_CUSTOM_INDEX = RESOLUTION_TABLE_SIZE - 1;
-CGSize resolutionTable[RESOLUTION_TABLE_SIZE];
+CMVideoDimensions resolutionTable[RESOLUTION_TABLE_SIZE];
 
 -(uint16_t)controllerTypeToSegmentIndex:(uint16_t)type{
     uint16_t index;
@@ -882,6 +882,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     self.framePacingStack.hasInfoTag = YES;
     [self addSetting:self.framePacingStack ofId:@"framePacingStack" to:videoSection];
+    if(!FrameInterpolator.deviceSupportsInterpolation) [self.framerateSelector setEnabled:false forSegmentAtIndex:FramePacingModeInterpolation];
 
     self.frameQueueSizeStack.hasDynamicLabel = YES;
     [self addSetting:self.frameQueueSizeStack ofId:@"frameQueueSizeStack" to:videoSection];
@@ -2129,7 +2130,10 @@ BOOL isCustomResolution(int resolutionSelected) {
         self.resolutionSelector.selectedSegmentIndex = 3;
         [self.resolutionSelector setNeedsLayout];
 
-        resolutionTable[5] = CGSizeMake([self->tempSettings.width integerValue], [self->tempSettings.height integerValue]); // custom initial value
+        resolutionTable[5] = (CMVideoDimensions){
+            .width = (int32_t)[self->tempSettings.width integerValue],
+            .height = (int32_t)[self->tempSettings.height integerValue],
+        }; // custom initial value
         [self updateResolutionTable];
 
 
@@ -2689,6 +2693,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self setHidden:(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy) forStack:self.frameQueueSizeStack];
         // [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue) forStack:self.frameTimebaseStack];
         [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue
+                        || sender.selectedSegmentIndex != FramePacingModeInterpolation
                         || self.renderingBackendSelector.selectedSegmentIndex != 0) forStack:self.asyncFrameDequeueStack];
 
         if(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy){
@@ -2698,6 +2703,16 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.enableGraphsSwitch setEnabled:sender.selectedSegmentIndex == FramePacingModeQueue];
         [self.graphOpacityStepper setEnabled:self.enableGraphsSwitch.isOn];
         [self setHidden:(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy) forStack:self.performanceGraphStack];
+        
+        bool enableInterpolation = sender.selectedSegmentIndex == FramePacingModeInterpolation;
+        [self widget:self.frameQueueSizeSlider setEnabled:!enableInterpolation];
+        [self updateResolutionDisplayLabel];
+        if(enableInterpolation){
+            if(self.framerateSelector.selectedSegmentIndex == 2) self.framerateSelector.selectedSegmentIndex = 1;
+            if(!FrameInterpolator.dimensionLimitsAreKnown){
+                NSLog(@"FrameInterpolator dimensionLimitsUnknown");
+            }
+        }
     }];
     
     /*
@@ -3648,6 +3663,9 @@ BOOL isCustomResolution(int resolutionSelected) {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:key];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
+    if(self.framerateSelector.selectedSegmentIndex == 2
+       && self.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) self.framerateSelector.selectedSegmentIndex = self.framerateSelector.previousSelectedSegmentIndex;
+    
     // NSInteger fps = [self getChosenFrameRate];
     // [self touchMoveEventIntervalSliderMoved:self.touchMoveEventIntervalSlider];
     [self updateBitrate];
@@ -3655,8 +3673,9 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void) updateBitrate {
     NSInteger fps = [self getChosenFrameRate];
-    NSInteger width = [self getChosenStreamWidth];
-    NSInteger height = [self getChosenStreamHeight];
+    CMVideoDimensions dimensions = [self getChosenStreamDimensions];
+    NSInteger width = dimensions.width;
+    NSInteger height = dimensions.height;
     NSInteger defaultBitrate;
     
     // This logic is shamelessly stolen from Moonlight Qt:
@@ -3792,7 +3811,10 @@ BOOL isCustomResolution(int resolutionSelected) {
         width = MAX(width, 256);
         height = MAX(height, 256);
 
-        resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = CGSizeMake(width, height);
+        resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX] = (CMVideoDimensions){
+            .width = (int32_t)width,
+            .height = (int32_t)height,
+        };
         [self updateBitrate];
         [self updateResolutionDisplayLabel];
         
@@ -3814,8 +3836,9 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) updateResolutionDisplayLabel {
-    NSInteger width = [self getChosenStreamWidth];
-    NSInteger height = [self getChosenStreamHeight];
+    CMVideoDimensions dimensions = [self getChosenStreamDimensions];
+    NSInteger width = dimensions.width;
+    NSInteger height = dimensions.height;
     
     [self findDynamicLabelFromStack:_resolutionSelectorStack].text = [NSString stringWithFormat:@"%ld × %ld", (long)width, (long)height];
 }
@@ -3888,22 +3911,26 @@ BOOL isCustomResolution(int resolutionSelected) {
         }
 }
 
-- (NSInteger) getChosenStreamHeight {
+- (CMVideoDimensions)getChosenStreamDimensions {
     // because the 4k resolution can be removed
+    CMVideoDimensions originalDimensions;
     if (self.customResolutionSwitch.isOn) {
-        return resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].height;
+        originalDimensions = resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX];
+    } else {
+        originalDimensions = resolutionTable[self.resolutionSelector.selectedSegmentIndex];
     }
-
-    return resolutionTable[self.resolutionSelector.selectedSegmentIndex].height;
-}
-
-- (NSInteger) getChosenStreamWidth {
-    // because the 4k resolution can be removed
-    if (self.customResolutionSwitch.isOn) {
-        return resolutionTable[RESOLUTION_TABLE_CUSTOM_INDEX].width;
+    
+    CMVideoDimensions targetDimensions = self.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation
+        ? [FrameInterpolator interpolatableDimensionsBy:originalDimensions]
+        : originalDimensions;
+    
+    if(targetDimensions.width == 0 || targetDimensions.height == 0) {
+        targetDimensions = [FrameInterpolator interpolatableDimensionsBy720p:originalDimensions];
     }
+    
+    NSLog(@"dimensions: %d, %d", targetDimensions.width, targetDimensions.height);
 
-    return resolutionTable[self.resolutionSelector.selectedSegmentIndex].width;
+    return targetDimensions;
 }
 
 - (UIStackView *)findFlatStackViewFrom:(UIView *)view {
@@ -4250,10 +4277,17 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     CGFloat settingsMenuOffset = _rememberFoldStateSwitch.isOn ? _scrollView.contentOffset.y : 0;
     
-    NSInteger height = self.mainFrameViewController.isStreaming ? currentSettings.height.intValue : [self getChosenStreamHeight];
-    NSInteger width = self.mainFrameViewController.isStreaming ? currentSettings.width.intValue : [self getChosenStreamWidth];
+    CMVideoDimensions dimensions;
+    if (self.mainFrameViewController.isStreaming) {
+        dimensions.width = (int32_t)currentSettings.width.intValue;
+        dimensions.height = (int32_t)currentSettings.height.intValue;
+    } else {
+        dimensions = [self getChosenStreamDimensions];
+    }
+    NSInteger height = dimensions.height;
+    NSInteger width = dimensions.width;
     
-    // NSLog(@"saveSettings aspectRatio %d, %ld, %ld",self.mainFrameViewController.isStreaming, width, height);
+    NSLog(@"saveSettings %d, %ld, %ld",self.mainFrameViewController.isStreaming, width, height);
     
     NSInteger framerate = [self getChosenFrameRate];
 

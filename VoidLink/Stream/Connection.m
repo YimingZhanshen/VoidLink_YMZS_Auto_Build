@@ -80,6 +80,10 @@ int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void*
 void DrCleanup(void)
 {
     [renderer cleanup];
+    // Drop the static reference so the old renderer (and its decoder resources)
+    // doesn't outlive the session; otherwise it stays alive until the next
+    // Connection init overwrites it, which can interleave with a new session.
+    renderer = nil;
 }
 
 -(BandwidthTracker *) getBwTracker

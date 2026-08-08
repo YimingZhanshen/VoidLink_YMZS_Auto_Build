@@ -108,7 +108,11 @@ static char FrameInterpolatedKey;
 
 - (CFDictionaryRef)getFormatDescExtensions {
     if (!_formatDescExt && _formatDesc) {
-        _formatDescExt = CFRetain(CMFormatDescriptionGetExtensions(_formatDesc));
+        // Can legitimately be NULL, and CFRetain(NULL) crashes
+        CFDictionaryRef ext = CMFormatDescriptionGetExtensions(_formatDesc);
+        if (ext) {
+            _formatDescExt = CFRetain(ext);
+        }
     }
     return _formatDescExt;
 }

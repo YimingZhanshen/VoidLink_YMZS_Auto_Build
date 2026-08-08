@@ -106,7 +106,17 @@ static const NSUInteger MaxFramesInFlight = 3;
 // best to tone-map Windows content
 static BOOL useEDR = YES;
 
-CFStringRef __currentColorSpace;
+// Name of the colorspace most recently applied to the layer, for the stats overlay.
+// Class-level because the stats path only has access to the class; guarded by a lock
+// since it is written on the render thread and read from other threads, and multiple
+// renderer instances can briefly overlap during a session switch.
+static NSString *__currentColorSpace;
+
+static void setCurrentColorSpaceName(NSString *name) {
+    @synchronized ([MetalVideoRenderer class]) {
+        __currentColorSpace = name;
+    }
+}
 
 @implementation MetalVideoRenderer {
     dispatch_queue_t _sq;
@@ -225,11 +235,9 @@ CFStringRef __currentColorSpace;
     if (_renderPassDescriptor) {
         _renderPassDescriptor = nil;
     }
-    
-    if (__currentColorSpace) {
-        CFRelease(__currentColorSpace);
-        __currentColorSpace = NULL;
-    }
+
+    // Do NOT clear __currentColorSpace here: a new renderer instance may already be
+    // live (session switch) and have set its own value.
 }
 
 #if !TARGET_OS_TV
@@ -405,9 +413,11 @@ CFStringRef __currentColorSpace;
                 paramBuffer.cscParams = (fullRange ? k_CscParams_Bt709Full : k_CscParams_Bt709Lim);
                 break;
             case COLORSPACE_REC_2020: {
+                // Frames without a format description (e.g. produced for the AVSB
+                // backend) must not crash us here
                 CFDictionaryRef ext = [frame getFormatDescExtensions];
-                CFStringRef frame_trc = CFDictionaryGetValue(ext, kCVImageBufferTransferFunctionKey);
-                if (CFEqual(frame_trc, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ)) {
+                CFStringRef frame_trc = ext ? CFDictionaryGetValue(ext, kCVImageBufferTransferFunctionKey) : NULL;
+                if (frame_trc && CFEqual(frame_trc, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ)) {
                     isHDR = YES;
                     newColorSpace = CGColorSpaceCreateWithName(_nonFullHdrColorSpace);
                     newPixelFormat = _nonFullHdrPixelFormat;
@@ -478,11 +488,7 @@ CFStringRef __currentColorSpace;
                 });
             }
 #endif
-            if (__currentColorSpace) {
-                CFRelease(__currentColorSpace);
-                __currentColorSpace = NULL;
-            }
-            __currentColorSpace = CGColorSpaceCopyName(newColorSpace);
+            setCurrentColorSpaceName(newColorSpace ? CFBridgingRelease(CGColorSpaceCopyName(newColorSpace)) : nil);
             CGColorSpaceRelease(newColorSpace);
         }
 
@@ -904,10 +910,9 @@ CFStringRef __currentColorSpace;
 }
 
 + (NSString *)currentColorSpace {
-    if (__currentColorSpace) {
-        return (__bridge NSString *)__currentColorSpace;
+    @synchronized ([MetalVideoRenderer class]) {
+        return __currentColorSpace;
     }
-    return nil;
 }
 
 @end

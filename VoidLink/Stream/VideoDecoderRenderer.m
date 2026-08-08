@@ -68,6 +68,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     FramePacingMode _framePacingMode;
     bool _enableTimebase;
     bool _asyncFrameDequeue;
+
+    // Cached UIApplication background state. UIKit's applicationState must only be
+    // read on the main thread, but the decode path needs it on the VTDecoder queue.
+    // Updated on the main thread via notifications; a stale read here is harmless
+    // (it only gates metrics collection).
+    volatile BOOL _appInBackground;
         
     // CMTime playTime;
     // NSTimeInterval previousLinkTime;
@@ -178,7 +184,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _needRequeuing = _queueSize>0;
 
     _frameQueue = [FrameQueue sharedInstance];
-    [_frameQueue start];
+    [_frameQueue startForOwner:self];
     [_frameQueue setHighWaterMark:MAX(1, _queueSize)];
 
     [self reinitializeDisplayLayer];
@@ -189,7 +195,27 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                                                  name:@"ScreenChanged"
                                                object:nil];
 
+    // Renderer init runs on the main thread, so reading applicationState here is legal.
+    // The decode queue reads the cached flag instead (UIKit forbids off-main reads).
+    _appInBackground = ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground);
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(appDidEnterBackground)
+                                                 name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(appWillEnterForeground)
+                                                 name:UIApplicationWillEnterForegroundNotification
+                                               object:nil];
+
     return self;
+}
+
+- (void)appDidEnterBackground {
+    _appInBackground = YES;
+}
+
+- (void)appWillEnterForeground {
+    _appInBackground = NO;
 }
 
 # pragma mark DisplayLink vsync callback
@@ -476,7 +502,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                         // we missed a callback
                         // Log(LOG_W, @"*** slow frametime %.3f ms", frametime * 1000.0);
                     }
-                    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+                    if (!self->_appInBackground) {
                         [[ImGuiPlots sharedInstance] observeFloat:PLOT_FRAMETIME value:frametime * 1000.0];
                     }
                 }
@@ -575,7 +601,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 - (void)cleanup{
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self->_frameQueue stop];
+        [self->_frameQueue stopForOwner:self];
         
         if (self->_renderingBackend == RENDER_AVSB) {
             [self->_displayLink invalidate];
@@ -1195,7 +1221,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                                     framesDropped += [self->_frameQueue enqueue:outputFrame withSlackSize:3];
                                 }
 
-                                if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+                                if (!self->_appInBackground) {
                                     static PlotMetrics frameQueueMetrics = {};
                                     [[ImGuiPlots sharedInstance] observeFloatReturnMetrics:PLOT_QUEUED_FRAMES value:[self->_frameQueue count] plotMetrics:&frameQueueMetrics];
                                     [self safeCopyMetricsTo:&self->_frameQueueMetrics from:&frameQueueMetrics];
@@ -1219,7 +1245,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
                     int framesDropped = [self->_frameQueue enqueue:frame withSlackSize:3];
 
-                    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+                    if (!self->_appInBackground) {
                         static PlotMetrics frameQueueMetrics = {};
                         [[ImGuiPlots sharedInstance] observeFloatReturnMetrics:PLOT_QUEUED_FRAMES value:[self->_frameQueue count] plotMetrics:&frameQueueMetrics];
                         [self safeCopyMetricsTo:&self->_frameQueueMetrics from:&frameQueueMetrics];

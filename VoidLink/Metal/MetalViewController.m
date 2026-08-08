@@ -109,13 +109,18 @@
 }
 
 - (void)waitToRenderTo:(nonnull CAMetalLayer *)layer {
-    // Skip waiting when renderer is paused
-    if (_renderer.isStopping) {
+    // Snapshot into a strong local: shutdown (main thread) can nil _renderer while
+    // the render thread is inside this method.
+    MetalVideoRenderer *renderer = _renderer;
+
+    // Skip waiting when renderer is paused or gone
+    if (!renderer || renderer.isStopping) {
+        _frameSlotAcquired = NO;
         return;
     }
 
     if (@available(iOS 13.0, *)) {
-        _frameSlotAcquired = [_renderer waitToRenderTo:layer];
+        _frameSlotAcquired = [renderer waitToRenderTo:layer];
     }
 
     if (_frameSlotAcquired) {
@@ -128,22 +133,27 @@
     if (!_frameSlotAcquired) {
         return;
     }
-    CFTimeInterval timeout = (1.0f / _framerate) - _renderer.averageGPUTime;
+    // Snapshot for the same reason as in waitToRenderTo
+    MetalVideoRenderer *renderer = _renderer;
+    if (!renderer) {
+        return;
+    }
+    CFTimeInterval timeout = (1.0f / _framerate) - renderer.averageGPUTime;
     Frame *frame = [_frameQueue dequeueWithTimeoutSync:timeout];
 
-    if (!_renderer.isStopping) {
+    if (!renderer.isStopping) {
         // Only render if not paused
         if (frame) {
             //if (@available(iOS 13.0, *)) {
-                [_renderer renderFrame:frame toLayer:layer];
+                [renderer renderFrame:frame toLayer:layer];
             //}
         } else {
-            dispatch_semaphore_signal([_renderer inFlightSemaphore]);
+            dispatch_semaphore_signal([renderer inFlightSemaphore]);
         }
     } else {
         // When paused, we still dequeue frames to prevent accumulation
         // but don't render them. Also sleep a bit to reduce CPU usage
-        dispatch_semaphore_signal([_renderer inFlightSemaphore]);
+        dispatch_semaphore_signal([renderer inFlightSemaphore]);
         usleep(100000);
     }
 }
@@ -177,11 +187,18 @@
 
     Log(LOG_I, @"[MetalViewController] viewDidDisappear");
 
+    [self shutdown];
+}
+
+- (void)shutdown {
     if (_displayLink) {
         [_displayLink invalidate];
         _displayLink = nil;
     }
 
+    // Stop the renderer before the render thread: isStopping makes the thread's
+    // renderFrame return early, so it can't enter the dispatch_sync-to-main path
+    // while we wait for it below.
     if (_renderer) {
         [_renderer shutdown];
         _renderer = nil;

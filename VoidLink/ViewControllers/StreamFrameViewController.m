@@ -1244,8 +1244,8 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 - (void)willMoveToParentViewController:(UIViewController *)parent {
     // Only cleanup when we're being destroyed
     if (parent == nil) {
-        _streamView = nil;
         [_streamView cleanUp];
+        _streamView = nil;
         [_controllerSupport cleanup];
 
         [UIApplication sharedApplication].idleTimerDisabled = NO;
@@ -1255,6 +1255,10 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
             _inactivityTimer = nil;
         }
         if (self.metalViewController) {
+            // Explicit shutdown: viewDidDisappear is not guaranteed to fire here
+            // (e.g. teardown while backgrounded), and it's what stops the render
+            // thread, display link and renderer.
+            [self.metalViewController shutdown];
             [self.metalViewController.view removeFromSuperview];
             [self.metalViewController removeFromParentViewController];
             self.metalViewController = nil;

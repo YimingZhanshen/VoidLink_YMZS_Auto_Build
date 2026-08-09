@@ -2681,39 +2681,55 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     // Check if the rendering backend has actually changed
     if (previousBackend != sender.selectedSegmentIndex) {
-        // Show alert to prompt user to restart the app
-        NSString *message = [LocalizationHelper localizedStringForKey: sender.selectedSegmentIndex == 1 ? @"metalRenderTip" : @"standardRenderTip"];
-        
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey:@"Restart Required"]
-                                                                                 message:message
-                                                                          preferredStyle:UIAlertControllerStyleAlert];
-        
-        UIAlertAction *quitAction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Quit Now"]
-                                                              style:UIAlertActionStyleDefault
-                                                            handler:^(UIAlertAction * _Nonnull action) {
-
+        // The renderer is picked up fresh at every stream start, so the change takes
+        // effect on the next session — no app restart needed.
+        void (^applyChange)(void) = ^{
             Settings* directSettings = [self->dataMan retrieveSettings];
             directSettings.renderingBackend = [NSNumber numberWithInteger:sender.selectedSegmentIndex];
             [self->dataMan saveData];
             [self saveSettings];
-            
-            exit(0);
-        }];
-        
-        UIAlertAction *laterAction = [UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Learn More"]
-                                                               style:UIAlertActionStyleCancel
-                                                             handler:^(UIAlertAction * _Nonnull action) {
-            self.renderingBackendSelector.selectedSegmentIndex = 0;
+        };
+
+        void (^revertChange)(void) = ^{
+            self.renderingBackendSelector.selectedSegmentIndex = previousBackend;
             [self.renderingBackendSelector sendActionsForControlEvents:UIControlEventValueChanged];
-            NSURL *url = [NSURL URLWithString:[LocalizationHelper localizedStringForKey:@"betterPerformanceLink"]];
-            if ([[UIApplication sharedApplication] canOpenURL:url]) {
-                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
-            }
-        }];
-        
-        [alertController addAction:laterAction];
-        [alertController addAction:quitAction];
-        [self presentViewController:alertController animated:YES completion:nil];
+        };
+
+        if (sender.selectedSegmentIndex == RENDER_METAL) {
+            // Metal is experimental: confirm its caveats before applying
+            NSString *message = [LocalizationHelper localizedStringForKey:@"metalRenderTip"];
+
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey:@"Enable Metal Renderer?"]
+                                                                                     message:message
+                                                                              preferredStyle:UIAlertControllerStyleAlert];
+
+            [alertController addAction:[UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Apply"]
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                applyChange();
+            }]];
+
+            [alertController addAction:[UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Learn More"]
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                revertChange();
+                NSURL *url = [NSURL URLWithString:[LocalizationHelper localizedStringForKey:@"betterPerformanceLink"]];
+                if ([[UIApplication sharedApplication] canOpenURL:url]) {
+                    [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+                }
+            }]];
+
+            [alertController addAction:[UIAlertAction actionWithTitle:[LocalizationHelper localizedStringForKey:@"Cancel"]
+                                                                style:UIAlertActionStyleCancel
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                revertChange();
+            }]];
+
+            [self presentViewController:alertController animated:YES completion:nil];
+        } else {
+            // Switching back to the standard renderer needs no confirmation
+            applyChange();
+        }
     }
 }
 

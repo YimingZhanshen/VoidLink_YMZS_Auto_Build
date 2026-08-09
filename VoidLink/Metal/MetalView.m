@@ -45,10 +45,20 @@
         Log(LOG_I, @"[MetalView] sending renderThread a cancel message");
         [_renderThread cancel];
         Log(LOG_I, @"[MetalView] waiting on renderThread to finish");
-        while (!_renderThread.isFinished) {
+        // Bounded wait only: shutdown typically runs on the main thread, and the render
+        // thread may be blocked in a dispatch_sync onto the main queue (layer colorspace
+        // changes). Spinning here forever would deadlock; if we time out, the thread
+        // exits on its own once the main queue is serviced again (it retains the view
+        // via its block, so this is safe).
+        CFTimeInterval deadline = CACurrentMediaTime() + 1.0;
+        while (!_renderThread.isFinished && CACurrentMediaTime() < deadline) {
             usleep(100);
         }
-        Log(LOG_I, @"[MetalView] renderThread has finished");
+        if (_renderThread.isFinished) {
+            Log(LOG_I, @"[MetalView] renderThread has finished");
+        } else {
+            Log(LOG_W, @"[MetalView] renderThread still busy after 1s, letting it exit asynchronously");
+        }
         _renderThread = nil;
     }
 }
@@ -66,6 +76,13 @@
         Log(LOG_I, @"[MetalView] movedToWindow(nil): shutting down...");
         [self shutdown];
         return;
+    }
+
+    // Never run two render loops at once (the view can move between windows,
+    // e.g. external display or re-parenting)
+    if (_renderThread) {
+        Log(LOG_W, @"[MetalView] movedToWindow with a live renderThread, restarting it");
+        [self shutdown];
     }
 
     // Render on a new thread

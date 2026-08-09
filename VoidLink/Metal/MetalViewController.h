@@ -24,4 +24,8 @@
 - (void)pauseRendering;
 - (void)resumeRendering;
 
+// Idempotent teardown: stops the render thread, display link and renderer.
+// Must be called when the stream session ends; also runs from viewDidDisappear.
+- (void)shutdown;
+
 @end

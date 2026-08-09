@@ -1403,8 +1403,11 @@ static NSMutableSet* hostList;
     // [self.settingsViewController.framePacingModeSelector setEnabled:shouldEnableFrameQueueSettings];
     [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeOff];
     [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeLegacy];
-    [self.settingsViewController.framePacingModeSelector setEnabled:_settingsViewController.framerateSelector.selectedSegmentIndex != _settingsViewController.framerateSelector.numberOfSegments-1
-     || !self.isStreaming forSegmentAtIndex:FramePacingModeInterpolation];
+    
+    if(FrameInterpolator.deviceSupportsInterpolation){
+        [self.settingsViewController.framePacingModeSelector setEnabled:_settingsViewController.framerateSelector.selectedSegmentIndex != _settingsViewController.framerateSelector.numberOfSegments-1
+         || !self.isStreaming forSegmentAtIndex:FramePacingModeInterpolation];
+    }
 
     // [self.settingsViewController.frameTimebaseSwitch setEnabled:shouldEnableFramePacing];
     [self.settingsViewController.asyncFrameDequeueSwitch setEnabled:shouldEnableFrameQueueSettings];

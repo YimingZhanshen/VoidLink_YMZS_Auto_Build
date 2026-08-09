@@ -895,7 +895,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     self.framePacingStack.hasInfoTag = YES;
     [self addSetting:self.framePacingStack ofId:@"framePacingStack" to:videoSection];
-    if(!FrameInterpolator.deviceSupportsInterpolation) [self.framerateSelector setEnabled:false forSegmentAtIndex:FramePacingModeInterpolation];
+    if(!FrameInterpolator.deviceSupportsInterpolation) [self.framePacingModeSelector setEnabled:false forSegmentAtIndex:FramePacingModeInterpolation];
 
     self.interpolationLevelStack.hasDynamicLabel = YES;
     [self addSetting:self.interpolationLevelStack ofId:@"interpolationLevelStack" to:videoSection];

@@ -2557,6 +2557,30 @@
         }
       }
     },
+    "FIi-Lv-Lbl.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"Interpolation Resolution\"; ObjectID = \"FIi-Lv-Lbl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Interpolation Resolution"
+          }
+        }
+      }
+    },
+    "FIi-Sc-Lbl.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"Scaled Stream Resolution\"; ObjectID = \"FIi-Sc-Lbl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scaled Stream Resolution"
+          }
+        }
+      }
+    },
     "fRl-Ra-Lbl.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Full Color Range\"; ObjectID = \"fRl-Ra-Lbl\";",
       "extractionState" : "extracted_with_value",

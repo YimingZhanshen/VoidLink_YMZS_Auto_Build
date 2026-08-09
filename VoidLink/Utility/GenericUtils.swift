@@ -55,6 +55,23 @@ import UIKit
                 completion: {})
         }
     }
+
+    @objc public static func handleFrameInterpolationPixelFormatTip(in vc: UIViewController?) {
+        let key = "hasShownFrameInterpolationPixelFormatTip"
+        guard !UserDefaults.standard.bool(forKey: key) else {
+            return
+        }
+        UserDefaults.standard.set(true, forKey: key)
+
+        AlertControllerUtil.showAlert(
+            in: vc,
+            title: LocalizationHelper.localizedString(forKey: "Tips"),
+            message: "\n\(LocalizationHelper.localizedString(forKey: "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR."))",
+            withCancel: false,
+            buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
+            countdown: 5
+        )
+    }
         
     @objc public static func needUpdateDefaultSettings() -> Bool {
         // let key = "needUpdateDefaultSettings20260226-1"

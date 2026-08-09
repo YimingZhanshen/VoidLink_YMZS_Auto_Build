@@ -130,6 +130,9 @@ typedef NS_ENUM(NSInteger, PencilTickMode) {
                     graphOpacity:(NSInteger)graphOpacity
                 renderingBackend:(NSInteger)renderingBackend
                  framePacingMode:(NSInteger)framePacingMode
+   interpolationMaximumDimension:(NSInteger)interpolationMaximumDimension
+  interpolationMaximumPixelCount:(NSInteger)interpolationMaximumPixelCount
+            streamDimensionScale:(CGFloat)streamDimensionScale
                   sendDummyEvent:(BOOL)sendDummyEvent
                rememberFoldState:(BOOL)rememberFoldState
               singleTapSensitivy:(CGFloat)singleTapSensitivy

@@ -49,5 +49,7 @@
 
 - (void)invalidateDecompressionSession;
 + (void)setFrameInterpolationEnabled:(bool)enabled;
++ (void)startOrRestartFrameInterpolation;
++ (void)stopFrameInterpolation;
 
 @end

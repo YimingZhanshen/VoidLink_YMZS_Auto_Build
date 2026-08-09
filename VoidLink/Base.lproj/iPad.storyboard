@@ -411,6 +411,42 @@
                                     <constraint firstAttribute="height" constant="56.5" id="IFC-Wo-Eu0"/>
                                 </constraints>
                             </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Lv-StK" userLabel="interpolationLevel Stack">
+                                <rect key="frame" x="440" y="1350" width="380" height="56.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Interpolation Resolution" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Lv-Lbl">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.93902439019999995" green="0.9625305918" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Lv-Sel" userLabel="Interpolation Level Slider">
+                                        <rect key="frame" x="0.0" y="25.5" width="380" height="31"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="FIp-Lv-Wid"/>
+                                    <constraint firstAttribute="height" constant="56.5" id="FIp-Lv-Hgt"/>
+                                </constraints>
+                            </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Sc-StK" userLabel="streamDimensionScale Stack">
+                                <rect key="frame" x="440" y="1411" width="380" height="56.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scaled Stream Resolution" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Sc-Lbl">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.93902439019999995" green="0.9625305918" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="FIp-Sc-Sld" userLabel="Stream Dimension Scale Slider">
+                                        <rect key="frame" x="0.0" y="25.5" width="380" height="31"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="FIp-Sc-Wid"/>
+                                    <constraint firstAttribute="height" constant="56.5" id="FIp-Sc-Hgt"/>
+                                </constraints>
+                            </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="hcl-DT-peO" userLabel="redirectMicStack">
                                 <rect key="frame" x="432" y="2215" width="245.5" height="31"/>
                                 <subviews>
@@ -2302,6 +2338,10 @@
                         <outlet property="fpsStack" destination="TuR-H8-e2H" id="zGQ-gR-P1i"/>
                         <outlet property="framePacingModeSelector" destination="2Dp-Qg-chi" id="h8A-YF-SZP"/>
                         <outlet property="framePacingStack" destination="oZG-5Y-pw5" id="vGd-hD-zTr"/>
+                        <outlet property="interpolationLevelSlider" destination="FIp-Lv-Sel" id="FIp-Out-Sel"/>
+                        <outlet property="interpolationLevelStack" destination="FIp-Lv-StK" id="FIp-Out-StK"/>
+                        <outlet property="streamDimensionScaleSlider" destination="FIp-Sc-Sld" id="FIp-Out-ScS"/>
+                        <outlet property="streamDimensionScaleStack" destination="FIp-Sc-StK" id="FIp-Out-ScK"/>
                         <outlet property="frameQueueSizeLabel" destination="Ce3-FM-vIh" id="90D-Tq-OGd"/>
                         <outlet property="frameQueueSizeSlider" destination="oZa-8Y-icz" id="Jo1-Fx-UMw"/>
                         <outlet property="frameQueueSizeStack" destination="MML-c1-D5j" id="82B-r7-Zbh"/>

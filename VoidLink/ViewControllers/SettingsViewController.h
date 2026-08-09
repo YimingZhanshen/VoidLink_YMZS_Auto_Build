@@ -128,6 +128,10 @@
 @property (strong, nonatomic) IBOutlet UIStackView *graphOpacityStack;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *renderingBackendSelector;
 @property (strong, nonatomic) IBOutlet UISegmentedControl *framePacingModeSelector;
+@property (strong, nonatomic) IBOutlet UIStackView *interpolationLevelStack;
+@property (strong, nonatomic) IBOutlet UISlider *interpolationLevelSlider;
+@property (strong, nonatomic) IBOutlet UIStackView *streamDimensionScaleStack;
+@property (strong, nonatomic) IBOutlet UISlider *streamDimensionScaleSlider;
 
 @property (strong, nonatomic) IBOutlet UIStackView *backgroundSessionTimerStack;
 @property (strong, nonatomic) IBOutlet UISlider *backgroundSessionTimerSlider;

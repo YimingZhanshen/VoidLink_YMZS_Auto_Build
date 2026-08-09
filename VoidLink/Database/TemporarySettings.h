@@ -99,6 +99,9 @@
 @property (nonatomic) BOOL ctrlDownForPinch;
 @property (nonatomic) BOOL passthroughGestures;
 @property (nonatomic, retain) NSNumber * framePacingMode;
+@property (nonatomic, retain) NSNumber * interpolationMaximumDimension;
+@property (nonatomic, retain) NSNumber * interpolationMaximumPixelCount;
+@property (nonatomic, retain) NSNumber * streamDimensionScale;
 @property (nonatomic, retain) NSNumber * scrollSensitivity;
 @property (nonatomic, retain) NSNumber * pinchSensitivity;
 @property (nonatomic, retain) NSNumber * relativeTouchSlideThreshold;

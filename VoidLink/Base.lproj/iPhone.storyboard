@@ -2548,6 +2548,42 @@
                                     <constraint firstAttribute="height" constant="56.5" id="Asf-2R-Qoi"/>
                                 </constraints>
                             </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Lv-StK" userLabel="interpolationLevel Stack">
+                                <rect key="frame" x="456" y="2232" width="380" height="56.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Interpolation Resolution" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Lv-Lbl">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.93902439019999995" green="0.9625305918" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Lv-Sel" userLabel="Interpolation Level Slider">
+                                        <rect key="frame" x="0.0" y="25.5" width="380" height="31"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="FIi-Lv-Wid"/>
+                                    <constraint firstAttribute="height" constant="56.5" id="FIi-Lv-Hgt"/>
+                                </constraints>
+                            </stackView>
+                            <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Sc-StK" userLabel="streamDimensionScale Stack">
+                                <rect key="frame" x="456" y="2293" width="380" height="56.5"/>
+                                <subviews>
+                                    <label verifyAmbiguity="off" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Scaled Stream Resolution" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Sc-Lbl">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.93902439019999995" green="0.9625305918" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <slider verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="FIi-Sc-Sld" userLabel="Stream Dimension Scale Slider">
+                                        <rect key="frame" x="0.0" y="25.5" width="380" height="31"/>
+                                    </slider>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="380" id="FIi-Sc-Wid"/>
+                                    <constraint firstAttribute="height" constant="56.5" id="FIi-Sc-Hgt"/>
+                                </constraints>
+                            </stackView>
                             <stackView verifyAmbiguity="off" opaque="NO" contentMode="scaleToFill" ambiguous="YES" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="CKa-yk-GSi" userLabel="redirectMicStack">
                                 <rect key="frame" x="5" y="2157" width="245.5" height="31"/>
                                 <subviews>
@@ -3569,6 +3605,10 @@
                         <outlet property="fpsStack" destination="aMv-7Q-yYg" id="JxU-wq-2Za"/>
                         <outlet property="framePacingModeSelector" destination="CC6-pu-Uoh" id="HTB-6I-QgB"/>
                         <outlet property="framePacingStack" destination="U0H-kh-QLS" id="M8w-wy-HI8"/>
+                        <outlet property="interpolationLevelSlider" destination="FIi-Lv-Sel" id="FIi-Out-Sel"/>
+                        <outlet property="interpolationLevelStack" destination="FIi-Lv-StK" id="FIi-Out-StK"/>
+                        <outlet property="streamDimensionScaleSlider" destination="FIi-Sc-Sld" id="FIi-Out-ScS"/>
+                        <outlet property="streamDimensionScaleStack" destination="FIi-Sc-StK" id="FIi-Out-ScK"/>
                         <outlet property="frameQueueSizeLabel" destination="r8X-jt-JfH" id="Tr9-eb-bIx"/>
                         <outlet property="frameQueueSizeSlider" destination="thv-JE-onX" id="gKD-6c-5tw"/>
                         <outlet property="frameQueueSizeStack" destination="IHx-FO-ctr" id="gob-Ea-Avh"/>

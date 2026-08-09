@@ -3056,6 +3056,30 @@
         }
       }
     },
+    "FIp-Lv-Lbl.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"Interpolation Resolution\"; ObjectID = \"FIp-Lv-Lbl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Interpolation Resolution"
+          }
+        }
+      }
+    },
+    "FIp-Sc-Lbl.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"Scaled Stream Resolution\"; ObjectID = \"FIp-Sc-Lbl\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Scaled Stream Resolution"
+          }
+        }
+      }
+    },
     "FJv-HJ-UYJ.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Move Event Interval\"; ObjectID = \"FJv-HJ-UYJ\";",
       "extractionState" : "extracted_with_value",

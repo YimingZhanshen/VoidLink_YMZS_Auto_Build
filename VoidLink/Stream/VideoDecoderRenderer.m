@@ -36,10 +36,18 @@
 //#define DISPLAYLINK_VERBOSE
 
 static BOOL kEnableFrameInterpolation = false;
+static __weak VideoDecoderRenderer *sActiveRenderer = nil;
 
 // Private libavformat API for writing the AV1 Codec Configuration Box
 extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                               int write_seq_header);
+
+@interface VideoDecoderRenderer ()
+- (void)startOrRestartFrameInterpolation;
+- (void)stopFrameInterpolation;
+- (NSInteger)displayLinkFrameRateForInterpolationEnabled:(BOOL)enabled;
+- (void)restartDisplayLinkForInterpolationEnabled:(BOOL)enabled;
+@end
 
 @implementation VideoDecoderRenderer {
     dispatch_queue_t _sq, _vtq;
@@ -60,6 +68,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     CMVideoFormatDescriptionRef _formatDescImageBuffer;
     VTDecompressionSessionRef _decompressionSession;
     FrameInterpolator *_frameInterpolator;
+    BOOL _frameInterpolationPaused;
 
     CADisplayLink *_displayLink;
     NSInteger _maxRefreshRate;
@@ -75,6 +84,26 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 
 + (void)setFrameInterpolationEnabled:(bool)enabled {
     kEnableFrameInterpolation = enabled;
+}
+
++ (void)startOrRestartFrameInterpolation {
+    kEnableFrameInterpolation = true;
+
+    VideoDecoderRenderer *renderer;
+    @synchronized(self) {
+        renderer = sActiveRenderer;
+    }
+    [renderer startOrRestartFrameInterpolation];
+}
+
++ (void)stopFrameInterpolation {
+    kEnableFrameInterpolation = false;
+
+    VideoDecoderRenderer *renderer;
+    @synchronized(self) {
+        renderer = sActiveRenderer;
+    }
+    [renderer stopFrameInterpolation];
 }
 
 - (void)reinitializeDisplayLayer
@@ -174,7 +203,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _asyncFrameDequeue = tempSettings.asyncFrameDequeue;
     NSLog(@"_asyncFrameDequeue %d", _asyncFrameDequeue);
     _enableTimebase = false;
-    _queueSize = kEnableFrameInterpolation ? 4 : tempSettings.frameQueueSize.intValue;
+    _queueSize = kEnableFrameInterpolation ? 8 : tempSettings.frameQueueSize.intValue;
     _needRequeuing = _queueSize>0;
 
     _frameQueue = [FrameQueue sharedInstance];
@@ -189,7 +218,113 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
                                                  name:@"ScreenChanged"
                                                object:nil];
 
+    @synchronized([VideoDecoderRenderer class]) {
+        sActiveRenderer = self;
+    }
+
     return self;
+}
+
+- (NSInteger)displayLinkFrameRateForInterpolationEnabled:(BOOL)enabled {
+    NSInteger multiplier = enabled ? 2 : 1;
+    return MIN(self->_frameRate * multiplier, self->_maxRefreshRate);
+}
+
+- (void)restartDisplayLinkForInterpolationEnabled:(BOOL)enabled {
+    dispatch_block_t restartBlock = ^{
+        if (self->_renderingBackend != RENDER_AVSB || self->_displayLink == nil) {
+            return;
+        }
+
+        NSInteger targetFrameRate = [self displayLinkFrameRateForInterpolationEnabled:enabled];
+        BOOL shouldRemainPaused = appDidEnterBackgroundWithoutPip;
+        self->_displayLink.paused = YES;
+        if (@available(iOS 15.0, tvOS 15.0, *)) {
+            self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
+        }
+        else {
+            self->_displayLink.preferredFramesPerSecond = targetFrameRate;
+        }
+        self->_displayLink.paused = shouldRemainPaused;
+        Log(LOG_I, @"Display link restarted at %ld FPS (interpolation %@)",
+            (long)targetFrameRate, enabled ? @"enabled" : @"disabled");
+    };
+
+    if ([NSThread isMainThread]) {
+        restartBlock();
+    }
+    else {
+        dispatch_async(dispatch_get_main_queue(), restartBlock);
+    }
+}
+
+- (void)invalidateDecompressionSession {
+    @synchronized(self) {
+        if (self->_decompressionSession != NULL) {
+            VTDecompressionSessionInvalidate(self->_decompressionSession);
+            CFRelease(self->_decompressionSession);
+            self->_decompressionSession = nil;
+        }
+    }
+}
+
+- (void)startOrRestartFrameInterpolation {
+    if (self->_displayLink == nil || self->_renderingBackend != RENDER_AVSB) {
+        return;
+    }
+
+    DataManager *dataMan = [[DataManager alloc] init];
+    TemporarySettings *settings = [dataMan getSettings];
+    NSInteger maximumDimension = settings.interpolationMaximumDimension.integerValue;
+    NSInteger maximumPixelCount = settings.interpolationMaximumPixelCount.integerValue;
+
+    dispatch_async(self->_vtq, ^{
+        FrameInterpolator *oldInterpolator = self->_frameInterpolator;
+        self->_frameInterpolator = [[FrameInterpolator alloc]
+            initWithMaximumDimension:maximumDimension
+            maximumPixelCount:maximumPixelCount];
+        self->_frameInterpolator.isEnabled = YES;
+        self->_frameInterpolationPaused = NO;
+        [oldInterpolator reset];
+
+        self->_queueSize = 8;
+        self->_needRequeuing = YES;
+        [self->_frameQueue setHighWaterMark:self->_queueSize];
+        [self->_frameQueue clear];
+        [self invalidateDecompressionSession];
+        [self restartDisplayLinkForInterpolationEnabled:YES];
+        LiRequestIdrFrame();
+
+        Log(LOG_I, @"Frame interpolation started or restarted with limits %ld / %ld pixels",
+            (long)maximumDimension, (long)maximumPixelCount);
+    });
+}
+
+- (void)stopFrameInterpolation {
+    if (self->_displayLink == nil || self->_renderingBackend != RENDER_AVSB) {
+        return;
+    }
+
+    DataManager *dataMan = [[DataManager alloc] init];
+    TemporarySettings *settings = [dataMan getSettings];
+    NSInteger normalQueueSize = settings.frameQueueSize.integerValue;
+
+    dispatch_async(self->_vtq, ^{
+        FrameInterpolator *oldInterpolator = self->_frameInterpolator;
+        self->_frameInterpolator = nil;
+        self->_frameInterpolationPaused = NO;
+        [oldInterpolator reset];
+
+        self->_queueSize = (int32_t)normalQueueSize;
+        self->_needRequeuing = self->_queueSize > 0;
+        [self->_frameQueue setHighWaterMark:MAX(1, self->_queueSize)];
+        [self->_frameQueue clear];
+        [self invalidateDecompressionSession];
+        [self restartDisplayLinkForInterpolationEnabled:NO];
+        LiRequestIdrFrame();
+
+        Log(LOG_I, @"Frame interpolation stopped");
+    });
 }
 
 # pragma mark DisplayLink vsync callback
@@ -210,7 +345,9 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         _renderingBackend = RENDER_AVSB;
         
         if (kEnableFrameInterpolation) {
-            _frameInterpolator = [[FrameInterpolator alloc] init];
+            _frameInterpolator = [[FrameInterpolator alloc]
+                initWithMaximumDimension:settings.interpolationMaximumDimension.integerValue
+                maximumPixelCount:settings.interpolationMaximumPixelCount.integerValue];
             _frameInterpolator.isEnabled = YES;
         }
         
@@ -229,10 +366,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         
         _displayLink = [CADisplayLink displayLinkWithTarget:self selector:displayLinkSelector];
 
-        NSInteger targetFrameRate = self->_frameRate;
-        if (self->_frameInterpolator != nil) {
-            targetFrameRate = MIN(self->_frameRate * 2, self->_maxRefreshRate);
-        }
+        NSInteger targetFrameRate = [self displayLinkFrameRateForInterpolationEnabled:self->_frameInterpolator != nil];
 
         if (@available(iOS 15.0, tvOS 15.0, *)) {
             _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
@@ -289,61 +423,26 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         nativePixelFormat = self->_fullRange ? frFormat : vrFormat;
     }
     BOOL interpolationRequested = self->_frameInterpolator != nil;
-    NSNumber *pixelFormat = interpolationRequested ? @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) : nativePixelFormat;
+    OSType interpolationPixelFormat = 0;
     if (interpolationRequested) {
-        LogOnce(LOG_I, @"Frame interpolation enabled; requesting 420v output from VTDecompressionSession");
+        interpolationPixelFormat = [FrameInterpolator supportedPixelFormatClosestTo:nativePixelFormat.unsignedIntValue];
+        if (interpolationPixelFormat == 0) {
+            LogOnce(LOG_W, @"Frame interpolation disabled because the device reports no supported pixel format");
+            [self->_frameInterpolator reset];
+            self->_frameInterpolator = nil;
+            interpolationRequested = NO;
+            [self restartDisplayLinkForInterpolationEnabled:NO];
+        }
+    }
+    NSNumber *pixelFormat = interpolationRequested ? @(interpolationPixelFormat) : nativePixelFormat;
+    if (interpolationRequested) {
+        LogOnce(LOG_I, @"Frame interpolation enabled; requesting pixel format %@ from VTDecompressionSession", pixelFormat);
     }
     NSMutableDictionary *destinationPixelBufferAttributes = [@{
         (id)kCVPixelBufferPixelFormatTypeKey : pixelFormat
     } mutableCopy];
-#endif
-
-#if !TARGET_OS_SIMULATOR
     if (interpolationRequested) {
-        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(_formatDesc);
-        NSDictionary *interpolationSourceAttributes =
-            [FrameInterpolator sourcePixelBufferAttributesForDimensions:dimensions];
-        CFDictionaryRef resolvedAttributes = NULL;
-        CVReturn resolveStatus = kCVReturnInvalidArgument;
-
-        if (interpolationSourceAttributes != nil) {
-            NSArray *attributeRequirements = @[
-                destinationPixelBufferAttributes,
-                interpolationSourceAttributes
-            ];
-            resolveStatus = CVPixelBufferCreateResolvedAttributesDictionary(
-                kCFAllocatorDefault,
-                (__bridge CFArrayRef)attributeRequirements,
-                &resolvedAttributes);
-        }
-
-        if (resolveStatus == kCVReturnSuccess && resolvedAttributes != NULL) {
-            destinationPixelBufferAttributes =
-                [(__bridge NSDictionary *)resolvedAttributes mutableCopy];
-            CFRelease(resolvedAttributes);
-        } else {
-            if (resolvedAttributes != NULL) {
-                CFRelease(resolvedAttributes);
-            }
-            Log(LOG_W,
-                @"Unable to resolve frame-interpolation source attributes for %dx%d (status %d); using native decode output",
-                dimensions.width,
-                dimensions.height,
-                resolveStatus);
-            [self->_frameInterpolator reset];
-            self->_frameInterpolator = nil;
-            interpolationRequested = NO;
-            destinationPixelBufferAttributes = [@{
-                (id)kCVPixelBufferPixelFormatTypeKey : nativePixelFormat
-            } mutableCopy];
-
-            NSInteger targetFrameRate = MIN(self->_frameRate, self->_maxRefreshRate);
-            if (@available(iOS 15.0, tvOS 15.0, *)) {
-                self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
-            } else {
-                self->_displayLink.preferredFramesPerSecond = targetFrameRate;
-            }
-        }
+        destinationPixelBufferAttributes[(id)kCVPixelBufferIOSurfacePropertiesKey] = @{};
     }
 #endif
 
@@ -360,7 +459,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 
     OSStatus status = [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
     if (status != noErr) {
-        Log(LOG_W, @"Falling back from 420v frame-interpolation decode output to native pixel format %@", nativePixelFormat);
+        Log(LOG_W, @"Falling back from frame-interpolation decode output %@ to native pixel format %@", pixelFormat, nativePixelFormat);
         [self->_frameInterpolator reset];
         self->_frameInterpolator = nil;
         destinationPixelBufferAttributes = [@{
@@ -372,12 +471,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
         }
         [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
 
-        NSInteger targetFrameRate = MIN(self->_frameRate, self->_maxRefreshRate);
-        if (@available(iOS 15.0, tvOS 15.0, *)) {
-            self->_displayLink.preferredFrameRateRange = CAFrameRateRangeMake(targetFrameRate, targetFrameRate, targetFrameRate);
-        } else {
-            self->_displayLink.preferredFramesPerSecond = targetFrameRate;
-        }
+        [self restartDisplayLinkForInterpolationEnabled:NO];
     }
 #else
     [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
@@ -574,6 +668,12 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 }
 
 - (void)cleanup{
+    @synchronized([VideoDecoderRenderer class]) {
+        if (sActiveRenderer == self) {
+            sActiveRenderer = nil;
+        }
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [self->_frameQueue stop];
         
@@ -1187,9 +1287,24 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                         [frame setFormatDesc:self->_formatDesc];
                     }
 
-                    if (self->_frameInterpolator != nil) {
-                        [self->_frameInterpolator processFrame:frame completion:^(NSArray *frames) {
+                    FrameInterpolator *interpolator = self->_frameInterpolator;
+                    if (interpolator != nil && appDidEnterBackgroundWithoutPip) {
+                        if (!self->_frameInterpolationPaused) {
+                            self->_frameInterpolationPaused = YES;
+                            [interpolator setPaused:YES];
+                        }
+                    }
+                    else if (interpolator != nil) {
+                        if (self->_frameInterpolationPaused) {
+                            self->_frameInterpolationPaused = NO;
+                            [interpolator setPaused:NO];
+                        }
+                        [interpolator processFrame:frame completion:^(NSArray *frames) {
                             dispatch_async(self->_vtq, ^{
+                                if (self->_frameInterpolator != interpolator) {
+                                    return;
+                                }
+
                                 int framesDropped = 0;
                                 for (Frame *outputFrame in (NSArray<Frame *> *)frames) {
                                     framesDropped += [self->_frameQueue enqueue:outputFrame withSlackSize:3];
@@ -1403,22 +1518,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 - (void)resetFramePacing {
     // Ensure this only runs for the AVSampleBuffer rendering backend and that the display link exists.
     if (_renderingBackend == RENDER_AVSB && _displayLink) {
-        Log(LOG_I, @"Frame pacing is being reset to %d FPS...", self->_frameRate);
-
-        // Toggling the paused state can help re-engage the display link with the
-        // run loop correctly after the app resumes from a background state like PiP.
-        _displayLink.paused = YES;
-
-        // Re-apply the desired frame rate range. This is the critical hint for ProMotion
-        // that may have been lost or ignored during the PiP transition.
-        if (@available(iOS 15.0, *)) {
-            _displayLink.preferredFrameRateRange = CAFrameRateRangeMake(self->_frameRate, self->_frameRate, self->_frameRate);
-        } else {
-            _displayLink.preferredFramesPerSecond = self->_frameRate;
-        }
-
-        // Resume the display link immediately.
-        _displayLink.paused = NO;
+        [self restartDisplayLinkForInterpolationEnabled:self->_frameInterpolator.isEnabled];
     } else if (_renderingBackend == RENDER_METAL) {
         @synchronized(self) {
             if (_decompressionSession != nil) {

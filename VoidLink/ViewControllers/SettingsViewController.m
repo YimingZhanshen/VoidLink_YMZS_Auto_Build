@@ -633,6 +633,12 @@ BOOL isCustomResolution(int resolutionSelected) {
     
     if(!settingsViewAlreadyAppeared) {
         if(![self contentOffsetRestored]) _scrollView.contentOffset = CGPointMake(_scrollView.contentOffset.x, tempSettings.settingsMenuOffset.floatValue);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.view layoutIfNeeded];
+            [self updateResolutionTable];
+            [self updateInterpolationLevelSliderWithMaximumDimension:self->tempSettings.interpolationMaximumDimension.integerValue];
+            [self.streamDimensionScaleSlider sendActionsForControlEvents:UIControlEventValueChanged];
+        });
     }
     if(@available(iOS 13.0, *)) if(ControllerUtil.primaryGCController) [self restoreControllerNavigationHighlight];
     
@@ -656,6 +662,13 @@ BOOL isCustomResolution(int resolutionSelected) {
     bool unlockDisplayOrientationFlipped = tempSettings.unlockDisplayOrientation != (_unlockDisplayOrientationSelector.selectedSegmentIndex == 1);
     if(unlockDisplayOrientationFlipped) [_mainFrameViewController setNeedsUpdateAllowedOrientation]; // handle allow portratit on & off
     if (@available(iOS 13.0, *)) if(ControllerNavigator.radialMenuView.superview) [ControllerNavigator updateRadialMenu];
+    
+    if(self.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) {
+        [VideoDecoderRenderer startOrRestartFrameInterpolation];
+    }
+    else {
+        [VideoDecoderRenderer stopFrameInterpolation];
+    }
 }
 
 
@@ -883,6 +896,12 @@ BOOL isCustomResolution(int resolutionSelected) {
     self.framePacingStack.hasInfoTag = YES;
     [self addSetting:self.framePacingStack ofId:@"framePacingStack" to:videoSection];
     if(!FrameInterpolator.deviceSupportsInterpolation) [self.framerateSelector setEnabled:false forSegmentAtIndex:FramePacingModeInterpolation];
+
+    self.interpolationLevelStack.hasDynamicLabel = YES;
+    [self addSetting:self.interpolationLevelStack ofId:@"interpolationLevelStack" to:videoSection];
+
+    self.streamDimensionScaleStack.hasDynamicLabel = YES;
+    [self addSetting:self.streamDimensionScaleStack ofId:@"streamDimensionScaleStack" to:videoSection];
 
     self.frameQueueSizeStack.hasDynamicLabel = YES;
     [self addSetting:self.frameQueueSizeStack ofId:@"frameQueueSizeStack" to:videoSection];
@@ -2235,6 +2254,12 @@ BOOL isCustomResolution(int resolutionSelected) {
 
         NSInteger framePacingMode = [self->tempSettings.framePacingMode integerValue];
         self.framePacingModeSelector.selectedSegmentIndex = framePacingMode;
+        ((UILabel *)self.interpolationLevelStack.arrangedSubviews.firstObject).text =
+            [LocalizationHelper localizedStringForKey:@"Interpolation Resolution"];
+        [self.interpolationLevelSlider addTarget:self action:@selector(interpolationLevelSliderMoved:) forControlEvents:UIControlEventValueChanged];
+        ((UILabel *)self.streamDimensionScaleStack.arrangedSubviews.firstObject).text =
+            [LocalizationHelper localizedStringForKey:@"Scaled Stream Resolution"];
+        [self.streamDimensionScaleSlider addTarget:self action:@selector(streamDimensionScaleSliderMoved:) forControlEvents:UIControlEventValueChanged];
         [self.framePacingModeSelector addTarget:self action:@selector(framePacingModeChanged:) forControlEvents:UIControlEventValueChanged];
         [self.framePacingModeSelector sendActionsForControlEvents:UIControlEventValueChanged];
 
@@ -2311,6 +2336,11 @@ BOOL isCustomResolution(int resolutionSelected) {
         
         self->_lastSelectedResolutionIndex = resolution;
         self.resolutionSelector.selectedSegmentIndex = resolution;
+        [self updateInterpolationLevelSliderWithMaximumDimension:self->tempSettings.interpolationMaximumDimension.integerValue];
+        self.streamDimensionScaleSlider.minimumValue = 0;
+        self.streamDimensionScaleSlider.maximumValue = 1;
+        self.streamDimensionScaleSlider.value = MIN(1, MAX(0, self->tempSettings.streamDimensionScale.floatValue));
+        [self.streamDimensionScaleSlider sendActionsForControlEvents:UIControlEventValueChanged];
         [self.resolutionSelector addTarget:self action:@selector(newResolutionChosen) forControlEvents:UIControlEventValueChanged];
 
         self.framerateSelector.selectedSegmentIndex = framerate;
@@ -2690,10 +2720,11 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void)framePacingModeChanged:(UISegmentedControl *)sender {
     // Hide frame queue size for Off and Legacy modes
     [GenericUtils handleLegacyFramePacingTipIn:self with:sender passAlert:settingsViewJustExpanded uiAction:^{
-        [self setHidden:(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy) forStack:self.frameQueueSizeStack];
-        // [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue) forStack:self.frameTimebaseStack];
         [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue
-                        || sender.selectedSegmentIndex != FramePacingModeInterpolation
+                         || self->_mainFrameViewController.isStreaming) forStack:self.frameQueueSizeStack];
+        // [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue) forStack:self.frameTimebaseStack];
+        [self setHidden:((sender.selectedSegmentIndex != FramePacingModeQueue
+                        && sender.selectedSegmentIndex != FramePacingModeInterpolation)
                         || self.renderingBackendSelector.selectedSegmentIndex != 0) forStack:self.asyncFrameDequeueStack];
 
         if(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy){
@@ -2705,12 +2736,17 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self setHidden:(sender.selectedSegmentIndex == FramePacingModeOff || sender.selectedSegmentIndex == FramePacingModeLegacy) forStack:self.performanceGraphStack];
         
         bool enableInterpolation = sender.selectedSegmentIndex == FramePacingModeInterpolation;
+        [self setHidden:!enableInterpolation forStack:self.interpolationLevelStack];
+        [self setHidden:!enableInterpolation || self->_mainFrameViewController.isStreaming forStack:self.streamDimensionScaleStack];
         [self widget:self.frameQueueSizeSlider setEnabled:!enableInterpolation];
         [self updateResolutionDisplayLabel];
         if(enableInterpolation){
             if(self.framerateSelector.selectedSegmentIndex == 2) self.framerateSelector.selectedSegmentIndex = 1;
             if(!FrameInterpolator.dimensionLimitsAreKnown){
                 NSLog(@"FrameInterpolator dimensionLimitsUnknown");
+            }
+            if(!self->settingsViewJustExpanded){
+                [GenericUtils handleFrameInterpolationPixelFormatTipIn:self];
             }
         }
     }];
@@ -3663,7 +3699,7 @@ BOOL isCustomResolution(int resolutionSelected) {
     [[NSUserDefaults standardUserDefaults] setBool:YES forKey:key];
     [[NSUserDefaults standardUserDefaults] synchronize];
     
-    if(self.framerateSelector.selectedSegmentIndex == 2
+    if(self.framerateSelector.selectedSegmentIndex == self.framerateSelector.numberOfSegments - 1
        && self.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) self.framerateSelector.selectedSegmentIndex = self.framerateSelector.previousSelectedSegmentIndex;
     
     // NSInteger fps = [self getChosenFrameRate];
@@ -3735,10 +3771,13 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) newResolutionChosen {
-    [self updateBitrate];
-    [self updateResolutionDisplayLabel];
     _lastSelectedResolutionIndex = self.resolutionSelector.selectedSegmentIndex;
-    [self updateResolutionTable];
+    if (self.mainFrameViewController.settingsExpandedInStreamView) {
+        [self updateResolutionDisplayLabel];
+    } else {
+        [self updateResolutionTable];
+    }
+    [self updateBitrate];
 }
 
 - (void)customResolutionSwitched:(UISwitch* )sender{
@@ -3836,11 +3875,44 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void) updateResolutionDisplayLabel {
-    CMVideoDimensions dimensions = [self getChosenStreamDimensions];
+    CMVideoDimensions dimensions = [self getChosenPresetStreamDimensions];
     NSInteger width = dimensions.width;
     NSInteger height = dimensions.height;
     
     [self findDynamicLabelFromStack:_resolutionSelectorStack].text = [NSString stringWithFormat:@"%ld × %ld", (long)width, (long)height];
+    if (self.interpolationLevelSlider != nil) {
+        [self.interpolationLevelSlider sendActionsForControlEvents:UIControlEventValueChanged];
+    }
+}
+
+- (void)updateInterpolationLevelSliderWithMaximumDimension:(NSInteger)savedMaximumDimension {
+    self.interpolationLevelSlider.minimumValue = 0;
+    self.interpolationLevelSlider.maximumValue = 1;
+    self.interpolationLevelSlider.value = [FrameInterpolator
+        interpolationLevelForDimensions:[self getChosenPresetStreamDimensions]
+        savedMaximumDimension:savedMaximumDimension];
+    [self.interpolationLevelSlider sendActionsForControlEvents:UIControlEventValueChanged];
+}
+
+- (void)interpolationLevelSliderMoved:(UISlider *)sender {
+    InterpolationResolutionConfiguration *configuration = [self getCurrentInterpolationResolutionConfiguration];
+    [self findDynamicLabelFromStack:self.interpolationLevelStack].text =
+        [NSString stringWithFormat:@"  %d × %d  ", configuration.dimensions.width, configuration.dimensions.height];
+    if (self.streamDimensionScaleSlider != nil) {
+        [self.streamDimensionScaleSlider sendActionsForControlEvents:UIControlEventValueChanged];
+    }
+}
+
+- (InterpolationResolutionConfiguration *)getCurrentInterpolationResolutionConfiguration {
+    return [FrameInterpolator
+        resolutionConfigurationForDimensions:[self getChosenPresetStreamDimensions]
+        level:self.interpolationLevelSlider.value];
+}
+
+- (void)streamDimensionScaleSliderMoved:(UISlider *)sender {
+    CMVideoDimensions dimensions = [self getChosenStreamDimensions];
+    [self findDynamicLabelFromStack:self.streamDimensionScaleStack].text =
+        [NSString stringWithFormat:@"  %d × %d  ", dimensions.width, dimensions.height];
 }
 
 - (void) touchMoveEventIntervalSliderMoved:(UISlider* )sender{
@@ -3911,7 +3983,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         }
 }
 
-- (CMVideoDimensions)getChosenStreamDimensions {
+- (CMVideoDimensions)getChosenPresetStreamDimensions {
     // because the 4k resolution can be removed
     CMVideoDimensions originalDimensions;
     if (self.customResolutionSwitch.isOn) {
@@ -3920,6 +3992,12 @@ BOOL isCustomResolution(int resolutionSelected) {
         originalDimensions = resolutionTable[self.resolutionSelector.selectedSegmentIndex];
     }
     
+    if(originalDimensions.width == 0 || originalDimensions.height == 0) {
+        originalDimensions.width = tempSettings.width.intValue;
+        originalDimensions.height = tempSettings.height.intValue;
+    }
+    
+    /*
     CMVideoDimensions targetDimensions = self.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation
         ? [FrameInterpolator interpolatableDimensionsBy:originalDimensions]
         : originalDimensions;
@@ -3929,8 +4007,25 @@ BOOL isCustomResolution(int resolutionSelected) {
     }
     
     NSLog(@"dimensions: %d, %d", targetDimensions.width, targetDimensions.height);
+    */
+    
+    return originalDimensions;
+}
 
-    return targetDimensions;
+- (CMVideoDimensions)getChosenStreamDimensions {
+    CMVideoDimensions presetDimensions = [self getChosenPresetStreamDimensions];
+    if (self.streamDimensionScaleSlider == nil) {
+        return [FrameInterpolator
+            scaledStreamDimensionsWithPresetDimensions:presetDimensions
+            interpolationDimensions:presetDimensions
+            scale:1];
+    }
+
+    InterpolationResolutionConfiguration *configuration = [self getCurrentInterpolationResolutionConfiguration];
+    return [FrameInterpolator
+        scaledStreamDimensionsWithPresetDimensions:presetDimensions
+        interpolationDimensions:configuration.dimensions
+        scale:self.streamDimensionScaleSlider.value];
 }
 
 - (UIStackView *)findFlatStackViewFrom:(UIView *)view {
@@ -4299,6 +4394,11 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     NSInteger renderingBackend = self.renderingBackendSelector.selectedSegmentIndex;
     NSInteger framePacingMode = self.framePacingModeSelector.selectedSegmentIndex;
+    InterpolationResolutionConfiguration *interpolationConfiguration =
+        [self getCurrentInterpolationResolutionConfiguration];
+    NSInteger interpolationMaximumDimension = interpolationConfiguration.maximumDimension;
+    NSInteger interpolationMaximumPixelCount = interpolationConfiguration.maximumPixelCount;
+    CGFloat streamDimensionScale = self.streamDimensionScaleSlider.value;
     NSInteger onscreenControls = self.onScreenWidgetSelector.selectedSegmentIndex;
     NSInteger keyboardToggleFingers = self.softKeyboardGestureSelector.selectedSegmentIndex == 3 ? 20 : self.softKeyboardGestureSelector.selectedSegmentIndex+3;
     NSInteger oscLayoutToolFingers = (uint16_t)self->oswLayoutFingers;
@@ -4428,6 +4528,9 @@ BOOL isCustomResolution(int resolutionSelected) {
                         graphOpacity:graphOpacity
                     renderingBackend:renderingBackend
                      framePacingMode:framePacingMode
+       interpolationMaximumDimension:interpolationMaximumDimension
+      interpolationMaximumPixelCount:interpolationMaximumPixelCount
+                streamDimensionScale:streamDimensionScale
                       sendDummyEvent:sendDummyEvent
                    rememberFoldState:rememberFoldState
                   singleTapSensitivy:singleTapSensitivity
@@ -4466,7 +4569,6 @@ BOOL isCustomResolution(int resolutionSelected) {
             }];
         });
     }
-
 }
 
 - (void)didReceiveMemoryWarning {

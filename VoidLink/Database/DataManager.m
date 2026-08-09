@@ -106,6 +106,9 @@
                     graphOpacity:(NSInteger)graphOpacity
                 renderingBackend:(NSInteger)renderingBackend
                  framePacingMode:(NSInteger)framePacingMode
+   interpolationMaximumDimension:(NSInteger)interpolationMaximumDimension
+  interpolationMaximumPixelCount:(NSInteger)interpolationMaximumPixelCount
+            streamDimensionScale:(CGFloat)streamDimensionScale
                   sendDummyEvent:(BOOL)sendDummyEvent
                rememberFoldState:(BOOL)rememberFoldState
               singleTapSensitivy:(CGFloat)singleTapSensitivy
@@ -193,6 +196,9 @@
         settingsToSave.graphOpacity = [NSNumber numberWithInteger:graphOpacity];
         settingsToSave.renderingBackend = [NSNumber numberWithInteger:renderingBackend];
         settingsToSave.framePacingMode = [NSNumber numberWithInteger:framePacingMode];
+        settingsToSave.interpolationMaximumDimension = [NSNumber numberWithInteger:interpolationMaximumDimension];
+        settingsToSave.interpolationMaximumPixelCount = [NSNumber numberWithInteger:interpolationMaximumPixelCount];
+        settingsToSave.streamDimensionScale = [NSNumber numberWithDouble:streamDimensionScale];
         settingsToSave.sendDummyEvent = sendDummyEvent;
         settingsToSave.singleTapSensitivity = [NSNumber numberWithDouble:singleTapSensitivy];
         settingsToSave.hapticEngine = [NSNumber numberWithInteger:hapticEngine];
@@ -370,4 +376,3 @@
 }
 
 @end
-

@@ -852,8 +852,8 @@ static NSMutableSet* hostList;
         }
     }
     
-    _streamConfig.height = [streamSettings.height intValue];
-    _streamConfig.width = [streamSettings.width intValue];
+    _streamConfig.height = streamSettings.height.intValue;
+    _streamConfig.width = streamSettings.width.intValue;
     
     NSLog(@"saveSettings.width %d, %d", _streamConfig.width, _streamConfig.height);
 #if TARGET_OS_TV
@@ -1399,11 +1399,16 @@ static NSMutableSet* hostList;
     [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.appThemeStack];
     [self.settingsViewController.renderingBackendSelector setEnabled:!_settingsExpandedInStreamView];
     // Enable frame pacing mode selector only if not in stream view AND not in performance mode
-    BOOL shouldEnableFramePacingSelector = !_settingsExpandedInStreamView && (self.settingsViewController.renderingBackendSelector.selectedSegmentIndex != RENDER_METAL);
-    [self.settingsViewController.framePacingModeSelector setEnabled:shouldEnableFramePacingSelector];
+    BOOL shouldEnableFrameQueueSettings = !_settingsExpandedInStreamView && (self.settingsViewController.renderingBackendSelector.selectedSegmentIndex != RENDER_METAL);
+    // [self.settingsViewController.framePacingModeSelector setEnabled:shouldEnableFrameQueueSettings];
+    [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:0];
+    [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:1];
+
     // [self.settingsViewController.frameTimebaseSwitch setEnabled:shouldEnableFramePacing];
-    [self.settingsViewController.asyncFrameDequeueSwitch setEnabled:shouldEnableFramePacingSelector];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView || !(shouldEnableFramePacingSelector && self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeQueue) forStack:self.settingsViewController.frameQueueSizeStack];
+    [self.settingsViewController.asyncFrameDequeueSwitch setEnabled:shouldEnableFrameQueueSettings];
+    [self.settingsViewController setHidden:_settingsExpandedInStreamView || !(shouldEnableFrameQueueSettings && self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeQueue) forStack:self.settingsViewController.frameQueueSizeStack];
+    [self.settingsViewController setHidden:!(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) forStack:self.settingsViewController.interpolationLevelStack];
+    [self.settingsViewController setHidden:_settingsExpandedInStreamView || !(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) forStack:self.settingsViewController.streamDimensionScaleStack];
 
     // Disable mic switch if sunshine does not support mic redirection
     [self.settingsViewController.redirectMicSwitch setEnabled:!_settingsExpandedInStreamView||streamFrameViewController.micStreamInitialized];
@@ -2145,24 +2150,19 @@ static NSMutableSet* hostList;
         .height = (int32_t)currentSettings.height.intValue,
     };
     [self fillResolutionTable:tempResolutionTable externalDisplayMode:currentSettings.externalDisplayMode.intValue];
-
+    return;
+    
+    /*
     int selectedIndex = currentSettings.resolutionSelected.intValue;
     if (selectedIndex >= 0 && selectedIndex < 6) {
         CMVideoDimensions originalDimensions = tempResolutionTable[selectedIndex];
-        
-        CMVideoDimensions targetDimensions;
-        if(currentSettings.framePacingMode.intValue == FramePacingModeInterpolation) {
-            targetDimensions = [FrameInterpolator interpolatableDimensionsBy:originalDimensions];
-            if(!(targetDimensions.width>0 && targetDimensions.height>0)) targetDimensions = [FrameInterpolator interpolatableDimensionsBy720p:originalDimensions];
-        }
-        else targetDimensions = originalDimensions;
-        
+        CMVideoDimensions targetDimensions = originalDimensions;
         currentSettings.width = @(targetDimensions.width);
         currentSettings.height = @(targetDimensions.height);
         NSLog(@"Updated resolution to: %@ x %@", currentSettings.width, currentSettings.height);
     }
-
     [dataMan saveData];
+     */
 }
 
 #if TARGET_OS_TV

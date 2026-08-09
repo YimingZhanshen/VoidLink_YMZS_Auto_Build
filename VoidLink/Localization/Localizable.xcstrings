@@ -9304,6 +9304,46 @@
         }
       }
     },
+    "Interpolation Resolution" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "插帧分辨率"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影格插補解析度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影格插補解析度"
+          }
+        }
+      }
+    },
+    "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前多数设备仅支持 8-bit YUV420 SDR 视频插帧。这种情况下，如果您打开了 HDR 或 YUV444 选项，中间帧将依然按 8-bit YUV420 SDR 格式生成。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前多數裝置僅支援 8-bit YUV420 SDR 影片影格插補。在這種情況下，如果您開啟 HDR 或 YUV444 選項，中間影格仍會以 8-bit YUV420 SDR 格式產生。"
+          }
+        }
+      }
+    },
     "Interpolation failed for an unknown reason." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17205,6 +17245,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "手勢所需的滑動距離，可有效避免因誤觸而展開選單。"
+          }
+        }
+      }
+    },
+    "Scaled Stream Resolution" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流分辨率缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流解析度縮放"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流解析度縮放"
           }
         }
       }

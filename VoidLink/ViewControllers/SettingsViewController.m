@@ -4030,6 +4030,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (CMVideoDimensions)getChosenStreamDimensions {
     CMVideoDimensions presetDimensions = [self getChosenPresetStreamDimensions];
+    if (self.framePacingModeSelector.selectedSegmentIndex != FramePacingModeInterpolation) return presetDimensions;
     if (self.streamDimensionScaleSlider == nil) {
         return [FrameInterpolator
             scaledStreamDimensionsWithPresetDimensions:presetDimensions

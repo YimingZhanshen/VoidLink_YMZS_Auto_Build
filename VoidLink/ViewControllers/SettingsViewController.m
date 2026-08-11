@@ -2257,6 +2257,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         ((UILabel *)self.interpolationLevelStack.arrangedSubviews.firstObject).text =
             [LocalizationHelper localizedStringForKey:@"Interpolation Resolution"];
         [self.interpolationLevelSlider addTarget:self action:@selector(interpolationLevelSliderMoved:) forControlEvents:UIControlEventValueChanged];
+        [self.interpolationLevelSlider addTarget:self action:@selector(interpolationLevelSliderInteractionEnded:) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchUpOutside)];
         ((UILabel *)self.streamDimensionScaleStack.arrangedSubviews.firstObject).text =
             [LocalizationHelper localizedStringForKey:@"Scaled Stream Resolution"];
         [self.streamDimensionScaleSlider addTarget:self action:@selector(streamDimensionScaleSliderMoved:) forControlEvents:UIControlEventValueChanged];
@@ -2665,6 +2666,9 @@ BOOL isCustomResolution(int resolutionSelected) {
         // Set pacing method to Queue and disable selector
         self.framePacingModeSelector.selectedSegmentIndex = FramePacingModeQueue;
         [self.framePacingModeSelector setEnabled:NO];
+        // [self setHidden:true forStack:self.frameQueueSizeStack];
+        [self setHidden:true forStack:self.interpolationLevelStack];
+        [self setHidden:true forStack:self.streamDimensionScaleStack];
     } else {
         // Balanced mode (AVSB renderer) - enable PiP toggle if iOS 15+
         if (@available(iOS 15.0, *)) {
@@ -2674,6 +2678,10 @@ BOOL isCustomResolution(int resolutionSelected) {
             [self.pipSwitch setEnabled:NO];
         }
         [self.framePacingModeSelector setEnabled:YES];
+        [self setHidden:self.framePacingModeSelector.selectedSegmentIndex != FramePacingModeQueue forStack:self.frameQueueSizeStack];
+        [self setHidden:self.framePacingModeSelector.selectedSegmentIndex != FramePacingModeInterpolation forStack:self.interpolationLevelStack];
+        [self setHidden:self.framePacingModeSelector.selectedSegmentIndex != FramePacingModeInterpolation forStack:self.streamDimensionScaleStack];
+        [self widget:self.frameQueueSizeSlider setEnabled:true];
     }
 
     // Get the current settings to compare with the new selection
@@ -3917,6 +3925,10 @@ BOOL isCustomResolution(int resolutionSelected) {
     if (self.streamDimensionScaleSlider != nil) {
         [self.streamDimensionScaleSlider sendActionsForControlEvents:UIControlEventValueChanged];
     }
+}
+
+- (void)interpolationLevelSliderInteractionEnded:(UISlider *)sender {
+    [GenericUtils handleFrameInterpolationResolutionTipIn:self];
 }
 
 - (InterpolationResolutionConfiguration *)getCurrentInterpolationResolutionConfiguration {

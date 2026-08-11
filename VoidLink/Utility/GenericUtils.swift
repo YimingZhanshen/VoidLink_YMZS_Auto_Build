@@ -66,10 +66,27 @@ import UIKit
         AlertControllerUtil.showAlert(
             in: vc,
             title: LocalizationHelper.localizedString(forKey: "Tips"),
-            message: "\n\(LocalizationHelper.localizedString(forKey: "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR."))",
+            message: "\n\(LocalizationHelper.localizedString(forKey: "Most devices currently perform frame interpolation using 8-bit YUV 4:2:0 video-range buffers. If HDR or YUV 4:4:4 is enabled, both source and intermediate frames may be processed and rendered in this pixel format, while HDR color characteristics and metadata are preserved."))",
             withCancel: false,
             buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
             countdown: 5
+        )
+    }
+
+    @objc public static func handleFrameInterpolationResolutionTip(in vc: UIViewController?) {
+        let key = "hasShownFrameInterpolationResolutionTip"
+        guard !UserDefaults.standard.bool(forKey: key) else {
+            return
+        }
+        UserDefaults.standard.set(true, forKey: key)
+
+        AlertControllerUtil.showAlert(
+            in: vc,
+            title: LocalizationHelper.localizedString(forKey: "Tips"),
+            message: LocalizationHelper.localizedString(forKey: "frameInterpolationResolutionTip"),
+            withCancel: false,
+            buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
+            countdown: 8
         )
     }
         

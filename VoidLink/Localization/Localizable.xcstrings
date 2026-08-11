@@ -9090,25 +9090,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n1. By default, The widget menu button will be automatically docked to bottom edge, then become almost transparent after staying idle for 2 seconds. \nThis timeout can be changed by entering “Edit” in the widget menu.\n\n2. From %@ edge, slide %d%% screen width to open settings menu\n\n3. From %@ edge, slide %d%% screen width to open toolbox menu\n\n4. Slide from top 40%% of screen edge to avoid sending touch events to PC side\n\nIf the screen shows large green or purple color artifacts: \n\n- Disable variable display refresh rate (G-Sync, Free-Sync) on the PC and set the display refresh rate to match the streaming frame rate.\n\n- If the issue still persists switch to “Legacy” frame pacing, or “Metal” rendering (side menu -> experimental section)"
+            "value" : "\n1. By default, The widget menu button will be automatically docked to bottom edge, then become almost transparent after staying idle for 2 seconds. \nThis timeout can be changed by entering “Edit” in the widget menu.\n\n2. From %@ edge, slide %d%% screen width to open settings menu\n\n3. From %@ edge, slide %d%% screen width to open toolbox menu\n\n4. Slide from top 40%% of screen edge to avoid sending touch events to PC side"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n1. 默认状态下，控件菜单按键在闲置2秒后将自动吸附屏幕【右下方边缘】，并进入高透明状态。\n可展开控件菜单，进入“修改布局”修改该延迟。\n\n2. 展开设置菜单: 从%@边缘滑动%d%%屏幕宽度\n\n3. 展开工具箱菜单: 从%@边缘滑动%d%%屏幕宽度\n\n4. 从40%%上半边缘滑动避免触控事件影响PC端\n\n若画面出现大片发绿、发紫的颜色异常:\n\n- 请在主机端关闭【可变显示刷新率(G-Sync, Free-Sync)】，并将显示刷新率设定为与串流帧率一致。\n\n- 若问题仍未解决，请在设置菜单中选择“传统” 帧步进，或实验性分区的“Metal” 渲染。"
+            "value" : "\n1. 默认状态下，控件菜单按键在闲置2秒后将自动吸附屏幕【右下方边缘】，并进入高透明状态。\n可展开控件菜单，进入“修改布局”修改该延迟。\n\n2. 展开设置菜单: 从%@边缘滑动%d%%屏幕宽度\n\n3. 展开工具箱菜单: 从%@边缘滑动%d%%屏幕宽度\n\n4. 从40%%上半边缘滑动避免触控事件影响PC端"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n1. 預設狀態下，控件選單按鍵在閒置3秒後將自動吸附至螢幕【右下方邊緣】，並進入高透明狀態。\n可展開控件選單，進入「修改佈局」修改該延遲。\n\n2. 展開設定選單: 從%@邊緣滑動%d%%螢幕寬度\n\n3. 展開工具箱選單: 從%@邊緣滑動%d%%螢幕寬度\n\n4. 從40%%上半邊緣滑動避免觸控事件影響PC端\n\n若畫面出現大片發綠、發紫等色彩異常：\n\n- 請在主機端關閉「可變顯示更新率(G-Sync, Free-Sync)」，並將顯示更新率設定為與串流幀率一致。\n\n- 若問題仍未解決，請在設定選單中選擇「傳統」影格步調，或使用實驗性功能中的「Metal」渲染。"
+            "value" : "\n1. 預設狀態下，控件選單按鍵在閒置3秒後將自動吸附至螢幕【右下方邊緣】，並進入高透明狀態。\n可展開控件選單，進入「修改佈局」修改該延遲。\n\n2. 展開設定選單: 從%@邊緣滑動%d%%螢幕寬度\n\n3. 展開工具箱選單: 從%@邊緣滑動%d%%螢幕寬度\n\n4. 從40%%上半邊緣滑動避免觸控事件影響PC端"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n1. 預設狀態下，控件選單按鍵在閒置3秒後將自動吸附至螢幕【右下方邊緣】，並進入高透明狀態。\n可展開控件選單，進入「修改佈局」修改該延遲。\n\n2. 展開設定選單: 從%@邊緣滑動%d%%螢幕寬度\n\n3. 展開工具箱選單: 從%@邊緣滑動%d%%螢幕寬度\n\n4. 從40%%上半邊緣滑動避免觸控事件影響PC端\n\n若畫面出現大片發綠、發紫等色彩異常：\n\n- 請在主機端關閉「可變顯示更新率(G-Sync, Free-Sync)」，並將顯示更新率設定為與串流幀率一致。\n\n- 若問題仍未解決，請在設定選單中選擇「傳統」影格步調，或使用實驗性功能中的「Metal」渲染。"
+            "value" : "\n1. 預設狀態下，控件選單按鍵在閒置3秒後將自動吸附至螢幕【右下方邊緣】，並進入高透明狀態。\n可展開控件選單，進入「修改佈局」修改該延遲。\n\n2. 展開設定選單: 從%@邊緣滑動%d%%螢幕寬度\n\n3. 展開工具箱選單: 從%@邊緣滑動%d%%螢幕寬度\n\n4. 從40%%上半邊緣滑動避免觸控事件影響PC端"
           }
         }
       }
@@ -9346,6 +9346,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "強制讓 Pencil 在主機端進入懸浮狀態"
+          }
+        }
+      }
+    },
+    "frameInterpolationResolutionTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "- In general, higher interpolation resolutions require more processing power.\n\n- Most devices with A15 or newer chips can interpolate 60 FPS to 120 FPS at the default interpolation resolution (around 720p).\n\n- Upgrade to iOS 27 to unlock interpolation resolutions above 720p.\n\n- If you experience increased input latency, stuttering, or other issues, lower the interpolation resolution.\n\n- There is always a setting that balances image quality and performance for stable frame interpolation."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "- 一般而言，插帧分辨率越大，性能开销越大。\n\n- 大多数搭载 A15 或更新芯片的设备，可以在默认插帧分辨率(720p左右)下实现 60→120 FPS 插帧。\n\n- 如需解锁超过 720p 的插帧分辨率，请升级至 iOS 27。\n\n- 若出现操作延迟增大、卡顿等异常现象，请降低插帧分辨率。\n\n- 总有一个能够平衡画质与性能的档位，可以实现稳定插帧。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
           }
         }
       }
@@ -12262,25 +12291,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\nWait!\n\n- VoidLink's standard rendering mode already delivers extremely strong performance, on par with Metal rendering.\n\n- Metal rendering consumes more GPU resources and power, and on some devices it may result in reduced performance.\n\n- Metal render currently is unable to handle HDR content correctly on most devices.\n\n- Metal rendering mode does not support PiP.\n\n- Tapping “Apply” means I acknowledge the above information."
+            "value" : "\nWait!\n\n- VoidLink's standard rendering mode already delivers extremely strong performance, on par with its own Metal rendering\n\n- Metal HDR rendering requires developer custom shaders, and regardless of any claims otherwise, no Metal renderer can reproduce the VoidLink standard renderer’s device-calibrated HDR accuracy.\n\n- Metal rendering mode does not support PiP.\n\n- Tapping “Apply” means I acknowledge the above information."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "\n等等！\n\n- VoidLink 标准渲染模式的性能已经非常强，与Metal 渲染处于同一水准。\n\n- Metal 渲染需消耗更多GPU资源和电量，在某些设备上可能会导致性能下降。\n\n- Metal 渲染模式下不支持画中画。\n\n- 目前 Metal 渲染器在大多数设备上无法正确处理 HDR 内容。\n\n点击“应用”表示我已知晓并认可以上信息。"
+            "state" : "translated",
+            "value" : "\n等等！\n\n- VoidLink 标准渲染模式的性能已相当出色，不仅与自身的 Metal 渲染器处于同等水准，更大幅超越一些以 vibe coding 打造的所谓 Metal 渲染器。\n\n- Metal 渲染需消耗更多GPU资源和电量，在某些设备上可能会导致性能下降。\n\n- Metal HDR 渲染需要开发者自行编写着色器。无论开发者如何宣称，任何 Metal 渲染器都无法还原 VoidLink 标准渲染器经过设备校准的 HDR 准确性。\n\n- Metal 渲染模式下不支持画中画。\n\n点击“应用”表示我已知晓并认可以上信息。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "\n等等！\n\n- VoidLink 標準渲染模式的效能已經非常強大，與 Metal 渲染處於同等水準。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
+            "state" : "needs_review",
+            "value" : "\n等等！\n\n- VoidLink 標準算繪模式的效能相當出色，不僅與自身的 Metal 算繪器處於同等水準，更大幅超越一些以 vibe coding 打造的所謂 Metal 算繪器。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal HDR 算繪需要開發者自行編寫著色器。無論開發者如何宣稱，任何 Metal 算繪器都無法還原 VoidLink 標準算繪器經過裝置校準的 HDR 準確性。\n\n- Metal 渲染模式下不支援画中画。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "\n等等！\n\n- VoidLink 標準渲染模式的效能已經非常強大，與 Metal 渲染處於同等水準。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
+            "state" : "needs_review",
+            "value" : "\n等等！\n\n- VoidLink 標準算繪模式的效能相當出色，不僅與自身的 Metal 算繪器處於同等水準，更大幅超越一些以 vibe coding 打造的所謂 Metal 算繪器。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal HDR 算繪需要開發者自行編寫著色器。無論開發者如何宣稱，任何 Metal 算繪器都無法還原 VoidLink 標準算繪器經過裝置校準的 HDR 準確性。\n\n- Metal 渲染模式下不支援画中画。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         }
       }
@@ -12458,19 +12487,25 @@
         }
       }
     },
-    "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR." : {
+    "Most devices currently perform frame interpolation using 8-bit YUV 4:2:0 video-range buffers. If HDR or YUV 4:4:4 is enabled, both source and intermediate frames may be processed and rendered in this pixel format, while HDR color characteristics and metadata are preserved." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目前多数设备仅支持 8-bit YUV420 SDR 视频插帧。这种情况下，如果您打开了 HDR 或 YUV444 选项，中间帧将依然按 8-bit YUV420 SDR 格式生成。"
+            "value" : "目前大多数设备使用 8-bit YUV 4:2:0 Video Range 格式进行插帧。如果启用了 HDR 或 YUV 4:4:4，视频可能将转换为此像素格式进行插帧，同时保留其 HDR 色彩特性和元数据。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "目前多數裝置僅支援 8-bit YUV420 SDR 影片影格插補。在這種情況下，如果您開啟 HDR 或 YUV444 選項，中間影格仍會以 8-bit YUV420 SDR 格式產生。"
+            "value" : "目前大多數裝置使用 8-bit YUV 4:2:0 Video Range 格式進行影格插補。如果啟用了 HDR 或 YUV 4:4:4，視訊可能會轉換為此像素格式進行影格插補，同時保留其 HDR 色彩特性與中繼資料。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前大多數裝置使用 8-bit YUV 4:2:0 Video Range 格式進行影格插補。如果啟用了 HDR 或 YUV 4:4:4，視訊可能會轉換為此像素格式進行影格插補，同時保留其 HDR 色彩特性與中繼資料。"
           }
         }
       }
@@ -17688,25 +17723,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- Standard render has better performance on most devices now.\n\n- The change takes effect the next time you start a stream."
+            "value" : "- VoidLink's standard rendering mode already delivers extremely strong performance, on par with its own Metal rendering\n\n- Metal HDR rendering requires developer custom shaders, and regardless of any claims otherwise, no Metal renderer can reproduce the VoidLink standard renderer’s device-calibrated HDR accuracy.\n\n- Metal rendering mode does not support PiP.\n\n- Tapping “Apply” means I acknowledge the above information."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 目前, 标准渲染模式在大多数设备上具有更好的性能。\n\n- 渲染模式的更改将在下次开始串流时生效。"
+            "value" : "- VoidLink 标准渲染模式的性能已相当出色，不仅与自身的 Metal 渲染器处于同等水准，更大幅超越一些以 vibe coding 打造的所谓 Metal 渲染器。\n\n- Metal 渲染需消耗更多GPU资源和电量，在某些设备上可能会导致性能下降。\n\n- Metal HDR 渲染需要开发者自行编写着色器。无论开发者如何宣称，任何 Metal 渲染器都无法还原 VoidLink 标准渲染器经过设备校准的 HDR 准确性。\n\n- Metal 渲染模式下不支持画中画。\n\n点击“应用”表示我已知晓并认可以上信息。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 目前，在大多数装置上，標準渲染模式具有较佳的效能。\n\n- 变更渲染模式将在下次开始串流时生效。"
+            "value" : "- VoidLink 標準算繪模式的效能相當出色，不僅與自身的 Metal 算繪器處於同等水準，更大幅超越一些以 vibe coding 打造的所謂 Metal 算繪器。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal HDR 算繪需要開發者自行編寫著色器。無論開發者如何宣稱，任何 Metal 算繪器都無法還原 VoidLink 標準算繪器經過裝置校準的 HDR 準確性。\n\n- Metal 渲染模式下不支援画中画。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n- 目前，在大多数装置上，標準渲染模式具有较佳的效能。\n\n- 变更渲染模式将在下次开始串流时生效。"
+            "value" : "- VoidLink 標準算繪模式的效能相當出色，不僅與自身的 Metal 算繪器處於同等水準，更大幅超越一些以 vibe coding 打造的所謂 Metal 算繪器。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal HDR 算繪需要開發者自行編寫著色器。無論開發者如何宣稱，任何 Metal 算繪器都無法還原 VoidLink 標準算繪器經過裝置校準的 HDR 準確性。\n\n- Metal 渲染模式下不支援画中画。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         }
       }

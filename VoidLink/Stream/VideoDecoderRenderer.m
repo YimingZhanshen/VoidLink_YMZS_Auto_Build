@@ -644,9 +644,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 // Render frame at a specific targetTime
 - (void)renderFrame:(Frame *)frame atTime:(CMTime)targetTime {
-    if (kEnableFrameInterpolation && self->_frameInterpolator != nil) {
+    // if (kEnableFrameInterpolation && self->_frameInterpolator != nil) {
         // [self logColorMetadataForFrameIfNeeded:frame];
-    }
+    // }
+    
     CMSampleBufferSetOutputPresentationTimeStamp(frame.sampleBuffer, targetTime);
 
     if (_enableTimebase && [self->_displayLayer controlTimebase] == NULL) {

@@ -33,6 +33,7 @@
 - (void)setHdrMode:(BOOL)enabled;
 - (void)safeCopyMetricsTo:(PlotMetrics *)dst from:(PlotMetrics *)src;
 - (void)getAllStats:(video_stats_t *)stats;
+- (uint64_t)renderedInterpolatedFrameCount;
 - (void)optimizeRefreshRate;
 - (void)resetFramePacing;
 

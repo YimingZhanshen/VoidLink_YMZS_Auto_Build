@@ -209,17 +209,38 @@
         float scalePlotMetrics = stats.frameDropMetrics.nsamples > 0 ? ((float)stats.frameDropMetrics.nsamples / stats.totalFrames) : 1.0f;
         fps = (stats.totalFrames - stats.networkDroppedFrames - (stats.frameDropMetrics.total / scalePlotMetrics)) / interval;
     }
+    float interpolatedFps = stats.interpolatedFrames / interval;
+
+    NSString *renderingFpsString;
+    if (framePacingMode == FramePacingModeInterpolation) {
+        renderingFpsString = [NSString stringWithFormat:@"Rendering FPS: %dx%d %.2f+%.2f",
+                              _config.width, _config.height, fps, interpolatedFps];
+    }
+    else {
+        renderingFpsString = [NSString stringWithFormat:@"Rendering FPS: %dx%d %.2f",
+                              _config.width, _config.height, fps];
+    }
 
     double avgVideoMbps = [_connection getBwTracker].averageMbps;
     double peakVideoMbps = [_connection getBwTracker].peakMbps;
 
     NSString* colorRange = _config.fullColorRange ? @"Full" : @"Limited";
 
-    if(overlayLevel == 1) return [LocalizationHelper localizedStringForKey:@"simplifiedOsdText",
-                 fps,
-                 stats.networkDroppedFrames / interval,
-                 avgVideoMbps,
-                 latencyString];
+    if (overlayLevel == 1) {
+        if (framePacingMode == FramePacingModeInterpolation) {
+            return [LocalizationHelper localizedStringForKey:@"simplifiedOsdTextWithInterpolation",
+                    fps,
+                    interpolatedFps,
+                    stats.networkDroppedFrames / interval,
+                    avgVideoMbps,
+                    latencyString];
+        }
+        return [LocalizationHelper localizedStringForKey:@"simplifiedOsdText",
+                fps,
+                stats.networkDroppedFrames / interval,
+                avgVideoMbps,
+                latencyString];
+    }
     else {
         if (framePacingMode == FramePacingModeLegacy || framePacingMode == FramePacingModeOff) {
             NSString* rendererWithPacing = stats.renderingBackendString;
@@ -231,15 +252,13 @@
                 }
             }
             
-            return [LocalizationHelper localizedStringForKey:@"Video stream: %dx%d %.2f FPS (Codec: %@, %@)\n"
+            return [LocalizationHelper localizedStringForKey:@"%@ (Codec: %@, %@)\n"
                      "Bitrate: %.1f Mbps, Peak: %.1f\n"
                      "%@"
                      "Renderer: %@\n"
                      "Frames dropped by network: %.1f%%\n"
                      "Average network latency: %@",
-                     _config.width,
-                     _config.height,
-                     fps,
+                     renderingFpsString,
                      [_connection getActiveCodecName],
                      colorRange,
                      avgVideoMbps, peakVideoMbps,
@@ -253,16 +272,14 @@
                 rendererWithPacing = @"AVSampleBuffer (Queue Pacing)";
             }
             
-            return [LocalizationHelper localizedStringForKey:@"Video stream: %dx%d %.2f FPS (Codec: %@, %@)\n"
+            return [LocalizationHelper localizedStringForKey:@"%@ (Codec: %@, %@)\n"
                      "Bitrate: %.1f Mbps, Peak: %.1f, Frames buffered: %.1f\n"
                      "%@"
                      "Renderer: %@\n"
                      "Frames dropped by network/pacing jitter: %.1f%% / %.1f%%\n"
                      "Average network latency: %@\n"
                      "Decode time: %.2f/%.2f/%.2f ms %@",
-                     _config.width,
-                     _config.height,
-                     fps,
+                     renderingFpsString,
                      [_connection getActiveCodecName],
                      colorRange,
                      avgVideoMbps, peakVideoMbps, stats.frameQueueMetrics.avg,

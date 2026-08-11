@@ -43,6 +43,7 @@ static int activeVideoFormat;
 static video_stats_t currentVideoStats;
 static video_stats_t lastVideoStats;
 static NSLock* videoStatsLock;
+static uint64_t lastRenderedInterpolatedFrameCount;
 
 static SDL_AudioDeviceID audioDevice;
 static OPUS_MULTISTREAM_CONFIGURATION audioConfig;
@@ -73,6 +74,7 @@ int DrDecoderSetup(int videoFormat, int width, int height, int redrawRate, void*
     Log(LOG_I, @"Active video format: 0x%x", activeVideoFormat);
     memset(&currentVideoStats, 0, sizeof(currentVideoStats));
     memset(&lastVideoStats, 0, sizeof(lastVideoStats));
+    lastRenderedInterpolatedFrameCount = [renderer renderedInterpolatedFrameCount];
     bwTracker = [[BandwidthTracker alloc] initWithWindowSeconds:10 bucketIntervalMs:250];
     return 0;
 }
@@ -178,6 +180,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit)
         // Flip stats roughly every second
         if (now - currentVideoStats.startTime >= 1.0f) {
             currentVideoStats.endTime = now;
+            uint64_t renderedInterpolatedFrameCount = [renderer renderedInterpolatedFrameCount];
+            currentVideoStats.interpolatedFrames = (int)(renderedInterpolatedFrameCount - lastRenderedInterpolatedFrameCount);
+            lastRenderedInterpolatedFrameCount = renderedInterpolatedFrameCount;
             
             [videoStatsLock lock];
             lastVideoStats = currentVideoStats;

@@ -9350,138 +9350,6 @@
         }
       }
     },
-    "Interpolation Resolution" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插帧分辨率"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "影格插補解析度"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "影格插補解析度"
-          }
-        }
-      }
-    },
-    "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目前多数设备仅支持 8-bit YUV420 SDR 视频插帧。这种情况下，如果您打开了 HDR 或 YUV444 选项，中间帧将依然按 8-bit YUV420 SDR 格式生成。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目前多數裝置僅支援 8-bit YUV420 SDR 影片影格插補。在這種情況下，如果您開啟 HDR 或 YUV444 選項，中間影格仍會以 8-bit YUV420 SDR 格式產生。"
-          }
-        }
-      }
-    },
-    "Interpolation failed for an unknown reason." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未知原因导致的插帧失败"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未知原因導致插幀失敗"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未知原因導致插幀失敗"
-          }
-        }
-      }
-    },
-    "Interpolation overhead is too high. Falling back to normal mode." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插帧性能开销过大，回退普通模式"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀效能開銷過大，回退至一般模式"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀效能開銷過大，回退至一般模式"
-          }
-        }
-      }
-    },
-    "Interpolator error:" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插帧器错误："
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀器錯誤："
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀器錯誤："
-          }
-        }
-      }
-    },
-    "Interpolator started." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插帧器已启动。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀器已啟動。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "插幀器已啟動。"
-          }
-        }
-      }
-    },
     "framePacingStackTip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11015,6 +10883,29 @@
         }
       }
     },
+    "Interpolation Resolution" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "插帧分辨率"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影格插補解析度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影格插補解析度"
+          }
+        }
+      }
+    },
     "Interpolator error:" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12371,25 +12262,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\nHold up! \n\n- Standard render has better performance on most devices now.\n\n- The change takes effect the next time you start a stream. No app restart is needed.\n\n- Metal rendering is an experimental feature that may cause performance degradation on some devices.\n\n- Metal render currently is unable to handle HDR content correctly on most devices.\n\n- Metal rendering mode does not support PiP.\n\n- Tapping “Apply” means I acknowledge the above information."
+            "value" : "\nWait!\n\n- VoidLink's standard rendering mode already delivers extremely strong performance, on par with Metal rendering.\n\n- Metal rendering consumes more GPU resources and power, and on some devices it may result in reduced performance.\n\n- Metal render currently is unable to handle HDR content correctly on most devices.\n\n- Metal rendering mode does not support PiP.\n\n- Tapping “Apply” means I acknowledge the above information."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "\n等等！\n\n- 标准渲染模式目前在大多数设备上具有更好的性能。\n\n- 渲染模式的更改将在下次开始串流时生效，无需重启应用程序。\n\n- Metal 渲染是一项实验性功能，在某些设备上可能会导致性能下降。\n\n- Metal 渲染模式下不支持画中画。\n\n- 目前 Metal 渲染器在大多数设备上无法正确处理 HDR 内容。\n\n点击“应用”表示我已知晓并认可以上信息。"
+            "state" : "needs_review",
+            "value" : "\n等等！\n\n- VoidLink 标准渲染模式的性能已经非常强，与Metal 渲染处于同一水准。\n\n- Metal 渲染需消耗更多GPU资源和电量，在某些设备上可能会导致性能下降。\n\n- Metal 渲染模式下不支持画中画。\n\n- 目前 Metal 渲染器在大多数设备上无法正确处理 HDR 内容。\n\n点击“应用”表示我已知晓并认可以上信息。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n等等！\n\n- 目前在大多数装置上，標準渲染模式具有较佳的效能。\n\n- 变更渲染模式将在下次开始串流时生效，无需重新启动应用程式。\n\n- Metal 渲染为实验性功能，可能在某些装置上造成效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
+            "value" : "\n等等！\n\n- VoidLink 標準渲染模式的效能已經非常強大，與 Metal 渲染處於同等水準。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\n等等！\n\n- 目前在大多数装置上，標準渲染模式具有较佳的效能。\n\n- 变更渲染模式将在下次开始串流时生效，无需重新启动应用程式。\n\n- Metal 渲染为实验性功能，可能在某些装置上造成效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
+            "value" : "\n等等！\n\n- VoidLink 標準渲染模式的效能已經非常強大，與 Metal 渲染處於同等水準。\n\n- Metal 渲染需要消耗更多 GPU 資源與電量，在部分裝置上可能反而會導致效能下降。\n\n- Metal 渲染模式下不支援画中画。\n\n- Metal 渲染器目前在大多数装置上无法正确处理 HDR 内容。\n\n点选「套用」表示我已了解并同意上述说明。"
           }
         }
       }
@@ -12563,6 +12454,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "修改"
+          }
+        }
+      }
+    },
+    "Most devices currently support frame interpolation only for 8-bit YUV 4:2:0 SDR video. In this case, if HDR or YUV 4:4:4 is enabled, intermediate frames will still be generated in 8-bit YUV 4:2:0 SDR." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前多数设备仅支持 8-bit YUV420 SDR 视频插帧。这种情况下，如果您打开了 HDR 或 YUV444 选项，中间帧将依然按 8-bit YUV420 SDR 格式生成。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前多數裝置僅支援 8-bit YUV420 SDR 影片影格插補。在這種情況下，如果您開啟 HDR 或 YUV444 選項，中間影格仍會以 8-bit YUV420 SDR 格式產生。"
           }
         }
       }
@@ -16482,6 +16390,29 @@
         }
       }
     },
+    "Scaled Stream Resolution" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流分辨率缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流解析度縮放"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流解析度縮放"
+          }
+        }
+      }
+    },
     "screenRotationTIp" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17214,6 +17145,35 @@
         }
       }
     },
+    "simplifiedOsdTextWithInterpolation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FPS: %6.2f+%.2f    Dropped frames: %4.1f%%    Bitrate: %5.1f Mbps    Latency: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帧率: %6.2f+%.2f    丢帧: %4.1f%%    码率: %5.1f Mbps   延迟: %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FPS: %6.2f+%.2f    掉幀: %4.1f%%    位元速率: %5.1f Mbps   延遲: %@"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FPS: %6.2f+%.2f    掉幀: %4.1f%%    位元速率: %5.1f Mbps   延遲: %@"
+          }
+        }
+      }
+    },
     "Size" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17383,29 +17343,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "手勢所需的滑動距離，可有效避免因誤觸而展開選單。"
-          }
-        }
-      }
-    },
-    "Scaled Stream Resolution" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流分辨率缩放"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流解析度縮放"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流解析度縮放"
           }
         }
       }

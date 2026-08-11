@@ -31,6 +31,7 @@
 #include <libavutil/mem.h>
 #include <mach/mach_time.h>
 #include <math.h>
+#include <stdatomic.h>
 
 // Define for extra logging related to frame pacing
 //#define DISPLAYLINK_VERBOSE
@@ -47,6 +48,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 - (void)stopFrameInterpolation;
 - (NSInteger)displayLinkFrameRateForInterpolationEnabled:(BOOL)enabled;
 - (void)restartDisplayLinkForInterpolationEnabled:(BOOL)enabled;
+// - (void)logColorMetadataForFrameIfNeeded:(Frame *)frame;
 @end
 
 @implementation VideoDecoderRenderer {
@@ -69,6 +71,9 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     VTDecompressionSessionRef _decompressionSession;
     FrameInterpolator *_frameInterpolator;
     BOOL _frameInterpolationPaused;
+    BOOL _loggedSourceFrameColorMetadata;
+    BOOL _loggedInterpolatedFrameColorMetadata;
+    atomic_uint_fast64_t _renderedInterpolatedFrameCount;
 
     CADisplayLink *_displayLink;
     NSInteger _maxRefreshRate;
@@ -201,6 +206,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _streamAspectRatio = aspectRatio;
     _maxRefreshRate = [[UIScreen mainScreen] maximumFramesPerSecond];
     _parameterSetBuffers = [[NSMutableArray alloc] init];
+    atomic_init(&_renderedInterpolatedFrameCount, 0);
 
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* tempSettings = [dataMan getSettings];
@@ -638,6 +644,9 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
 // Render frame at a specific targetTime
 - (void)renderFrame:(Frame *)frame atTime:(CMTime)targetTime {
+    if (kEnableFrameInterpolation && self->_frameInterpolator != nil) {
+        // [self logColorMetadataForFrameIfNeeded:frame];
+    }
     CMSampleBufferSetOutputPresentationTimeStamp(frame.sampleBuffer, targetTime);
 
     if (_enableTimebase && [self->_displayLayer controlTimebase] == NULL) {
@@ -659,8 +668,15 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         Log(LOG_I, @"Setting timebase for stream to %d / %d", pts.value, pts.timescale);
     }
 
-    if(appDidEnterBackgroundWithoutPip) [self->_displayLayer flush];
-    else [self->_displayLayer enqueueSampleBuffer:frame.sampleBuffer];
+    if(appDidEnterBackgroundWithoutPip) {
+        [self->_displayLayer flush];
+    }
+    else {
+        [self->_displayLayer enqueueSampleBuffer:frame.sampleBuffer];
+        if (kEnableFrameInterpolation && frame.isInterpolated) {
+            atomic_fetch_add_explicit(&_renderedInterpolatedFrameCount, 1, memory_order_relaxed);
+        }
+    }
 
 #ifdef DISPLAYLINK_VERBOSE
     // Some OS-level metrics I'm not sure what to do with
@@ -688,6 +704,78 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
     }
 }
 
+/*
+- (void)logColorMetadataForFrameIfNeeded:(Frame *)frame {
+    BOOL *logged = frame.isInterpolated ?
+        &_loggedInterpolatedFrameColorMetadata :
+        &_loggedSourceFrameColorMetadata;
+    if (*logged || frame.sampleBuffer == nil) {
+        return;
+    }
+    *logged = YES;
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(frame.sampleBuffer);
+    CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(frame.sampleBuffer);
+    if (imageBuffer == nil) {
+        Log(LOG_W, @"[FrameColor] %@ frame has no image buffer",
+            frame.isInterpolated ? @"interpolated" : @"source");
+        return;
+    }
+
+    OSType pixelFormat = CVPixelBufferGetPixelFormatType(imageBuffer);
+    char fourCC[5] = {
+        (char)((pixelFormat >> 24) & 0xff),
+        (char)((pixelFormat >> 16) & 0xff),
+        (char)((pixelFormat >> 8) & 0xff),
+        (char)(pixelFormat & 0xff),
+        '\0'
+    };
+
+    CFTypeRef bufferTransfer = CVBufferGetAttachment(
+        imageBuffer, kCVImageBufferTransferFunctionKey, NULL);
+    CFTypeRef bufferPrimaries = CVBufferGetAttachment(
+        imageBuffer, kCVImageBufferColorPrimariesKey, NULL);
+    CFTypeRef bufferMatrix = CVBufferGetAttachment(
+        imageBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
+    CFTypeRef bufferMastering = CVBufferGetAttachment(
+        imageBuffer, kCVImageBufferMasteringDisplayColorVolumeKey, NULL);
+    CFTypeRef bufferContentLight = CVBufferGetAttachment(
+        imageBuffer, kCVImageBufferContentLightLevelInfoKey, NULL);
+
+    CFDictionaryRef extensions = formatDescription != nil ?
+        CMFormatDescriptionGetExtensions(formatDescription) : NULL;
+    CFTypeRef formatTransfer = extensions != NULL ?
+        CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_TransferFunction) : NULL;
+    CFTypeRef formatPrimaries = extensions != NULL ?
+        CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_ColorPrimaries) : NULL;
+    CFTypeRef formatMatrix = extensions != NULL ?
+        CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_YCbCrMatrix) : NULL;
+    CFTypeRef formatMastering = extensions != NULL ?
+        CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_MasteringDisplayColorVolume) : NULL;
+    CFTypeRef formatContentLight = extensions != NULL ?
+        CFDictionaryGetValue(extensions, kCMFormatDescriptionExtension_ContentLightLevelInfo) : NULL;
+
+    Log(LOG_I,
+        @"[FrameColor] %@ frame: %dx%d pixelFormat=%s (%u); "
+         "buffer transfer=%@ primaries=%@ matrix=%@ mastering=%@ contentLight=%@; "
+         "format transfer=%@ primaries=%@ matrix=%@ mastering=%@ contentLight=%@",
+        frame.isInterpolated ? @"interpolated" : @"source",
+        (int)CVPixelBufferGetWidth(imageBuffer),
+        (int)CVPixelBufferGetHeight(imageBuffer),
+        fourCC,
+        (unsigned int)pixelFormat,
+        (__bridge id)bufferTransfer,
+        (__bridge id)bufferPrimaries,
+        (__bridge id)bufferMatrix,
+        bufferMastering != NULL ? @"present" : @"nil",
+        bufferContentLight != NULL ? @"present" : @"nil",
+        (__bridge id)formatTransfer,
+        (__bridge id)formatPrimaries,
+        (__bridge id)formatMatrix,
+        formatMastering != NULL ? @"present" : @"nil",
+        formatContentLight != NULL ? @"present" : @"nil");
+} */
+ 
 - (void)stop{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_displayLink invalidate];
@@ -1485,6 +1573,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         memcpy(&stats->frameQueueMetrics, &_frameQueueMetrics, sizeof(PlotMetrics));
         [_frameQueue.frameDropMetrics copyMetrics:&stats->frameDropMetrics];
     });
+}
+
+- (uint64_t)renderedInterpolatedFrameCount {
+    return atomic_load_explicit(&_renderedInterpolatedFrameCount, memory_order_relaxed);
 }
 
 // When streaming lower framerate content on a ProMotion display, the screen refresh rate can be

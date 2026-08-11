@@ -40,6 +40,7 @@ typedef struct {
     int totalFrames;
     int receivedFrames;
     int networkDroppedFrames;
+    int interpolatedFrames;
     int totalHostProcessingLatency;
     int framesWithHostProcessingLatency;
     int maxHostProcessingLatency;

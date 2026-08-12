@@ -2690,19 +2690,19 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pencil模式"
+            "value" : "Pencil模式(非内购功能)"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pencil模式"
+            "value" : "Pencil模式(非內購功能）"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pencil模式"
+            "value" : "Pencil模式(非內購功能）"
           }
         }
       }

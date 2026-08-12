@@ -9356,25 +9356,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "- In general, higher interpolation resolutions require more processing power.\n\n- Most devices with A15 or newer chips can interpolate 60 FPS to 120 FPS at the default interpolation resolution (around 720p).\n\n- Upgrade to iOS 27 to unlock interpolation resolutions above 720p.\n\n- If you experience increased input latency, stuttering, or other issues, lower the interpolation resolution.\n\n- There is always a setting that balances image quality and performance for stable frame interpolation."
+            "value" : "- In general, higher interpolation resolutions require more processing power.\n\n- Most devices with A15 or newer chips can interpolate 60 FPS to 120 FPS at the default interpolation resolution (around 720p).\nRecommended configurations for your reference:\niPhone 13 Pro (A15) - 1344 × 624\niPad Pro 2024 (M4) - 1440 × 992\n\n- Upgrade to iOS 27 to unlock interpolation resolutions above 720p.\n\n- If you experience increased input latency, stuttering, or other issues, lower the interpolation resolution.\n\n- There is always a setting that balances image quality and performance for stable frame interpolation.\n\n- Older models may not be able to initiate the interpolator(such as A12 SoC devices)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "- 一般而言，插帧分辨率越大，性能开销越大。\n\n- 大多数搭载 A15 或更新芯片的设备，可以在默认插帧分辨率(720p左右)下实现 60→120 FPS 插帧。\n\n- 如需解锁超过 720p 的插帧分辨率，请升级至 iOS 27。\n\n- 若出现操作延迟增大、卡顿等异常现象，请降低插帧分辨率。\n\n- 总有一个能够平衡画质与性能的档位，可以实现稳定插帧。"
+            "state" : "translated",
+            "value" : "- 一般而言，插帧分辨率越大，性能开销越大。\n\n- 大多数搭载 A15 或更新芯片的设备，可以在默认插帧分辨率(720p左右)下实现 60→120 FPS 插帧。\n以下配置供您参考:\niPhone 13 Pro (A15) - 1344 × 624\niPad Pro 2024 (M4) - 1440 × 992\n\n- 如需解锁超过 720p 的插帧分辨率，请升级至 iOS 27。\n\n- 若出现操作延迟增大、卡顿等异常现象，请降低插帧分辨率。\n\n- 总有一个能够平衡画质与性能的档位，可以实现稳定插帧。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
+            "state" : "translated",
+            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n以下配置供您参考:\niPhone 13 Pro (A15) - 1344 × 624\niPad Pro 2024 (M4) - 1440 × 992\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
+            "state" : "translated",
+            "value" : "- 一般而言，影格插補解析度越高，效能負載越大。\n\n- 多數搭載 A15 或更新晶片的裝置，可在預設影格插補解析度(720p左右)下實現 60→120 FPS 影格插補。\n以下配置供您参考:\niPhone 13 Pro (A15) - 1344 × 624\niPad Pro 2024 (M4) - 1440 × 992\n\n- 如需解鎖超過 720p 的影格插補解析度，請升級至 iOS 27。\n\n- 若出現操作延遲增加、卡頓等異常情況，請降低影格插補解析度。\n\n- 總能找到一個兼顧畫質與效能的設定，以穩定進行影格插補。"
           }
         }
       }
@@ -11702,25 +11702,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Legacy Frame Pacing and No Frame Pacing modes may reduce streaming performance or cause frequent jitter and stuttering, and do not support screen-off keep-alive or background streaming without Picture-in-Picture. These modes are intended only for the rare cases where the streamed image exhibits color corruption.\n\nTap [Confirm] to continue.\nTap [Cancel] to return to Queue Buffering mode."
+            "value" : "Legacy Frame Pacing and No Frame Pacing modes may reduce streaming performance or cause frequent jitter and stuttering, and do not support screen-off keep-alive or background streaming without Picture-in-Picture. \n\nTap [Confirm] to continue.\nTap [Cancel] to return to Queue Buffering mode."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "传统帧步进、无帧步进模式将导致串流性能衰减，或频繁的画面抖动和卡顿，且不支持熄屏保持以及无画中画的后台串流，仅适用于串流画面出现颜色异常的极少数情况。\n\n点【确定】以继续。\n点【取消】返回队列缓冲模式。"
+            "value" : "传统帧步进、无帧步进模式将导致串流性能衰减，或频繁的画面抖动和卡顿，且不支持熄屏保持以及无画中画的后台串流。\n\n点【确定】以继续。\n点【取消】返回队列缓冲模式。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "傳統影格步調、無影格步調模式可能導致串流效能下降，或頻繁發生畫面抖動與卡頓，且不支援熄屏保持及無子母畫面的背景串流，僅適用於極少數串流畫面出現色彩異常的情況。\n\n點選【確定】以繼續。\n點選【取消】返回佇列緩衝模式。"
+            "value" : "傳統影格步調、無影格步調模式可能導致串流效能下降，或頻繁發生畫面抖動與卡頓，且不支援熄屏保持及無子母畫面的背景串流。\n\n點選【確定】以繼續。\n點選【取消】返回佇列緩衝模式。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "傳統影格步調、無影格步調模式可能導致串流效能下降，或頻繁發生畫面抖動與卡頓，僅適用於極少數串流畫面出現色彩異常的情況。\n\n點選【確定】以繼續。\n點選【取消】返回佇列緩衝模式。"
+            "state" : "translated",
+            "value" : "傳統影格步調、無影格步調模式可能導致串流效能下降，或頻繁發生畫面抖動與卡頓，且不支援熄屏保持及無子母畫面的背景串流。\n\n點選【確定】以繼續。\n點選【取消】返回佇列緩衝模式。"
           }
         }
       }
@@ -17873,31 +17873,60 @@
         }
       }
     },
+    "streamDimensionScaleStackTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can use this setting to reduce the difference between the streaming resolution and the intermediate-frame resolution, minimizing interpolation-induced flickering for a more natural viewing experience."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您可以通过该设置减小串流分辨率与中间帧分辨率的差距，从而减少插帧造成的闪烁效应，从而获得更自然的观感。\n"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您可以透過此設定縮小串流解析度與中間影格解析度之間的差距，減少影格插補造成的閃爍，使畫面看起來更加自然。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您可以透過此設定縮小串流解析度與中間影格解析度之間的差距，減少影格插補造成的閃爍，使畫面看起來更加自然。"
+          }
+        }
+      }
+    },
     "streamingRadialMenuButtonTip" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Press the same or a different button for controller navigation during streaming. [Home] button is also available.\n\nNote: if you want to designate the Home button, double tap to pass it through to VoidLink app on iOS 26+."
+            "value" : "Press the same or a different button for controller navigation during streaming. [Home] button is also available.\n\nNote: if you want to designate the Home button, double tap to pass it through to VoidLink app on iOS 26+.\nAlso, on iOS 27+, go to Settings -> General -> Game Controller -> Home Button Overrides, then add VoidLink to enable direct Home button passthrough."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请按下相同或不同的按键，作为串流时的手柄导航键。\n您也可以指定 [Home] 鍵。\n\n注意：iOS 26+ 系统中，需要双击Home键才能将该按键透传至 VoidLink。"
+            "value" : "请按下相同或不同的按键，作为串流时的手柄导航键。\n您也可以指定 [Home] 鍵。\n\n注意：iOS 26+ 系统中，需要双击Home键才能将该按键透传至 VoidLink。\n另外，您可以在 iOS 27+ 系统中前往 设置 -> 通用 -> 游戏控制器 -> 主屏幕按钮覆盖，添加 VoidLink 以实现 Home 键直通。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。"
+            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。\n另外，在 iOS 27 或以上系統中，前往「設定」->「一般」->「遊戲控制器」->「主畫面按鈕覆寫」，然後新增 VoidLink，即可啟用 Home 鍵直通。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。"
+            "value" : "請按下相同或不同的按鍵，作為串流時的手把導覽鍵。 \n您也可以指定 [Home] 鍵。\n\n注意：在 iOS 26 以上系統中，需要雙擊 Home 鍵才能將該按鍵透傳至 VoidLink。\n另外，在 iOS 27 或以上系統中，前往「設定」->「一般」->「遊戲控制器」->「主畫面按鈕覆寫」，然後新增 VoidLink，即可啟用 Home 鍵直通。"
           }
         }
       }
@@ -18397,6 +18426,29 @@
         }
       }
     },
+    "This device does not support frame interpolation." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前设备不支持插帧。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前裝置不支援影格插補。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前裝置不支援影格插補。"
+          }
+        }
+      }
+    },
     "This functional widget cannot be combined with gamepad buttons" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18462,6 +18514,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這是一項實驗性功能，可能導致畫面卡頓。"
+          }
+        }
+      }
+    },
+    "This system version does not support frame interpolation." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前系统版本不支持插帧。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前系統版本不支援影格插補。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前系統版本不支援影格插補。"
           }
         }
       }

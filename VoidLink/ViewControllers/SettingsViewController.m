@@ -898,9 +898,11 @@ BOOL isCustomResolution(int resolutionSelected) {
     if(!FrameInterpolator.deviceSupportsInterpolation) [self.framePacingModeSelector setEnabled:false forSegmentAtIndex:FramePacingModeInterpolation];
 
     self.interpolationLevelStack.hasDynamicLabel = YES;
+    self.interpolationLevelStack.hasInfoTag = YES;
     [self addSetting:self.interpolationLevelStack ofId:@"interpolationLevelStack" to:videoSection];
 
     self.streamDimensionScaleStack.hasDynamicLabel = YES;
+    self.streamDimensionScaleStack.hasInfoTag = YES;
     [self addSetting:self.streamDimensionScaleStack ofId:@"streamDimensionScaleStack" to:videoSection];
 
     self.frameQueueSizeStack.hasDynamicLabel = YES;
@@ -1840,6 +1842,14 @@ BOOL isCustomResolution(int resolutionSelected) {
         tipText = [LocalizationHelper localizedStringForKey:@"globeAsEscapeStackTip"];
         showOnlineDocAction = false;
     }
+    if([sender.superview.accessibilityIdentifier isEqualToString: @"interpolationLevelStack"]){
+        tipText = [LocalizationHelper localizedStringForKey:@"frameInterpolationResolutionTip"];
+        showOnlineDocAction = false;
+    }
+    if([sender.superview.accessibilityIdentifier isEqualToString: @"streamDimensionScaleStack"]){
+        tipText = [LocalizationHelper localizedStringForKey:@"streamDimensionScaleStackTip"];
+        showOnlineDocAction = false;
+    }
 
     UIStackView* parentStack = (UIStackView* )sender.superview;
     NSString* edgeSide = self.slideToSettingsScreenEdgeSelector.selectedSegmentIndex == 1 ? [LocalizationHelper localizedStringForKey:@"left"] : [LocalizationHelper localizedStringForKey:@"right"];
@@ -2262,6 +2272,11 @@ BOOL isCustomResolution(int resolutionSelected) {
             [LocalizationHelper localizedStringForKey:@"Scaled Stream Resolution"];
         [self.streamDimensionScaleSlider addTarget:self action:@selector(streamDimensionScaleSliderMoved:) forControlEvents:UIControlEventValueChanged];
         [self.framePacingModeSelector addTarget:self action:@selector(framePacingModeChanged:) forControlEvents:UIControlEventValueChanged];
+        UITapGestureRecognizer *interpolationAvailabilityTap = [[UITapGestureRecognizer alloc]
+            initWithTarget:self
+            action:@selector(framePacingModeSelectorTapped:)];
+        interpolationAvailabilityTap.cancelsTouchesInView = NO;
+        [self.framePacingModeSelector addGestureRecognizer:interpolationAvailabilityTap];
         [self.framePacingModeSelector sendActionsForControlEvents:UIControlEventValueChanged];
 
         // [self.frameTimebaseSwitch setOn:self->tempSettings.enableFrameTimebase];
@@ -2742,6 +2757,17 @@ BOOL isCustomResolution(int resolutionSelected) {
 }
 
 - (void)framePacingModeChanged:(UISegmentedControl *)sender {
+    if (sender.selectedSegmentIndex == FramePacingModeInterpolation) {
+        if (@available(iOS 26.0, tvOS 26.0, *)) {
+            if (!FrameInterpolator.deviceSupportsInterpolation) {
+                return;
+            }
+        }
+        else {
+            return;
+        }
+    }
+
     // Hide frame queue size for Off and Legacy modes
     [GenericUtils handleLegacyFramePacingTipIn:self with:sender passAlert:settingsViewJustExpanded uiAction:^{
         [self setHidden:(sender.selectedSegmentIndex != FramePacingModeQueue
@@ -2792,6 +2818,25 @@ BOOL isCustomResolution(int resolutionSelected) {
             [self.graphOpacityStepper setEnabled:YES];
         }
     }*/
+}
+
+- (void)framePacingModeSelectorTapped:(UITapGestureRecognizer *)recognizer {
+    UISegmentedControl *selector = (UISegmentedControl *)recognizer.view;
+    if (selector.numberOfSegments == 0) {
+        return;
+    }
+
+    CGFloat segmentWidth = CGRectGetWidth(selector.bounds) / selector.numberOfSegments;
+    NSInteger visualIndex = MIN((NSInteger)([recognizer locationInView:selector].x / segmentWidth),
+                                selector.numberOfSegments - 1);
+    NSInteger segmentIndex = selector.effectiveUserInterfaceLayoutDirection == UIUserInterfaceLayoutDirectionRightToLeft
+        ? selector.numberOfSegments - visualIndex - 1
+        : visualIndex;
+    if (segmentIndex != FramePacingModeInterpolation) {
+        return;
+    }
+
+    [GenericUtils handleFrameInterpolationAvailabilityTipIn:self];
 }
 
 - (void)onScreenWidgetChanged{

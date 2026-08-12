@@ -89,6 +89,34 @@ import UIKit
             countdown: 8
         )
     }
+
+    @objc public static func handleFrameInterpolationAvailabilityTip(in vc: UIViewController?) -> Bool {
+        guard #available(iOS 26.0, tvOS 26.0, *) else {
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: LocalizationHelper.localizedString(forKey: "Tips"),
+                message: LocalizationHelper.localizedString(forKey: "This system version does not support frame interpolation."),
+                withCancel: false,
+                buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
+                countdown: 0
+            )
+            return false
+        }
+
+        guard FrameInterpolator.deviceSupportsInterpolation else {
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: LocalizationHelper.localizedString(forKey: "Tips"),
+                message: LocalizationHelper.localizedString(forKey: "This device does not support frame interpolation."),
+                withCancel: false,
+                buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
+                countdown: 0
+            )
+            return false
+        }
+
+        return true
+    }
         
     @objc public static func needUpdateDefaultSettings() -> Bool {
         // let key = "needUpdateDefaultSettings20260226-1"

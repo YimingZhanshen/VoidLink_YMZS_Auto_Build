@@ -22,7 +22,7 @@
 
 #import "LocalizationHelper.h"
 
-@interface SettingsViewController () <MenuSectionDelegate, WidgetPickerViewControllerDelegate>
+@interface SettingsViewController () <MenuSectionDelegate, WidgetPickerViewControllerDelegate, UIScrollViewDelegate>
 @property(nonatomic, assign) SettingsMenuMode currentSettingsMenuMode;
 @end
 
@@ -686,6 +686,7 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void)initParentStack{
     self.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentAutomatic;
+    self.scrollView.delegate = self;
     // 可选：确保 scrollView 开启垂直滚动
     self.scrollView.alwaysBounceVertical = YES;
     self.scrollView.showsVerticalScrollIndicator = NO;
@@ -1309,6 +1310,18 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void)stopAutoScroll {
     [_autoScrollDisplayLink invalidate];
     _autoScrollDisplayLink = nil;
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    if (scrollView != self.scrollView) {
+        return;
+    }
+    
+    [self settingsScrollViewWillBeginDragging:scrollView];
+}
+
+- (void)settingsScrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [self scheduleTouchVelocityPreviewDismiss];
 }
 
 - (BOOL)scrolledToTop {

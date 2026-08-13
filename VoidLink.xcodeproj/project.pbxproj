@@ -473,9 +473,7 @@
 				18A0EE252EFB9B5A00BA853A /* SVGKit in Frameworks */,
 				9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */,
 				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
-				FB8946ED19F6AFE800339C8A /* libopus.a in Frameworks */,
 				98882A082AF60F7400C5A11C /* libavutil.a in Frameworks */,
-				180345E12E819877004AF36F /* libopus-sim.a in Frameworks */,
 				182760F72E83E2EA00EC1C5C /* DequeModule in Frameworks */,
 				182760FD2E83E68B00EC1C5C /* Collections in Frameworks */,
 				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
@@ -1570,6 +1568,8 @@
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 0.0.1;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(PROJECT_DIR)/libs/opus/lib/iOS/libopus.a";
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/libs/opus/lib/iOS-Sim/libopus.a";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voidlink.tf.debug10.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1636,6 +1636,8 @@
 					"$(PROJECT_DIR)/libs/FFmpeg/lib/iOS-Sim",
 				);
 				MARKETING_VERSION = 0.0.1;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = "$(PROJECT_DIR)/libs/opus/lib/iOS/libopus.a";
+				"OTHER_LDFLAGS[sdk=iphonesimulator*]" = "$(PROJECT_DIR)/libs/opus/lib/iOS-Sim/libopus.a";
 				PRODUCT_BUNDLE_IDENTIFIER = com.voidlink.tf.iOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";

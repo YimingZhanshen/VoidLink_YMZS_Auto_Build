@@ -72,9 +72,9 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
             }
             break;
         case 0x06:
-            [trigger setModeVibrationWithStartPosition:effect.parameter0
+            [trigger setModeVibrationWithStartPosition:effect.parameter2
                                              amplitude:effect.parameter1
-                                             frequency:effect.parameter2];
+                                             frequency:effect.parameter0];
             break;
         default:
             // Log(LOG_W, @"Ignoring unsupported adaptive trigger effect type: 0x%02X", effect.type);
@@ -526,12 +526,12 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
                  i == DS_EFFECT_PAYLOAD_SIZE - 1 ? "%02X" : "%02X ", right[i]);
     }
 
-    /*
+
     Log(LOG_I, @"Adaptive trigger: controller=%u flags=0x%02X "
                 "leftType=0x%02X left=[%s] rightType=0x%02X right=[%s]",
         controllerNumber, eventFlags,
         typeLeft, leftPayload, typeRight, rightPayload);
-     */
+
 
     VL_ADAPTIVE_TRIGGER_EFFECT leftEffect = DecodeAdaptiveTriggerEffect(typeLeft, left);
     VL_ADAPTIVE_TRIGGER_EFFECT rightEffect = DecodeAdaptiveTriggerEffect(typeRight, right);

@@ -705,6 +705,7 @@ import ObjectiveC.runtime
         self.isMultipleTouchEnabled = self.widgetType == WidgetTypeEnum.button
             || CommandManager.mousePadWithButtonActions.contains(self.touchPadString)
             || self.touchPadString == "MAGNIFIER"
+            || self.touchPadString == "DS4TOUCH"
     }
     
     // ======================================================================================================
@@ -2270,7 +2271,10 @@ import ObjectiveC.runtime
                 case "DS4TOUCH":
                     if quickDoubleTapDetected {
                         self.showl3r3Indicator()
-                        self.sendComboButtonsDownEvent(comboStrings: self.comboButtonStrings)}
+                        if activeTouchesCount < 2 {
+                            self.sendComboButtonsDownEvent(comboStrings: self.comboButtonStrings)
+                        }
+                    }
                 case "DPAD", "WASDPAD", "ARROWPAD":
                     if activeTouchesCount == 1 {
                         // showLrudBall(at: touchBeganLocation)

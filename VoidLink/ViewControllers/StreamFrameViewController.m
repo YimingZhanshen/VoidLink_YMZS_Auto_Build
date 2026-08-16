@@ -1946,6 +1946,17 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     [_controllerSupport setControllerLed:controllerNumber r:r g:g b:b];
 }
 
+- (void) setAdaptiveTriggers:(uint16_t)controllerNumber eventFlags:(uint8_t)eventFlags
+                     typeLeft:(uint8_t)typeLeft typeRight:(uint8_t)typeRight
+                         left:(const uint8_t*)left right:(const uint8_t*)right {
+    [_controllerSupport setAdaptiveTriggers:controllerNumber
+                                 eventFlags:eventFlags
+                                   typeLeft:typeLeft
+                                  typeRight:typeRight
+                                       left:left
+                                      right:right];
+}
+
 - (void)connectionStatusUpdate:(int)status {
     Log(LOG_W, @"Connection status update: %d", status);
 

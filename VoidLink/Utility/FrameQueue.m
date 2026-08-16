@@ -1,3 +1,16 @@
+//
+//  FrameQueue.m
+//  Moonlight
+//
+//  Created by Andy Grundman.
+//  Ported to VoidLink by Acaki.
+//  Copyright (c) 2025 Moonlight Stream. All rights reserved.
+//
+//  Modified by True砖家 since 2026/8/6.
+//  Copyright © 2026 True砖家 on Bilibili. All rights reserved.
+//
+
+
 @import AVFoundation;
 @import VideoToolbox;
 

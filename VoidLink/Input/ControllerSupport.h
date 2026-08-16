@@ -52,6 +52,9 @@
 -(void) rumbleTriggers:(uint16_t)controllerNumber leftTrigger:(uint16_t)leftTrigger rightTrigger:(uint16_t)rightTrigger;
 -(void) setMotionEventState:(uint16_t)controllerNumber motionType:(uint8_t)motionType reportRateHz:(uint16_t)reportRateHz;
 -(void) setControllerLed:(uint16_t)controllerNumber r:(uint8_t)r g:(uint8_t)g b:(uint8_t)b;
+-(void) setAdaptiveTriggers:(uint16_t)controllerNumber eventFlags:(uint8_t)eventFlags
+                    typeLeft:(uint8_t)typeLeft typeRight:(uint8_t)typeRight
+                        left:(const uint8_t*)left right:(const uint8_t*)right;
 -(void) updateTimerStateForOsc;
 
 -(uint16_t) getActiveGamepadMask;

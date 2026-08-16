@@ -16,6 +16,7 @@
 
 #import "DataManager.h"
 #include "Limelight.h"
+#include <stdio.h>
 
 @import GameController;
 #if !TARGET_OS_TV
@@ -25,6 +26,61 @@
 
 static const double MOUSE_SPEED_DIVISOR = 1.25;
 static __weak ControllerSupport *VLSharedControllerSupport = nil;
+
+typedef struct _VL_ADAPTIVE_TRIGGER_EFFECT {
+    uint8_t type;
+    float parameter0;
+    float parameter1;
+    float parameter2;
+} VL_ADAPTIVE_TRIGGER_EFFECT;
+
+static VL_ADAPTIVE_TRIGGER_EFFECT DecodeAdaptiveTriggerEffect(uint8_t type, const uint8_t* payload)
+{
+    const float byteScale = 1.0f / 255.0f;
+    VL_ADAPTIVE_TRIGGER_EFFECT effect = {
+        .type = type,
+        .parameter0 = payload[0] * byteScale,
+        .parameter1 = payload[1] * byteScale,
+        .parameter2 = payload[2] * byteScale,
+    };
+    return effect;
+}
+
+static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
+                                       VL_ADAPTIVE_TRIGGER_EFFECT effect)
+    API_AVAILABLE(ios(14.5), tvos(14.5));
+
+static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
+                                       VL_ADAPTIVE_TRIGGER_EFFECT effect)
+{
+    switch (effect.type) {
+        case 0x00:
+            [trigger setModeOff];
+            break;
+        case 0x01:
+            [trigger setModeFeedbackWithStartPosition:effect.parameter0
+                                   resistiveStrength:effect.parameter1];
+            break;
+        case 0x02:
+            if (effect.parameter1 > effect.parameter0) {
+                [trigger setModeWeaponWithStartPosition:effect.parameter0
+                                            endPosition:effect.parameter1
+                                     resistiveStrength:effect.parameter2];
+            }
+            else {
+                // Log(LOG_W, @"Ignoring invalid adaptive weapon effect: start=%.3f end=%.3f", effect.parameter0, effect.parameter1);
+            }
+            break;
+        case 0x06:
+            [trigger setModeVibrationWithStartPosition:effect.parameter0
+                                             amplitude:effect.parameter1
+                                             frequency:effect.parameter2];
+            break;
+        default:
+            // Log(LOG_W, @"Ignoring unsupported adaptive trigger effect type: 0x%02X", effect.type);
+            break;
+    }
+}
 
 @interface ControllerSupport()
 
@@ -455,6 +511,55 @@ static __weak ControllerSupport *VLSharedControllerSupport = nil;
     }
 }
 
+-(void) setAdaptiveTriggers:(uint16_t)controllerNumber eventFlags:(uint8_t)eventFlags
+                    typeLeft:(uint8_t)typeLeft typeRight:(uint8_t)typeRight
+                        left:(const uint8_t*)left right:(const uint8_t*)right {
+    char leftPayload[DS_EFFECT_PAYLOAD_SIZE * 3] = {0};
+    char rightPayload[DS_EFFECT_PAYLOAD_SIZE * 3] = {0};
+
+    for (int i = 0; i < DS_EFFECT_PAYLOAD_SIZE; i++) {
+        snprintf(leftPayload + (i * 3), sizeof(leftPayload) - (i * 3),
+                 i == DS_EFFECT_PAYLOAD_SIZE - 1 ? "%02X" : "%02X ", left[i]);
+        snprintf(rightPayload + (i * 3), sizeof(rightPayload) - (i * 3),
+                 i == DS_EFFECT_PAYLOAD_SIZE - 1 ? "%02X" : "%02X ", right[i]);
+    }
+
+    /*
+    Log(LOG_I, @"Adaptive trigger: controller=%u flags=0x%02X "
+                "leftType=0x%02X left=[%s] rightType=0x%02X right=[%s]",
+        controllerNumber, eventFlags,
+        typeLeft, leftPayload, typeRight, rightPayload);
+     */
+
+    VL_ADAPTIVE_TRIGGER_EFFECT leftEffect = DecodeAdaptiveTriggerEffect(typeLeft, left);
+    VL_ADAPTIVE_TRIGGER_EFFECT rightEffect = DecodeAdaptiveTriggerEffect(typeRight, right);
+    bool applyLeft = (eventFlags & DS_EFFECT_LEFT_TRIGGER) != 0;
+    bool applyRight = (eventFlags & DS_EFFECT_RIGHT_TRIGGER) != 0;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (@available(iOS 14.5, tvOS 14.5, *)) {
+            VoidController* controller = [self->_voidControllers objectForKey:@(controllerNumber)];
+            if (controller == nil) {
+                Log(LOG_W, @"Ignoring adaptive trigger effect for missing gamepad %u", controllerNumber);
+                return;
+            }
+
+            if (![controller.gamepad.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                Log(LOG_W, @"Ignoring adaptive trigger effect for non-DualSense gamepad %u", controllerNumber);
+                return;
+            }
+
+            GCDualSenseGamepad* dualSense = (GCDualSenseGamepad*)controller.gamepad.extendedGamepad;
+            if (applyLeft) {
+                ApplyAdaptiveTriggerEffect(dualSense.leftTrigger, leftEffect);
+            }
+            if (applyRight) {
+                ApplyAdaptiveTriggerEffect(dualSense.rightTrigger, rightEffect);
+            }
+        }
+    });
+}
+
 -(void) updateLeftStick:(VoidController*)controller x:(short)x y:(short)y
 {
     @synchronized(controller) {
@@ -691,6 +796,14 @@ static __weak ControllerSupport *VLSharedControllerSupport = nil;
 
 -(void) cleanupControllerHaptics:(VoidController*) controller
 {
+    if (@available(iOS 14.5, tvOS 14.5, *)) {
+        if ([controller.gamepad.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+            GCDualSenseGamepad* dualSense = (GCDualSenseGamepad*)controller.gamepad.extendedGamepad;
+            [dualSense.leftTrigger setModeOff];
+            [dualSense.rightTrigger setModeOff];
+        }
+    }
+
     [controller.lowFreqMotor cleanup];
     [controller.highFreqMotor cleanup];
     [controller.leftTriggerMotor cleanup];
@@ -854,7 +967,6 @@ static __weak ControllerSupport *VLSharedControllerSupport = nil;
                 capabilities |= LI_CCAP_TOUCHPAD;
             }
             
-            
             // LI_CTYPE_UNKNOWN for option "Both"
             if(voidController.playerIndex == 0){
                 type = _streamConfig.emulatedControllerType == LI_CTYPE_UNKNOWN ? LI_CTYPE_PS : _streamConfig.emulatedControllerType;
@@ -878,9 +990,7 @@ static __weak ControllerSupport *VLSharedControllerSupport = nil;
                     }
                 }
             }
-            
-            
-            
+                        
             // Detect supported haptics localities
             if (controller.haptics) {
                 if ([controller.haptics.supportedLocalities containsObject:GCHapticsLocalityHandles]) {

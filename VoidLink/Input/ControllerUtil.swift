@@ -14,6 +14,10 @@ import Foundation
 #if !VOIDLINK_PREVIEW
 import Collections
 #endif
+#if os(iOS) && !VOIDLINK_PREVIEW
+import SwiftUI
+import UIKit
+#endif
 
 @objc enum ControllerElementType: Int {
     case button
@@ -311,10 +315,107 @@ import Collections
         qos: .userInteractive
     )
     private static let maxQueuedDualSensePCMChunks = 8
+    private static let dualSenseHapticsEQDefaultsKey = "voidlink.dualsense.haptics.eq.v0"
+    private static let defaultDualSenseHapticsEQ: [Float] = [0.3, 1, 1, 0.3, 1]
+    private static let dualSenseHapticsEQLimits: [ClosedRange<Float>] = [0...1, 0...2, 0...2, 0...1, 0...2]
+    private static let dualSenseHapticsEQLock = NSLock()
+    private static var dualSenseHapticsEQ = loadDualSenseHapticsEQ()
     private static var dualSensePCMQueue = Deque<DualSensePCMChunk>()
     private static var dualSenseWorkerScheduled = false
     private static var dualSenseForcedDiscontinuities = Set<UInt16>()
     private static var dualSenseAuthoredEngines = [UInt16: AuthoredEngineState]()
+
+#if os(iOS)
+    private static var dualSenseHapticsEQOverlayWindow: UIWindow?
+    private static weak var dualSenseHapticsEQPreviousKeyWindow: UIWindow?
+    private static var didPresentDualSenseHapticsEQ = false
+#endif
+
+    private static func loadDualSenseHapticsEQ() -> [Float] {
+        guard let storedValues = UserDefaults.standard.array(forKey: dualSenseHapticsEQDefaultsKey),
+              storedValues.count == defaultDualSenseHapticsEQ.count else {
+            return defaultDualSenseHapticsEQ
+        }
+
+        let values = storedValues.compactMap { ($0 as? NSNumber)?.floatValue }
+        return sanitizedDualSenseHapticsEQ(values)
+    }
+
+    private static func sanitizedDualSenseHapticsEQ(_ values: [Float]) -> [Float] {
+        guard values.count == defaultDualSenseHapticsEQ.count,
+              values.allSatisfy(\.isFinite) else {
+            return defaultDualSenseHapticsEQ
+        }
+        return zip(values, dualSenseHapticsEQLimits).map { value, limits in
+            min(max(value, limits.lowerBound), limits.upperBound)
+        }
+    }
+
+    fileprivate static func dualSenseHapticsEQSnapshot() -> [Float] {
+        dualSenseHapticsEQLock.lock()
+        let values = dualSenseHapticsEQ
+        dualSenseHapticsEQLock.unlock()
+        return values
+    }
+
+    fileprivate static func defaultDualSenseHapticsEQSnapshot() -> [Float] {
+        defaultDualSenseHapticsEQ
+    }
+
+    fileprivate static func previewDualSenseHapticsEQ(_ values: [Float]) {
+        let sanitizedValues = sanitizedDualSenseHapticsEQ(values)
+        dualSenseHapticsEQLock.lock()
+        dualSenseHapticsEQ = sanitizedValues
+        dualSenseHapticsEQLock.unlock()
+    }
+
+    fileprivate static func saveDualSenseHapticsEQ(_ values: [Float]) {
+        let sanitizedValues = sanitizedDualSenseHapticsEQ(values)
+        previewDualSenseHapticsEQ(sanitizedValues)
+        UserDefaults.standard.set(sanitizedValues.map(Double.init), forKey: dualSenseHapticsEQDefaultsKey)
+    }
+
+#if os(iOS)
+    @available(iOS 14.0, *)
+    @objc static func presentDualSenseHapticsEQIfNeeded() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard !didPresentDualSenseHapticsEQ,
+              dualSenseHapticsEQOverlayWindow == nil,
+              let keyWindow = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap(\.windows)
+                .first(where: { $0.isKeyWindow }),
+              let windowScene = keyWindow.windowScene else {
+            return
+        }
+
+        didPresentDualSenseHapticsEQ = true
+        dualSenseHapticsEQPreviousKeyWindow = keyWindow
+
+        let store = DualSenseHapticsEQStore(values: dualSenseHapticsEQSnapshot())
+        let rootView = DualSenseHapticsEQView(store: store) {
+            closeDualSenseHapticsEQ()
+        }
+        let hostingController = UIHostingController(rootView: rootView)
+        hostingController.view.backgroundColor = .clear
+
+        let overlayWindow = UIWindow(windowScene: windowScene)
+        overlayWindow.frame = windowScene.screen.bounds
+        overlayWindow.windowLevel = .alert + 1
+        overlayWindow.backgroundColor = .clear
+        overlayWindow.rootViewController = hostingController
+        dualSenseHapticsEQOverlayWindow = overlayWindow
+        overlayWindow.makeKeyAndVisible()
+    }
+
+    fileprivate static func closeDualSenseHapticsEQ() {
+        dualSenseHapticsEQOverlayWindow?.isHidden = true
+        dualSenseHapticsEQOverlayWindow?.rootViewController = nil
+        dualSenseHapticsEQOverlayWindow = nil
+        dualSenseHapticsEQPreviousKeyWindow?.makeKey()
+        dualSenseHapticsEQPreviousKeyWindow = nil
+    }
+#endif
 
     @objc(enqueueDualSenseHapticsPCMWithControllerNumber:flags:sequenceNumber:presentationTimeUs:frameCount:pcmData:)
     static func enqueueDualSenseHapticsPCM(
@@ -499,21 +600,38 @@ import Collections
             return
         }
 
-        let leftAmplitude = min(max(left?.rms_amplitude ?? 0, 0), 1)
-        let rightAmplitude = min(max(right?.rms_amplitude ?? 0, 0), 1)
-        let leftSharpness = min(max(1 - (left?.low_band_ratio ?? 1), 0), 1)
-        let rightSharpness = min(max(1 - (right?.low_band_ratio ?? 1), 0), 1)
-        let leftTransient = min(max(left?.transient_strength ?? 0, 0), 1)
-        let rightTransient = min(max(right?.transient_strength ?? 0, 0), 1)
+        let eq = dualSenseHapticsEQSnapshot()
+        let masterGain = eq[0]
+        let lowBandGain = eq[1]
+        let highBandGain = eq[2]
+        let transientGain = eq[3]
+        let sharpnessGain = eq[4]
+
+        func renderValues(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
+            let lowBandRatio = min(max(lane?.low_band_ratio ?? 1, 0), 1)
+            let highBandRatio = 1 - lowBandRatio
+            let bandGain = (
+                lowBandRatio * lowBandGain * lowBandGain +
+                highBandRatio * highBandGain * highBandGain
+            ).squareRoot()
+            return (
+                min(max((lane?.rms_amplitude ?? 0) * masterGain * bandGain, 0), 1),
+                min(max(highBandRatio * sharpnessGain, 0), 1),
+                min(max((lane?.transient_strength ?? 0) * masterGain * transientGain * bandGain, 0), 1)
+            )
+        }
+
+        let leftValues = renderValues(for: left)
+        let rightValues = renderValues(for: right)
 
         controllerSupport.renderDualSenseHaptics(
             controllerNumber,
-            leftAmplitude: leftAmplitude,
-            leftSharpness: leftSharpness,
-            leftTransient: leftTransient,
-            rightAmplitude: rightAmplitude,
-            rightSharpness: rightSharpness,
-            rightTransient: rightTransient,
+            leftAmplitude: leftValues.amplitude,
+            leftSharpness: leftValues.sharpness,
+            leftTransient: leftValues.transient,
+            rightAmplitude: rightValues.amplitude,
+            rightSharpness: rightValues.sharpness,
+            rightTransient: rightValues.transient,
             delaySeconds: delay
         )
     }
@@ -856,6 +974,200 @@ import Collections
         return CGVector(dx: circulatedX, dy: circulatedY)
     }
 }
+
+#if os(iOS) && !VOIDLINK_PREVIEW
+@available(iOS 14.0, *)
+private final class DualSenseHapticsEQStore: ObservableObject {
+    let originalValues: [Double]
+    @Published private(set) var values: [Double]
+
+    init(values: [Float]) {
+        let doubles = values.map(Double.init)
+        originalValues = doubles
+        self.values = doubles
+    }
+
+    func binding(for index: Int) -> Binding<Double> {
+        Binding(
+            get: { self.values[index] },
+            set: { self.updateValue($0, at: index) }
+        )
+    }
+
+    func reset() {
+        values = ControllerUtil.defaultDualSenseHapticsEQSnapshot().map(Double.init)
+        preview()
+    }
+
+    func save() {
+        ControllerUtil.saveDualSenseHapticsEQ(values.map(Float.init))
+    }
+
+    func cancel() {
+        ControllerUtil.previewDualSenseHapticsEQ(originalValues.map(Float.init))
+    }
+
+    private func updateValue(_ value: Double, at index: Int) {
+        values[index] = value
+        preview()
+    }
+
+    private func preview() {
+        ControllerUtil.previewDualSenseHapticsEQ(values.map(Float.init))
+    }
+}
+
+@available(iOS 14.0, *)
+private struct DualSenseHapticsEQView: View {
+    private struct Parameter: Identifiable {
+        let id: Int
+        let title: String
+        let range: ClosedRange<Double>
+        let step: Double
+        let usesMultiplier: Bool
+    }
+
+    @ObservedObject var store: DualSenseHapticsEQStore
+    let onClose: () -> Void
+
+    private let parameters = [
+        Parameter(id: 0, title: "Master Gain", range: 0...1, step: 0.01, usesMultiplier: false),
+        Parameter(id: 1, title: "Low Band (<200 Hz)", range: 0...2, step: 0.01, usesMultiplier: true),
+        Parameter(id: 2, title: "High Band (>200 Hz)", range: 0...2, step: 0.01, usesMultiplier: true),
+        Parameter(id: 3, title: "Transient Gain", range: 0...1, step: 0.01, usesMultiplier: false),
+        Parameter(id: 4, title: "Sharpness", range: 0...2, step: 0.01, usesMultiplier: true),
+    ]
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.opacity(0.28)
+                    .edgesIgnoringSafeArea(.all)
+                    .contentShape(Rectangle())
+                    .onTapGesture { cancelAndClose() }
+
+                VStack(spacing: 12) {
+                    HStack(spacing: 10) {
+                        Text("DualSense Haptic EQ")
+                            .font(.system(size: 19, weight: .bold, design: .rounded))
+                            .foregroundColor(Color.black.opacity(0.76))
+
+                        Spacer()
+
+                        Button(action: store.reset) {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(Color.black.opacity(0.62))
+                                .frame(width: 34, height: 34)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .fill(Color.white.opacity(0.9))
+                                )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .accessibility(label: Text("Reset EQ"))
+                    }
+
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 8) {
+                            ForEach(parameters) { parameter in
+                                parameterRow(parameter)
+                            }
+                        }
+                    }
+
+                    HStack(spacing: 10) {
+                        actionButton(title: "Cancel", isPrimary: false) {
+                            cancelAndClose()
+                        }
+                        actionButton(title: "Save", isPrimary: true) {
+                            store.save()
+                            onClose()
+                        }
+                    }
+                }
+                .padding(UIDevice.current.userInterfaceIdiom == .phone ? 12 : 18)
+                .frame(maxWidth: UIDevice.current.userInterfaceIdiom == .phone ? 380 : 460)
+                .frame(maxHeight: max(280, geometry.size.height - 28))
+                .background(
+                    RoundedRectangle(cornerRadius: UIDevice.current.userInterfaceIdiom == .phone ? 22 : 28, style: .continuous)
+                        .fill(Color(red: 0.94, green: 0.97, blue: 0.98).opacity(0.98))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: UIDevice.current.userInterfaceIdiom == .phone ? 22 : 28, style: .continuous)
+                                .stroke(Color.white.opacity(0.96), lineWidth: 1.1)
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.12), radius: 24, x: 0, y: 12)
+                .padding(.horizontal, 14)
+            }
+        }
+    }
+
+    private func parameterRow(_ parameter: Parameter) -> some View {
+        HStack(spacing: 10) {
+            Text(parameter.title)
+                .font(.system(size: 12.5, weight: .bold, design: .rounded))
+                .foregroundColor(Color.black.opacity(0.64))
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(width: 132, alignment: .leading)
+
+            Slider(
+                value: store.binding(for: parameter.id),
+                in: parameter.range,
+                step: parameter.step
+            )
+            .accentColor(Color(red: 0.18, green: 0.61, blue: 0.67))
+            .environment(\.colorScheme, .light)
+
+            Text(formattedValue(store.values[parameter.id], multiplier: parameter.usesMultiplier))
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                .foregroundColor(Color(red: 0.14, green: 0.46, blue: 0.52))
+                .frame(width: 48, alignment: .trailing)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 44)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.white.opacity(0.9))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.white.opacity(0.94), lineWidth: 1)
+        )
+    }
+
+    private func actionButton(title: String, isPrimary: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundColor(isPrimary ? .white : Color.black.opacity(0.66))
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(isPrimary
+                            ? Color(red: 0.16, green: 0.53, blue: 0.59)
+                            : Color.white.opacity(0.82))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.white.opacity(isPrimary ? 0.22 : 0.76), lineWidth: 1)
+                )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+
+    private func formattedValue(_ value: Double, multiplier: Bool) -> String {
+        String(format: multiplier ? "x%.2f" : "%.2f", value)
+    }
+
+    private func cancelAndClose() {
+        store.cancel()
+        onClose()
+    }
+}
+#endif
 
 // MARK: - realtime overlay
 

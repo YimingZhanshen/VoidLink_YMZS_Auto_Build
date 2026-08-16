@@ -360,7 +360,7 @@ final class ControllerNavigator: NSObject {
         guard uiNavigationDelegate === delegate else { return }
         /*
         if previousUINavigationDelegate is StreamFrameViewController {
-            ControllerSupport.sharedInstance().reinitiatePrimaryController()
+            ControllerSupport.sharedInstance()?.reinitiatePrimaryController()
             return
         } */
         
@@ -378,7 +378,7 @@ final class ControllerNavigator: NSObject {
                 // GamepadNavigationIllustrationHud.updateNavigationElements(controllerMouseNavigationElements)
                 return
             }
-            ControllerSupport.sharedInstance().reinitiatePrimaryController()
+            ControllerSupport.sharedInstance()?.reinitiatePrimaryController()
             GamepadNavigationIllustrationHud.updateHud()
             return;
         }
@@ -769,7 +769,7 @@ final class ControllerNavigator: NSObject {
                 radialMenuDelayTimer?.clean()
                 stickReleasedInRadialMenu = false
                 if radialMenuView == nil, uiNavigationDelegate is StreamFrameViewController {
-                    ControllerSupport.sharedInstance().sendNavigationButtonPress()
+                    ControllerSupport.sharedInstance()?.sendNavigationButtonPress()
                     return
                 }
                 radialMenuView?.dismiss()

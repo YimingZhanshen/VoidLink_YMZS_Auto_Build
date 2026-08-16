@@ -3,6 +3,7 @@
 //
 
 #include <Limelight.h>
+#include <moonlight_haptics/authored_haptics.h>
 #import "SettingsViewController.h"
 #import "MainFrameViewController.h"
 #import "LoadingFrameViewController.h"

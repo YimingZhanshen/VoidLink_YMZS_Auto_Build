@@ -87,6 +87,93 @@
     }
 }
 
+-(void)setAuthoredAmplitude:(float)amplitude
+                  sharpness:(float)sharpness
+          transientStrength:(float)transientStrength API_AVAILABLE(ios(14.0), tvos(14.0)) {
+    if (_hapticEngine == nil) {
+        return;
+    }
+
+    amplitude = fmaxf(0.0f, fminf(1.0f, amplitude));
+    sharpness = fmaxf(0.0f, fminf(1.0f, sharpness));
+    transientStrength = fmaxf(0.0f, fminf(1.0f, transientStrength));
+
+    NSError* error = nil;
+    if (amplitude == 0.0f) {
+        if (_playing) {
+            [_hapticPlayer stopAtTime:CHHapticTimeImmediate error:&error];
+            _playing = NO;
+        }
+    }
+    else {
+        if (_hapticPlayer == nil) {
+            CHHapticEventParameter* intensity = [[CHHapticEventParameter alloc]
+                initWithParameterID:CHHapticEventParameterIDHapticIntensity value:1.0f];
+            CHHapticEventParameter* eventSharpness = [[CHHapticEventParameter alloc]
+                initWithParameterID:CHHapticEventParameterIDHapticSharpness value:0.5f];
+            CHHapticEvent* event = [[CHHapticEvent alloc]
+                initWithEventType:CHHapticEventTypeHapticContinuous
+                parameters:@[intensity, eventSharpness]
+                relativeTime:0
+                duration:GCHapticDurationInfinite];
+            CHHapticPattern* pattern = [[CHHapticPattern alloc]
+                initWithEvents:@[event] parameters:@[] error:&error];
+            if (pattern == nil || error != nil) {
+                Log(LOG_W, @"Controller %d: Authored haptic pattern creation failed: %@", _playerIndex, error);
+                return;
+            }
+            _hapticPlayer = [_hapticEngine createPlayerWithPattern:pattern error:&error];
+            if (_hapticPlayer == nil || error != nil) {
+                Log(LOG_W, @"Controller %d: Authored haptic player creation failed: %@", _playerIndex, error);
+                return;
+            }
+        }
+
+        NSArray* parameters = @[
+            [[CHHapticDynamicParameter alloc]
+                initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl
+                value:amplitude relativeTime:0],
+            [[CHHapticDynamicParameter alloc]
+                initWithParameterID:CHHapticDynamicParameterIDHapticSharpnessControl
+                value:sharpness relativeTime:0]
+        ];
+        [_hapticPlayer sendParameters:parameters atTime:CHHapticTimeImmediate error:&error];
+        if (error != nil) {
+            Log(LOG_W, @"Controller %d: Authored haptic parameter update failed: %@", _playerIndex, error);
+            return;
+        }
+        if (!_playing) {
+            [_hapticPlayer startAtTime:CHHapticTimeImmediate error:&error];
+            if (error != nil) {
+                _hapticPlayer = nil;
+                Log(LOG_W, @"Controller %d: Authored haptic playback start failed: %@", _playerIndex, error);
+                return;
+            }
+            _playing = YES;
+        }
+    }
+
+    // Emit one-shot attacks only when the analyzer found a meaningful transient.
+    if (transientStrength >= 0.05f) {
+        CHHapticEventParameter* intensity = [[CHHapticEventParameter alloc]
+            initWithParameterID:CHHapticEventParameterIDHapticIntensity value:transientStrength];
+        CHHapticEventParameter* eventSharpness = [[CHHapticEventParameter alloc]
+            initWithParameterID:CHHapticEventParameterIDHapticSharpness value:sharpness];
+        CHHapticEvent* event = [[CHHapticEvent alloc]
+            initWithEventType:CHHapticEventTypeHapticTransient
+            parameters:@[intensity, eventSharpness]
+            relativeTime:0];
+        CHHapticPattern* pattern = [[CHHapticPattern alloc]
+            initWithEvents:@[event] parameters:@[] error:&error];
+        id<CHHapticPatternPlayer> transientPlayer = pattern == nil ? nil :
+            [_hapticEngine createPlayerWithPattern:pattern error:&error];
+        [transientPlayer startAtTime:CHHapticTimeImmediate error:&error];
+        if (error != nil) {
+            Log(LOG_W, @"Controller %d: Authored haptic transient failed: %@", _playerIndex, error);
+        }
+    }
+}
+
 -(id) initDeviceEngineContextWithGamepad:(GCController*)gamepad API_AVAILABLE(ios(13.0), tvos(13.0)) {
     NSError *error = nil;
     _hapticEngine = [[CHHapticEngine alloc] initAndReturnError:&error];

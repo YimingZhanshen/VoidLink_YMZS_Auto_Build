@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1D500022FFC000100000001 /* authored_haptics_engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A1D500012FFC000100000001 /* authored_haptics_engine.cpp */; settings = {COMPILER_FLAGS = "-std=c++17"; }; };
 		180345E12E819877004AF36F /* libopus-sim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 180345E02E819877004AF36F /* libopus-sim.a */; };
 		180E6E372E93BFDB0067C73A /* AlertControllerUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180E6E362E93BFDB0067C73A /* AlertControllerUtil.swift */; };
 		1817B61E2E6FD04D000D938D /* SafeTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1817B61D2E6FD04D000D938D /* SafeTimer.swift */; };
@@ -187,6 +188,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A1D500012FFC000100000001 /* authored_haptics_engine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = authored_haptics_engine.cpp; path = "third_party/moonlight-audio-haptics/src/core/authored_haptics_engine.cpp"; sourceTree = SOURCE_ROOT; };
 		180345E02E819877004AF36F /* libopus-sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libopus-sim.a"; sourceTree = "<group>"; };
 		180E6E362E93BFDB0067C73A /* AlertControllerUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertControllerUtil.swift; sourceTree = "<group>"; };
 		1817B61D2E6FD04D000D938D /* SafeTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeTimer.swift; sourceTree = "<group>"; };
@@ -1139,6 +1141,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1D500022FFC000100000001 /* authored_haptics_engine.cpp in Sources */,
 				FB290D0719B2C406004C83CF /* Limelight.xcdatamodeld in Sources */,
 				9819CC22254F180F008A7C8E /* AbsoluteTouchHandler.m in Sources */,
 				9819CC14254F107A008A7C8E /* RelativeTouchHandler.m in Sources */,
@@ -1345,7 +1348,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.trzj.VoidLinkPreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG VOIDLINK_PREVIEW $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1395,6 +1398,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.trzj.VoidLinkPreview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "VOIDLINK_PREVIEW $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -1529,10 +1533,13 @@
 				GCC_PREFIX_HEADER = "VoidLink/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
-					"$(PROJECT_DIR)/libs/**",
+					"$(PROJECT_DIR)/libs/FFmpeg/include",
+					"$(PROJECT_DIR)/libs/SDL2/include",
+					"$(PROJECT_DIR)/libs/opus/include/opus",
 					"$(PROJECT_DIR)/Limelight/Input/CustomOSC",
 					"$(PROJECT_DIR)/Limelight/ViewControllers/CustomOSCViewControl",
 					"$(PROJECT_DIR)/Limelight/ViewControllers/CustomOSCViewControl/Cells",
@@ -1597,10 +1604,13 @@
 				GCC_PREFIX_HEADER = "VoidLink/Limelight-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
-					"$(PROJECT_DIR)/libs/**",
+					"$(PROJECT_DIR)/libs/FFmpeg/include",
+					"$(PROJECT_DIR)/libs/SDL2/include",
+					"$(PROJECT_DIR)/libs/opus/include/opus",
 					"$(PROJECT_DIR)/Limelight/Input/CustomOSC",
 					"$(PROJECT_DIR)/Limelight/ViewControllers/CustomOSCViewControl",
 					"$(PROJECT_DIR)/Limelight/ViewControllers/CustomOSCViewControl/Cells",

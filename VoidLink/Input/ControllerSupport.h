@@ -26,7 +26,7 @@
 
 @property (readonly) bool shallDisableGyroHotSwitch;
 
-+(ControllerSupport*) sharedInstance;
++(nullable ControllerSupport*) sharedInstance;
 
 -(id) initWithConfig:(StreamConfiguration*)streamConfig delegate:(id<ControllerSupportDelegate>)delegate;
 -(void) connectionEstablished;
@@ -55,6 +55,15 @@
 -(void) setAdaptiveTriggers:(uint16_t)controllerNumber eventFlags:(uint8_t)eventFlags
                     typeLeft:(uint8_t)typeLeft typeRight:(uint8_t)typeRight
                         left:(const uint8_t*)left right:(const uint8_t*)right;
+-(void) renderDualSenseHaptics:(uint16_t)controllerNumber
+                 leftAmplitude:(float)leftAmplitude
+                 leftSharpness:(float)leftSharpness
+                 leftTransient:(float)leftTransient
+                rightAmplitude:(float)rightAmplitude
+                rightSharpness:(float)rightSharpness
+                rightTransient:(float)rightTransient
+                   delaySeconds:(double)delaySeconds;
+-(void) cancelScheduledDualSenseHaptics;
 -(void) updateTimerStateForOsc;
 
 -(uint16_t) getActiveGamepadMask;

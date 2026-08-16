@@ -139,6 +139,8 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
     bool _controllerGyroSwitchHoldPressed;
     ControllerGyroSwitchMode _gyroSwitchMode;
 
+    uint64_t _authoredHapticsGeneration;
+
     __weak MotionHandler* motionHandler;
 }
 
@@ -558,6 +560,55 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
             }
         }
     });
+}
+
+-(void) renderDualSenseHaptics:(uint16_t)controllerNumber
+                 leftAmplitude:(float)leftAmplitude
+                 leftSharpness:(float)leftSharpness
+                 leftTransient:(float)leftTransient
+                rightAmplitude:(float)rightAmplitude
+                rightSharpness:(float)rightSharpness
+                rightTransient:(float)rightTransient
+                   delaySeconds:(double)delaySeconds {
+    __block uint64_t generation;
+    @synchronized(self) {
+        generation = _authoredHapticsGeneration;
+    }
+    dispatch_block_t renderBlock = ^{
+        @synchronized(self) {
+            if (generation != self->_authoredHapticsGeneration) {
+                return;
+            }
+        }
+        if (@available(iOS 14.5, tvOS 14.5, *)) {
+            VoidController* controller = [self->_voidControllers objectForKey:@(controllerNumber)];
+            if (controller == nil ||
+                ![controller.gamepad.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                return;
+            }
+
+            [controller.lowFreqMotor setAuthoredAmplitude:leftAmplitude
+                                                sharpness:leftSharpness
+                                        transientStrength:leftTransient];
+            [controller.highFreqMotor setAuthoredAmplitude:rightAmplitude
+                                                 sharpness:rightSharpness
+                                         transientStrength:rightTransient];
+        }
+    };
+
+    if (delaySeconds > 0.0) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delaySeconds * NSEC_PER_SEC)),
+                       dispatch_get_main_queue(), renderBlock);
+    }
+    else {
+        dispatch_async(dispatch_get_main_queue(), renderBlock);
+    }
+}
+
+-(void) cancelScheduledDualSenseHaptics {
+    @synchronized(self) {
+        _authoredHapticsGeneration++;
+    }
 }
 
 -(void) updateLeftStick:(VoidController*)controller x:(short)x y:(short)y
@@ -988,6 +1039,12 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
                     if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
                         type = LI_CTYPE_PS;
                     }
+                }
+            }
+
+            if (@available(iOS 14.5, tvOS 14.5, *)) {
+                if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                    capabilities |= LI_CCAP_DS5_HAPTICS_PCM;
                 }
             }
                         
@@ -2063,6 +2120,8 @@ double rc_expo(double x, double expo) {
 
 -(void) cleanup
 {
+    [ControllerUtil stopAllDualSenseHaptics];
+
     if (VLSharedControllerSupport == self) {
         VLSharedControllerSupport = nil;
     }

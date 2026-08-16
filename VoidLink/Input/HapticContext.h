@@ -12,6 +12,9 @@
 @interface HapticContext : NSObject
 
 -(void)setMotorAmplitude:(unsigned short)amplitude;
+-(void)setAuthoredAmplitude:(float)amplitude
+                  sharpness:(float)sharpness
+          transientStrength:(float)transientStrength;
 -(void)cleanup;
 
 +(HapticContext*) createContextForHighFreqMotor:(GCController*)gamepad;

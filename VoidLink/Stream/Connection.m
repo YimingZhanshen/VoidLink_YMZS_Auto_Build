@@ -588,6 +588,22 @@ void ClSetAdaptiveTriggers(uint16_t controllerNumber, uint8_t eventFlags,
                               right:right];
 }
 
+void ClDs5HapticsPcm(const LI_DS5_HAPTICS_PCM_FRAME* frame)
+{
+    if (frame == NULL || frame->pcmData == NULL) {
+        return;
+    }
+
+    // common-c owns pcmData only for this callback, so copy before returning.
+    NSData* pcmData = [NSData dataWithBytes:frame->pcmData length:frame->pcmDataLength];
+    [ControllerUtil enqueueDualSenseHapticsPCMWithControllerNumber:frame->controllerNumber
+                                                             flags:frame->flags
+                                                    sequenceNumber:frame->sequenceNumber
+                                                presentationTimeUs:frame->presentationTimeUs
+                                                        frameCount:frame->frameCount
+                                                           pcmData:pcmData];
+}
+
 -(void) terminate
 {
     // Interrupt any action blocking LiStartConnection(). This is
@@ -597,6 +613,7 @@ void ClSetAdaptiveTriggers(uint16_t controllerNumber, uint8_t eventFlags,
     LiInterruptConnection();
     [audioPlayerNode stop];
     [audioEngine stop];
+    [ControllerUtil stopAllDualSenseHaptics];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
     // We dispatch this async to get out because this can be invoked
@@ -750,6 +767,7 @@ void ClSetAdaptiveTriggers(uint16_t controllerNumber, uint8_t eventFlags,
     _clCallbacks.setMotionEventState = ClSetMotionEventState;
     _clCallbacks.setControllerLED = ClSetControllerLED;
     _clCallbacks.setAdaptiveTriggers = ClSetAdaptiveTriggers;
+    _clCallbacks.ds5HapticsPcm = ClDs5HapticsPcm;
     
     [[NSNotificationCenter defaultCenter] addObserver:self
            selector:@selector(handleAudioSessionInterruption:)

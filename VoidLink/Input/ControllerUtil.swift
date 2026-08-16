@@ -11,6 +11,9 @@ import GameController
 import Combine
 import CoreGraphics
 import Foundation
+#if !VOIDLINK_PREVIEW
+import Collections
+#endif
 
 @objc enum ControllerElementType: Int {
     case button
@@ -260,6 +263,261 @@ import Foundation
 
 @objc class ControllerUtil: NSObject {
     @objc static weak var delegate: ControllerUtilDelegate?
+
+#if !VOIDLINK_PREVIEW
+    private struct DualSensePCMChunk {
+        let controllerNumber: UInt16
+        let flags: UInt8
+        let sequenceNumber: UInt32
+        let presentationTimeUs: UInt64
+        let frameCount: UInt16
+        let pcmData: Data
+    }
+
+    private final class AuthoredEngineState {
+        var engine: OpaquePointer?
+        var renderHostAnchorUs: UInt64?
+        var renderLocalAnchor = 0.0
+
+        init?() {
+            var config = AhAuthoredConfig()
+            guard ah_authored_config_init(&config, 48_000) == AH_STATUS_OK else {
+                return nil
+            }
+            guard ah_authored_create(&config, &engine) == AH_STATUS_OK, engine != nil else {
+                return nil
+            }
+        }
+
+        deinit {
+            ah_authored_destroy(engine)
+        }
+
+        func renderDelay(for timestampUs: UInt64, resetTimeline: Bool) -> TimeInterval {
+            let now = ProcessInfo.processInfo.systemUptime
+            if resetTimeline || renderHostAnchorUs == nil {
+                renderHostAnchorUs = timestampUs
+                renderLocalAnchor = now + 0.01
+            }
+            let anchor = renderHostAnchorUs ?? timestampUs
+            let hostDelta = timestampUs >= anchor ? Double(timestampUs - anchor) / 1_000_000.0 : 0
+            return min(max(renderLocalAnchor + hostDelta - now, 0), 0.08)
+        }
+    }
+
+    private static let dualSenseHapticsLock = NSLock()
+    private static let dualSenseHapticsWorker = DispatchQueue(
+        label: "com.voidlink.dualsense-authored-haptics",
+        qos: .userInteractive
+    )
+    private static let maxQueuedDualSensePCMChunks = 8
+    private static var dualSensePCMQueue = Deque<DualSensePCMChunk>()
+    private static var dualSenseWorkerScheduled = false
+    private static var dualSenseForcedDiscontinuities = Set<UInt16>()
+    private static var dualSenseAuthoredEngines = [UInt16: AuthoredEngineState]()
+
+    @objc(enqueueDualSenseHapticsPCMWithControllerNumber:flags:sequenceNumber:presentationTimeUs:frameCount:pcmData:)
+    static func enqueueDualSenseHapticsPCM(
+        controllerNumber: UInt16,
+        flags: UInt8,
+        sequenceNumber: UInt32,
+        presentationTimeUs: UInt64,
+        frameCount: UInt16,
+        pcmData: Data
+    ) {
+        let expectedByteCount = Int(frameCount) * 2 * MemoryLayout<Int16>.size
+        guard frameCount <= 480, pcmData.count == expectedByteCount else {
+            NSLog("DualSense haptics: rejected malformed PCM chunk for controller %u", controllerNumber)
+            return
+        }
+
+        let chunk = DualSensePCMChunk(
+            controllerNumber: controllerNumber,
+            flags: flags,
+            sequenceNumber: sequenceNumber,
+            presentationTimeUs: presentationTimeUs,
+            frameCount: frameCount,
+            pcmData: pcmData
+        )
+
+        dualSenseHapticsLock.lock()
+        if dualSensePCMQueue.count >= maxQueuedDualSensePCMChunks,
+           let dropped = dualSensePCMQueue.popFirst() {
+            dualSenseForcedDiscontinuities.insert(dropped.controllerNumber)
+        }
+        dualSensePCMQueue.append(chunk)
+        let shouldScheduleWorker = !dualSenseWorkerScheduled
+        dualSenseWorkerScheduled = true
+        dualSenseHapticsLock.unlock()
+
+        if shouldScheduleWorker {
+            dualSenseHapticsWorker.async {
+                drainDualSensePCMQueue()
+            }
+        }
+    }
+
+    @objc static func stopAllDualSenseHaptics() {
+        ControllerSupport.sharedInstance()?.cancelScheduledDualSenseHaptics()
+
+        dualSenseHapticsLock.lock()
+        dualSensePCMQueue.removeAll(keepingCapacity: true)
+        dualSenseForcedDiscontinuities.removeAll(keepingCapacity: true)
+        dualSenseHapticsLock.unlock()
+
+        dualSenseHapticsWorker.async {
+            let controllerNumbers = Array(dualSenseAuthoredEngines.keys)
+            dualSenseAuthoredEngines.removeAll(keepingCapacity: false)
+            for controllerNumber in controllerNumbers {
+                renderDualSenseHaptics(controllerNumber: controllerNumber, left: nil, right: nil, delay: 0)
+            }
+        }
+    }
+
+    private static func drainDualSensePCMQueue() {
+        while true {
+            dualSenseHapticsLock.lock()
+            guard var chunk = dualSensePCMQueue.popFirst() else {
+                dualSenseWorkerScheduled = false
+                dualSenseHapticsLock.unlock()
+                return
+            }
+            if dualSenseForcedDiscontinuities.remove(chunk.controllerNumber) != nil {
+                chunk = DualSensePCMChunk(
+                    controllerNumber: chunk.controllerNumber,
+                    flags: chunk.flags | 0x04,
+                    sequenceNumber: chunk.sequenceNumber,
+                    presentationTimeUs: chunk.presentationTimeUs,
+                    frameCount: chunk.frameCount,
+                    pcmData: chunk.pcmData
+                )
+            }
+            dualSenseHapticsLock.unlock()
+            processDualSensePCMChunk(chunk)
+        }
+    }
+
+    private static func processDualSensePCMChunk(_ chunk: DualSensePCMChunk) {
+        let isStreamStart = (chunk.flags & 0x01) != 0
+        let isStreamEnd = (chunk.flags & 0x02) != 0
+        let isDiscontinuity = (chunk.flags & 0x04) != 0
+
+        if isStreamStart || dualSenseAuthoredEngines[chunk.controllerNumber] == nil {
+            dualSenseAuthoredEngines[chunk.controllerNumber] = AuthoredEngineState()
+            NSLog("DualSense haptics: stream started for controller %u", chunk.controllerNumber)
+        }
+        guard let state = dualSenseAuthoredEngines[chunk.controllerNumber],
+              let engine = state.engine else {
+            NSLog("DualSense haptics: failed to create authored engine for controller %u", chunk.controllerNumber)
+            return
+        }
+
+        var inputFlags: UInt32 = 0
+        if isStreamStart { inputFlags |= UInt32(AH_AUTHORED_INPUT_STREAM_START) }
+        if isDiscontinuity { inputFlags |= UInt32(AH_AUTHORED_INPUT_DISCONTINUITY) }
+        if isStreamEnd { inputFlags |= UInt32(AH_AUTHORED_INPUT_STREAM_END) }
+
+        var samples = [Int16](repeating: 0, count: Int(chunk.frameCount) * 2)
+        chunk.pcmData.withUnsafeBytes { rawBuffer in
+            let bytes = rawBuffer.bindMemory(to: UInt8.self)
+            for index in samples.indices {
+                let offset = index * 2
+                let value = UInt16(bytes[offset]) | (UInt16(bytes[offset + 1]) << 8)
+                samples[index] = Int16(bitPattern: value)
+            }
+        }
+
+        let outputCapacity = ah_authored_get_max_output_frames(
+            engine,
+            UInt32(chunk.frameCount),
+            inputFlags
+        )
+        var outputFrames = [AhAuthoredHapticFrame](
+            repeating: AhAuthoredHapticFrame(),
+            count: Int(outputCapacity)
+        )
+        var outputCount: UInt32 = 0
+        let status = samples.withUnsafeBufferPointer { sampleBuffer -> AhStatus in
+            var input = AhAuthoredProcessInput()
+            input.struct_size = UInt32(MemoryLayout<AhAuthoredProcessInput>.size)
+            input.interleaved_pcm = sampleBuffer.baseAddress
+            input.frame_count = UInt32(chunk.frameCount)
+            input.flags = inputFlags
+            input.first_sample_time_us = chunk.presentationTimeUs
+            input.sequence_number = chunk.sequenceNumber
+            return ah_authored_process_i16(
+                engine,
+                &input,
+                &outputFrames,
+                outputCapacity,
+                &outputCount
+            )
+        }
+
+        guard status == AH_STATUS_OK || status == AH_STATUS_OUTPUT_AVAILABLE else {
+            NSLog("DualSense haptics: authored conversion failed with status %d", status)
+            ah_authored_reset(engine)
+            renderDualSenseHaptics(controllerNumber: chunk.controllerNumber, left: nil, right: nil, delay: 0)
+            return
+        }
+
+        var finalRenderDelay = 0.0
+        for index in 0..<Int(outputCount) {
+            let frame = outputFrames[index]
+            let silent = (frame.flags & UInt32(AH_AUTHORED_FRAME_SILENT)) != 0
+            let resetTimeline = isStreamStart || isDiscontinuity ||
+                (frame.flags & UInt32(AH_AUTHORED_FRAME_DISCONTINUITY)) != 0
+            let delay = state.renderDelay(for: frame.timestamp_us, resetTimeline: resetTimeline && index == 0)
+            finalRenderDelay = max(finalRenderDelay, delay)
+            renderDualSenseHaptics(
+                controllerNumber: chunk.controllerNumber,
+                left: silent ? nil : frame.lanes.0,
+                right: silent ? nil : frame.lanes.1,
+                delay: delay
+            )
+        }
+
+        if isStreamEnd {
+            renderDualSenseHaptics(
+                controllerNumber: chunk.controllerNumber,
+                left: nil,
+                right: nil,
+                delay: finalRenderDelay + 0.005
+            )
+            dualSenseAuthoredEngines.removeValue(forKey: chunk.controllerNumber)
+            NSLog("DualSense haptics: stream ended for controller %u", chunk.controllerNumber)
+        }
+    }
+
+    private static func renderDualSenseHaptics(
+        controllerNumber: UInt16,
+        left: AhAuthoredLaneFrame?,
+        right: AhAuthoredLaneFrame?,
+        delay: TimeInterval
+    ) {
+        guard let controllerSupport = ControllerSupport.sharedInstance() else {
+            return
+        }
+
+        let leftAmplitude = min(max(left?.rms_amplitude ?? 0, 0), 1)
+        let rightAmplitude = min(max(right?.rms_amplitude ?? 0, 0), 1)
+        let leftSharpness = min(max(1 - (left?.low_band_ratio ?? 1), 0), 1)
+        let rightSharpness = min(max(1 - (right?.low_band_ratio ?? 1), 0), 1)
+        let leftTransient = min(max(left?.transient_strength ?? 0, 0), 1)
+        let rightTransient = min(max(right?.transient_strength ?? 0, 0), 1)
+
+        controllerSupport.renderDualSenseHaptics(
+            controllerNumber,
+            leftAmplitude: leftAmplitude,
+            leftSharpness: leftSharpness,
+            leftTransient: leftTransient,
+            rightAmplitude: rightAmplitude,
+            rightSharpness: rightSharpness,
+            rightTransient: rightTransient,
+            delaySeconds: delay
+        )
+    }
+#endif
     
     static private let stickMaxOffset:CGFloat = 0x7FFE
     @objc static var navigationActionTriggered:Bool = false

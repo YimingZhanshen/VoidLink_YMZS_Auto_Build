@@ -316,11 +316,7 @@ import UIKit
         qos: .userInteractive
     )
     private static let maxQueuedDualSensePCMChunks = 8
-    private static let dualSenseHapticsEQDefaultsKey = "voidlink.dualsense.haptics.eq.v0"
-    private static let defaultDualSenseHapticsEQ: [Float] = [0.3, 1, 1, 0.3, 1]
-    private static let dualSenseHapticsEQLimits: [ClosedRange<Float>] = [0...1, 0...2, 0...2, 0...1, 0...2]
-    private static let dualSenseHapticsEQLock = NSLock()
-    private static var dualSenseHapticsEQ = loadDualSenseHapticsEQ()
+    private static let defaultDualSenseHapticsEQ: [Float] = [0.78, 0.98, 1.59, 0.175, 1.2]
     private static var dualSensePCMQueue = Deque<DualSensePCMChunk>()
     private static var dualSenseWorkerScheduled = false
     private static var dualSenseForcedDiscontinuities = Set<UInt16>()
@@ -332,31 +328,8 @@ import UIKit
     private static var didPresentDualSenseHapticsEQ = false
 #endif
 
-    private static func loadDualSenseHapticsEQ() -> [Float] {
-        guard let storedValues = UserDefaults.standard.array(forKey: dualSenseHapticsEQDefaultsKey),
-              storedValues.count == defaultDualSenseHapticsEQ.count else {
-            return defaultDualSenseHapticsEQ
-        }
-
-        let values = storedValues.compactMap { ($0 as? NSNumber)?.floatValue }
-        return sanitizedDualSenseHapticsEQ(values)
-    }
-
-    private static func sanitizedDualSenseHapticsEQ(_ values: [Float]) -> [Float] {
-        guard values.count == defaultDualSenseHapticsEQ.count,
-              values.allSatisfy(\.isFinite) else {
-            return defaultDualSenseHapticsEQ
-        }
-        return zip(values, dualSenseHapticsEQLimits).map { value, limits in
-            min(max(value, limits.lowerBound), limits.upperBound)
-        }
-    }
-
     fileprivate static func dualSenseHapticsEQSnapshot() -> [Float] {
-        dualSenseHapticsEQLock.lock()
-        let values = dualSenseHapticsEQ
-        dualSenseHapticsEQLock.unlock()
-        return values
+        defaultDualSenseHapticsEQ
     }
 
     fileprivate static func defaultDualSenseHapticsEQSnapshot() -> [Float] {
@@ -364,16 +337,9 @@ import UIKit
     }
 
     fileprivate static func previewDualSenseHapticsEQ(_ values: [Float]) {
-        let sanitizedValues = sanitizedDualSenseHapticsEQ(values)
-        dualSenseHapticsEQLock.lock()
-        dualSenseHapticsEQ = sanitizedValues
-        dualSenseHapticsEQLock.unlock()
     }
 
     fileprivate static func saveDualSenseHapticsEQ(_ values: [Float]) {
-        let sanitizedValues = sanitizedDualSenseHapticsEQ(values)
-        previewDualSenseHapticsEQ(sanitizedValues)
-        UserDefaults.standard.set(sanitizedValues.map(Double.init), forKey: dualSenseHapticsEQDefaultsKey)
     }
 
 #if os(iOS)
@@ -688,6 +654,7 @@ import UIKit
             rightValues.transient += (commonTransient - rightValues.transient) * centerBlend
         }
 
+        /*
         if logDiagnostics {
             NSLog(
                 "DS5 authored: c=%u srcL[rms=%.3f high=%.3f hz=%.0f] srcR[rms=%.3f high=%.3f hz=%.0f] corr=%.2f outL[a=%.3f s=%.3f t=%.3f] outR[a=%.3f s=%.3f t=%.3f]",
@@ -707,6 +674,7 @@ import UIKit
                 Double(rightValues.transient)
             )
         }
+        */
 
         controllerSupport.renderDualSenseHaptics(
             controllerNumber,

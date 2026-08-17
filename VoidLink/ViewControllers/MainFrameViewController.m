@@ -2326,11 +2326,6 @@ static NSMutableSet* hostList;
         ControllerNavigator.controllerMouseExpo = settings.controllerMouseExpo.floatValue;
         if(ControllerNavigator.enabled) [ControllerNavigator start];
 
-#if !TARGET_OS_TV
-        if (@available(iOS 14.0, *)) {
-            [ControllerUtil presentDualSenseHapticsEQIfNeeded];
-        }
-#endif
     }
 }
 

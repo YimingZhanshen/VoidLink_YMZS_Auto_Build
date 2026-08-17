@@ -1916,6 +1916,7 @@ double rc_expo(double x, double expo) {
     // Stop all timers to ensure a clean slate before applying the new setting.
     [self stopTimerForAllControllers];
 
+    _gyroEnabledFlag = _gyroMode != GyroModeOff && tempSettings.emulatedControllerType.intValue == LI_CTYPE_PS;
     switch(_gyroMode) {
         case AlwaysController:
             // Activate timers only for physical controllers.

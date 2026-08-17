@@ -201,6 +201,9 @@ import CoreMotion
                     if motion.sensorsRequireManualActivation {
                         motion.sensorsActive = true
                     }
+                    if rollToLeftStick {
+                        leftStickMotion = 0
+                    }
                     if motion.sensorsActive {
                         motion.valueChangedHandler = { [weak self] motion in
                             self?.handleMotionData(gcMotion: motion)

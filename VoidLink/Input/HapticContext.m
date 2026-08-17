@@ -154,7 +154,7 @@
     }
 
     // Emit one-shot attacks only when the analyzer found a meaningful transient.
-    if (transientStrength >= 0.05f) {
+    if (transientStrength >= 0.015f) {
         CHHapticEventParameter* intensity = [[CHHapticEventParameter alloc]
             initWithParameterID:CHHapticEventParameterIDHapticIntensity value:transientStrength];
         CHHapticEventParameter* eventSharpness = [[CHHapticEventParameter alloc]

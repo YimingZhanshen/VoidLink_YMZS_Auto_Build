@@ -282,6 +282,7 @@ import UIKit
         var engine: OpaquePointer?
         var renderHostAnchorUs: UInt64?
         var renderLocalAnchor = 0.0
+        var diagnosticFrameCounter: UInt32 = 0
 
         init?() {
             var config = AhAuthoredConfig()
@@ -301,11 +302,11 @@ import UIKit
             let now = ProcessInfo.processInfo.systemUptime
             if resetTimeline || renderHostAnchorUs == nil {
                 renderHostAnchorUs = timestampUs
-                renderLocalAnchor = now + 0.01
+                renderLocalAnchor = now + 0.002
             }
             let anchor = renderHostAnchorUs ?? timestampUs
             let hostDelta = timestampUs >= anchor ? Double(timestampUs - anchor) / 1_000_000.0 : 0
-            return min(max(renderLocalAnchor + hostDelta - now, 0), 0.08)
+            return min(max(renderLocalAnchor + hostDelta - now, 0), 0.025)
         }
     }
 
@@ -570,10 +571,13 @@ import UIKit
                 (frame.flags & UInt32(AH_AUTHORED_FRAME_DISCONTINUITY)) != 0
             let delay = state.renderDelay(for: frame.timestamp_us, resetTimeline: resetTimeline && index == 0)
             finalRenderDelay = max(finalRenderDelay, delay)
+            state.diagnosticFrameCounter &+= 1
             renderDualSenseHaptics(
                 controllerNumber: chunk.controllerNumber,
                 left: silent ? nil : frame.lanes.0,
                 right: silent ? nil : frame.lanes.1,
+                laneCorrelation: frame.lane_correlation,
+                logDiagnostics: state.diagnosticFrameCounter % 100 == 0,
                 delay: delay
             )
         }
@@ -594,6 +598,8 @@ import UIKit
         controllerNumber: UInt16,
         left: AhAuthoredLaneFrame?,
         right: AhAuthoredLaneFrame?,
+        laneCorrelation: Float = 0,
+        logDiagnostics: Bool = false,
         delay: TimeInterval
     ) {
         guard let controllerSupport = ControllerSupport.sharedInstance() else {
@@ -610,19 +616,97 @@ import UIKit
         func renderValues(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
             let lowBandRatio = min(max(lane?.low_band_ratio ?? 1, 0), 1)
             let highBandRatio = 1 - lowBandRatio
-            let bandGain = (
-                lowBandRatio * lowBandGain * lowBandGain +
-                highBandRatio * highBandGain * highBandGain
-            ).squareRoot()
+            let effectiveLowBandGain = pow(lowBandGain, 1.6)
+            let effectiveHighBandGain = pow(highBandGain, 1.6)
+            let weightedLowEnergy = lowBandRatio * effectiveLowBandGain * effectiveLowBandGain
+            let weightedHighEnergy = highBandRatio * effectiveHighBandGain * effectiveHighBandGain
+            let weightedEnergy = weightedLowEnergy + weightedHighEnergy
+            let bandGain = weightedEnergy.squareRoot()
+            let equalizedHighBandRatio = weightedEnergy > 0.000_001
+                ? weightedHighEnergy / weightedEnergy
+                : 0
+
+            let zeroCrossingFrequency = min(max((lane?.zero_crossing_rate_hz ?? 0) * 0.5, 0), 400)
+            let hasTextureModel = zeroCrossingFrequency >= 40
+            let representativeFrequency = hasTextureModel
+                ? zeroCrossingFrequency
+                : 120 * lowBandRatio + 300 * highBandRatio
+            let spectralSharpness = min(max((representativeFrequency - 40) / 360, 0), 1)
+            let immediateSharpness = equalizedHighBandRatio.squareRoot()
+            let synthesizedSharpness = hasTextureModel
+                ? 0.9 * immediateSharpness + 0.1 * spectralSharpness
+                : immediateSharpness
+            let sourceTransient = min(max(lane?.transient_strength ?? 0, 0), 1)
+            let rmsAmplitude = min(max(lane?.rms_amplitude ?? 0, 0), 1)
+            let perceptualBandTrim = 0.55 + 0.55 * equalizedHighBandRatio
+            let renderedTransient = min(max(
+                pow(sourceTransient, 0.45) * sqrt(masterGain) * transientGain *
+                    bandGain * perceptualBandTrim * 1.35,
+                0
+            ), 1)
+            let continuousShare = 1 - 0.85 * min(
+                pow(sourceTransient, 0.55) * transientGain,
+                1
+            )
+            let lowBody = pow(rmsAmplitude, 1.85) *
+                (1 - highBandRatio) * effectiveLowBandGain * 0.55
+            let highTexture = pow(rmsAmplitude, 0.55) *
+                pow(highBandRatio, 1.15) * effectiveHighBandGain * 0.22
+            let midBodyTrim = 1 - 0.55 * min(max((representativeFrequency - 90) / 140, 0), 1) *
+                (1 - highBandRatio)
+            let continuousAmplitude = (lowBody + highTexture) * masterGain *
+                perceptualBandTrim * midBodyTrim * continuousShare
             return (
-                min(max((lane?.rms_amplitude ?? 0) * masterGain * bandGain, 0), 1),
-                min(max(highBandRatio * sharpnessGain, 0), 1),
-                min(max((lane?.transient_strength ?? 0) * masterGain * transientGain * bandGain, 0), 1)
+                min(max(continuousAmplitude, 0), 1),
+                min(max(synthesizedSharpness * sharpnessGain, 0), 1),
+                renderedTransient
             )
         }
 
-        let leftValues = renderValues(for: left)
-        let rightValues = renderValues(for: right)
+        var leftValues = renderValues(for: left)
+        var rightValues = renderValues(for: right)
+
+        let positiveCorrelation = min(max(laneCorrelation, 0), 1)
+        let centerBlend = min(max((positiveCorrelation - 0.1) / 0.9, 0), 1) * 0.85
+        if centerBlend > 0 {
+            let commonAmplitude = sqrt(
+                (leftValues.amplitude * leftValues.amplitude +
+                 rightValues.amplitude * rightValues.amplitude) * 0.5
+            )
+            let amplitudeSum = leftValues.amplitude + rightValues.amplitude
+            let commonSharpness = amplitudeSum > 0.000_001
+                ? (leftValues.sharpness * leftValues.amplitude +
+                   rightValues.sharpness * rightValues.amplitude) / amplitudeSum
+                : max(leftValues.sharpness, rightValues.sharpness)
+            let commonTransient = max(leftValues.transient, rightValues.transient)
+
+            leftValues.amplitude += (commonAmplitude - leftValues.amplitude) * centerBlend
+            rightValues.amplitude += (commonAmplitude - rightValues.amplitude) * centerBlend
+            leftValues.sharpness += (commonSharpness - leftValues.sharpness) * centerBlend
+            rightValues.sharpness += (commonSharpness - rightValues.sharpness) * centerBlend
+            leftValues.transient += (commonTransient - leftValues.transient) * centerBlend
+            rightValues.transient += (commonTransient - rightValues.transient) * centerBlend
+        }
+
+        if logDiagnostics {
+            NSLog(
+                "DS5 authored: c=%u srcL[rms=%.3f high=%.3f hz=%.0f] srcR[rms=%.3f high=%.3f hz=%.0f] corr=%.2f outL[a=%.3f s=%.3f t=%.3f] outR[a=%.3f s=%.3f t=%.3f]",
+                controllerNumber,
+                Double(left?.rms_amplitude ?? 0),
+                Double(1 - min(max(left?.low_band_ratio ?? 1, 0), 1)),
+                Double(min(max((left?.zero_crossing_rate_hz ?? 0) * 0.5, 0), 400)),
+                Double(right?.rms_amplitude ?? 0),
+                Double(1 - min(max(right?.low_band_ratio ?? 1, 0), 1)),
+                Double(min(max((right?.zero_crossing_rate_hz ?? 0) * 0.5, 0), 400)),
+                Double(laneCorrelation),
+                Double(leftValues.amplitude),
+                Double(leftValues.sharpness),
+                Double(leftValues.transient),
+                Double(rightValues.amplitude),
+                Double(rightValues.sharpness),
+                Double(rightValues.transient)
+            )
+        }
 
         controllerSupport.renderDualSenseHaptics(
             controllerNumber,

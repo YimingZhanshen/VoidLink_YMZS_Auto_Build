@@ -778,7 +778,7 @@ final class ControllerNavigator: NSObject {
                 radialMenuButtonPressed = false
                 radialMenuDelayTimer?.clean()
                 stickReleasedInRadialMenu = false
-                if radialMenuView == nil, uiNavigationDelegate is StreamFrameViewController {
+                if radialMenuView == nil, let vc = uiNavigationDelegate as? StreamFrameViewController, vc.hasNoPresentedVC {
                     ControllerSupport.sharedInstance()?.sendNavigationButtonPress()
                     return
                 }

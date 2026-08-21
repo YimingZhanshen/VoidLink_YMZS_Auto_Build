@@ -2813,7 +2813,8 @@ static NSMutableSet* hostList;
     dispatch_async(dispatch_get_main_queue(), ^{
         switch (item) {
             case RadialMenuItemSettings:
-                [[self revealViewController] revealToggleAnimated:YES];
+                if(self.isStreaming && !self.settingsViewExpanded) [self->streamFrameViewController expandSettingsView];
+                else [[self revealViewController] revealToggleAnimated:YES];
                 break;
             case RadialMenuItemAllSettings:
                 [self.revealViewController allSettingSelected];

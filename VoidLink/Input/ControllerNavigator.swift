@@ -315,6 +315,8 @@ final class ControllerNavigator: NSObject {
     static var settingsReadTipSuppressNextRelease = false
     
     static var navigationTimer: SafeTimer?
+    private static let navigationInitialRepeatDelay: TimeInterval = 0.23
+    private static let navigationContinuousRepeatInterval: TimeInterval = 0.177
     private static let controllerDrivenUIKitAnimationWakeToken = ControllerDrivenUIKitAnimationWakeToken()
     @objc static weak var controllerNavigationHighlightedView: UIView?
     private static let installAlertControllerNavigationHook: Void = {
@@ -520,19 +522,27 @@ final class ControllerNavigator: NSObject {
 
 */
     private static func navigateContinuously(forward: Bool) {
-            navigationTimer?.clean()
-            navigationTimer = SafeTimer(interval: 0.23) {
-                uiNavigationDelegate?.navigateByController(forward: forward)
-            }
-            navigationTimer?.restart()
+        navigationTimer?.clean()
+        uiNavigationDelegate?.navigateByController(forward: forward)
+        navigationTimer = SafeTimer(
+            interval: navigationContinuousRepeatInterval,
+            delay: navigationInitialRepeatDelay
+        ) {
+            uiNavigationDelegate?.navigateByController(forward: forward)
+        }
+        navigationTimer?.restart(minimumRunCount: 0)
     }
     
     private static func navigateContinuously(downward: Bool) {
-            navigationTimer?.clean()
-            navigationTimer = SafeTimer(interval: 0.23) {
-                uiNavigationDelegate?.navigateByController(downward: downward)
-            }
-            navigationTimer?.restart()
+        navigationTimer?.clean()
+        uiNavigationDelegate?.navigateByController(downward: downward)
+        navigationTimer = SafeTimer(
+            interval: navigationContinuousRepeatInterval,
+            delay: navigationInitialRepeatDelay
+        ) {
+            uiNavigationDelegate?.navigateByController(downward: downward)
+        }
+        navigationTimer?.restart(minimumRunCount: 0)
     }
 
     @objc static func start() {
@@ -1227,6 +1237,12 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             highlightControllerNavigationView(target)
             return
         }
+        
+        if let identifer = identifer,
+           let target = nearestSelectableControllerNavigationTarget(to: identifer, selectableTargets: selectableTargets) {
+            highlightControllerNavigationView(target)
+            return
+        }
 
         highlightControllerNavigationView(selectableTargets[0])
     }
@@ -1249,6 +1265,14 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             highlightControllerNavigationView(target)
             return
         }
+        
+        if let highlightedView = ControllerNavigator.controllerNavigationHighlightedView,
+           !isControllerNavigationSectionHeader(highlightedView),
+           let highlightedIdentifier = controllerNavigationPersistenceIdentifier(for: highlightedView),
+           let target = nearestSelectableControllerNavigationTarget(to: highlightedIdentifier, selectableTargets: selectableTargets) {
+            highlightControllerNavigationView(target)
+            return
+        }
 
         highlightControllerNavigationView(selectableTargets[0])
     }
@@ -1268,6 +1292,31 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             seenIdentifiers.insert(identifier)
             return true
         }
+    }
+    
+    private func nearestSelectableControllerNavigationTarget(to identifier: String, selectableTargets: [UIView]) -> UIView? {
+        let orderedTargets = controllerNavigationTargetsIncludingUnavailable()
+        guard let persistedIndex = orderedTargets.firstIndex(where: {
+            controllerNavigationPersistenceIdentifier(for: $0) == identifier
+        }) else {
+            return nil
+        }
+        
+        for distance in 1..<orderedTargets.count {
+            let forwardIndex = persistedIndex + distance
+            if forwardIndex < orderedTargets.count,
+               let target = selectableTargets.first(where: { $0 === orderedTargets[forwardIndex] }) {
+                return target
+            }
+            
+            let backwardIndex = persistedIndex - distance
+            if backwardIndex >= 0,
+               let target = selectableTargets.first(where: { $0 === orderedTargets[backwardIndex] }) {
+                return target
+            }
+        }
+        
+        return nil
     }
 
     func controllerNavigationPersistenceIdentifier(for view: UIView) -> String? {
@@ -1569,6 +1618,44 @@ extension SettingsViewController: ControllerUINavigationDelegate {
 
         return targets
     }
+    
+    private func controllerNavigationTargetsIncludingUnavailable() -> [UIView] {
+        guard let parentStack = parentStack else { return [] }
+        
+        if currentSettingsMenuMode == .FavoriteSettings || currentSettingsMenuMode == .RemoveSettingItem {
+            return parentStack.arrangedSubviews.compactMap { $0 as? UIStackView }
+        }
+        
+        var targets: [UIView] = []
+        for arrangedSubview in parentStack.arrangedSubviews {
+            guard let sectionView = arrangedSubview as? MenuSectionView else { continue }
+            
+            if let headerView = sectionView.headerView {
+                targets.append(headerView)
+            }
+            
+            guard !shouldSkipControllerNavigationSection(sectionView) else { continue }
+            guard let rootStackView = sectionView.rootStackView else { continue }
+            
+            for arrangedRootSubview in rootStackView.arrangedSubviews {
+                guard let stackView = arrangedRootSubview as? UIStackView else { continue }
+                targets.append(contentsOf: deepestControllerNavigationStacks(from: stackView))
+            }
+        }
+        
+        return targets
+    }
+    
+    private func deepestControllerNavigationStacks(from stackView: UIStackView) -> [UIStackView] {
+        let childStackViews = stackView.arrangedSubviews.compactMap { $0 as? UIStackView }
+        guard !childStackViews.isEmpty else {
+            return [stackView]
+        }
+        
+        return childStackViews.flatMap {
+            deepestControllerNavigationStacks(from: $0)
+        }
+    }
 
     private func shouldSkipControllerNavigationSection(_ sectionView: MenuSectionView) -> Bool {
         guard let identifier = sectionView.identifier else {
@@ -1604,7 +1691,6 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             if skippingDisabledStacks, hasDisabledArrangedSubview(in: stackView) {
                 return []
             }
-
             return [stackView]
         }
 

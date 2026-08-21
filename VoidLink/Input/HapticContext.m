@@ -18,14 +18,20 @@
 @implementation HapticContext {
     GCControllerPlayerIndex _playerIndex;
     CHHapticEngine* _hapticEngine API_AVAILABLE(ios(13.0), tvos(14.0));
-    id<CHHapticPatternPlayer> _hapticPlayer API_AVAILABLE(ios(13.0), tvos(14.0));
-    BOOL _playing;
+    id<CHHapticPatternPlayer> _motorHapticPlayer API_AVAILABLE(ios(13.0), tvos(14.0));
+    id<CHHapticPatternPlayer> _authoredHapticPlayer API_AVAILABLE(ios(13.0), tvos(14.0));
+    BOOL _motorPlaying;
+    BOOL _authoredPlaying;
 }
 
 -(void)cleanup API_AVAILABLE(ios(14.0), tvos(14.0)) {
-    if (_hapticPlayer != nil) {
-        [_hapticPlayer cancelAndReturnError:nil];
-        _hapticPlayer = nil;
+    if (_motorHapticPlayer != nil) {
+        [_motorHapticPlayer cancelAndReturnError:nil];
+        _motorHapticPlayer = nil;
+    }
+    if (_authoredHapticPlayer != nil) {
+        [_authoredHapticPlayer cancelAndReturnError:nil];
+        _authoredHapticPlayer = nil;
     }
     if (_hapticEngine != nil) {
         [_hapticEngine stopWithCompletionHandler:nil];
@@ -43,15 +49,15 @@
     
     // Stop the effect entirely if the amplitude is 0
     if (amplitude == 0) {
-        if (_playing) {
-            [_hapticPlayer stopAtTime:0 error:&error];
-            _playing = NO;
+        if (_motorPlaying) {
+            [_motorHapticPlayer stopAtTime:0 error:&error];
+            _motorPlaying = NO;
         }
         
         return;
     }
 
-    if (_hapticPlayer == nil) {
+    if (_motorHapticPlayer == nil) {
         // We must initialize the intensity to 1.0f because the dynamic parameters are multiplied by this value before being applied
         CHHapticEventParameter* intensityParameter = [[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity value:1.0f];
         CHHapticEvent* hapticEvent = [[CHHapticEvent alloc] initWithEventType:CHHapticEventTypeHapticContinuous parameters:[NSArray arrayWithObject:intensityParameter] relativeTime:0 duration:GCHapticDurationInfinite];
@@ -61,7 +67,7 @@
             return;
         }
         
-        _hapticPlayer = [_hapticEngine createPlayerWithPattern:hapticPattern error:&error];
+        _motorHapticPlayer = [_hapticEngine createPlayerWithPattern:hapticPattern error:&error];
         if (error != nil) {
             Log(LOG_W, @"Controller %d: Haptic player creation failed: %@", _playerIndex, error);
             return;
@@ -69,21 +75,21 @@
     }
 
     CHHapticDynamicParameter* intensityParameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:amplitude / 65535.0f relativeTime:0];
-    [_hapticPlayer sendParameters:[NSArray arrayWithObject:intensityParameter] atTime:CHHapticTimeImmediate error:&error];
+    [_motorHapticPlayer sendParameters:[NSArray arrayWithObject:intensityParameter] atTime:CHHapticTimeImmediate error:&error];
     if (error != nil) {
         Log(LOG_W, @"Controller %d: Haptic player parameter update failed: %@", _playerIndex, error);
         return;
     }
     
-    if (!_playing) {
-        [_hapticPlayer startAtTime:0 error:&error];
+    if (!_motorPlaying) {
+        [_motorHapticPlayer startAtTime:0 error:&error];
         if (error != nil) {
-            _hapticPlayer = nil;
+            _motorHapticPlayer = nil;
             Log(LOG_W, @"Controller %d: Haptic playback start failed: %@", _playerIndex, error);
             return;
         }
         
-        _playing = YES;
+        _motorPlaying = YES;
     }
 }
 
@@ -100,13 +106,13 @@
 
     NSError* error = nil;
     if (amplitude == 0.0f) {
-        if (_playing) {
-            [_hapticPlayer stopAtTime:CHHapticTimeImmediate error:&error];
-            _playing = NO;
+        if (_authoredPlaying) {
+            [_authoredHapticPlayer stopAtTime:CHHapticTimeImmediate error:&error];
+            _authoredPlaying = NO;
         }
     }
     else {
-        if (_hapticPlayer == nil) {
+        if (_authoredHapticPlayer == nil) {
             CHHapticEventParameter* intensity = [[CHHapticEventParameter alloc]
                 initWithParameterID:CHHapticEventParameterIDHapticIntensity value:1.0f];
             CHHapticEventParameter* eventSharpness = [[CHHapticEventParameter alloc]
@@ -122,8 +128,8 @@
                 Log(LOG_W, @"Controller %d: Authored haptic pattern creation failed: %@", _playerIndex, error);
                 return;
             }
-            _hapticPlayer = [_hapticEngine createPlayerWithPattern:pattern error:&error];
-            if (_hapticPlayer == nil || error != nil) {
+            _authoredHapticPlayer = [_hapticEngine createPlayerWithPattern:pattern error:&error];
+            if (_authoredHapticPlayer == nil || error != nil) {
                 Log(LOG_W, @"Controller %d: Authored haptic player creation failed: %@", _playerIndex, error);
                 return;
             }
@@ -137,19 +143,19 @@
                 initWithParameterID:CHHapticDynamicParameterIDHapticSharpnessControl
                 value:sharpness relativeTime:0]
         ];
-        [_hapticPlayer sendParameters:parameters atTime:CHHapticTimeImmediate error:&error];
+        [_authoredHapticPlayer sendParameters:parameters atTime:CHHapticTimeImmediate error:&error];
         if (error != nil) {
             Log(LOG_W, @"Controller %d: Authored haptic parameter update failed: %@", _playerIndex, error);
             return;
         }
-        if (!_playing) {
-            [_hapticPlayer startAtTime:CHHapticTimeImmediate error:&error];
+        if (!_authoredPlaying) {
+            [_authoredHapticPlayer startAtTime:CHHapticTimeImmediate error:&error];
             if (error != nil) {
-                _hapticPlayer = nil;
+                _authoredHapticPlayer = nil;
                 Log(LOG_W, @"Controller %d: Authored haptic playback start failed: %@", _playerIndex, error);
                 return;
             }
-            _playing = YES;
+            _authoredPlaying = YES;
         }
     }
 
@@ -197,9 +203,11 @@
         }
         
         Log(LOG_W, @"Controller %d: Haptic engine stopped: %p", me->_playerIndex, stoppedReason);
-        me->_hapticPlayer = nil;
+        me->_motorHapticPlayer = nil;
+        me->_authoredHapticPlayer = nil;
         me->_hapticEngine = nil;
-        me->_playing = NO;
+        me->_motorPlaying = NO;
+        me->_authoredPlaying = NO;
     };
     _hapticEngine.resetHandler = ^{
         HapticContext* me = weakSelf;
@@ -208,8 +216,10 @@
         }
         
         Log(LOG_W, @"Controller %d: Haptic engine reset", me->_playerIndex);
-        me->_hapticPlayer = nil;
-        me->_playing = NO;
+        me->_motorHapticPlayer = nil;
+        me->_authoredHapticPlayer = nil;
+        me->_motorPlaying = NO;
+        me->_authoredPlaying = NO;
         [me->_hapticEngine startAndReturnError:nil];
     };
     
@@ -258,9 +268,11 @@
         }
         
         Log(LOG_W, @"Controller %d: Haptic engine stopped: %p", me->_playerIndex, stoppedReason);
-        me->_hapticPlayer = nil;
+        me->_motorHapticPlayer = nil;
+        me->_authoredHapticPlayer = nil;
         me->_hapticEngine = nil;
-        me->_playing = NO;
+        me->_motorPlaying = NO;
+        me->_authoredPlaying = NO;
     };
     _hapticEngine.resetHandler = ^{
         HapticContext* me = weakSelf;
@@ -269,8 +281,10 @@
         }
         
         Log(LOG_W, @"Controller %d: Haptic engine reset", me->_playerIndex);
-        me->_hapticPlayer = nil;
-        me->_playing = NO;
+        me->_motorHapticPlayer = nil;
+        me->_authoredHapticPlayer = nil;
+        me->_motorPlaying = NO;
+        me->_authoredPlaying = NO;
         [me->_hapticEngine startAndReturnError:nil];
     };
     

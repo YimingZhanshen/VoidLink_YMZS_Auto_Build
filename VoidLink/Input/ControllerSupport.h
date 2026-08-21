@@ -63,6 +63,15 @@
                 rightSharpness:(float)rightSharpness
                 rightTransient:(float)rightTransient
                    delaySeconds:(double)delaySeconds;
+-(BOOL) hasDualSenseController:(uint16_t)controllerNumber;
+-(void) renderDeviceDualSenseHaptics:(uint16_t)controllerNumber
+                        leftAmplitude:(float)leftAmplitude
+                        leftSharpness:(float)leftSharpness
+                        leftTransient:(float)leftTransient
+                       rightAmplitude:(float)rightAmplitude
+                       rightSharpness:(float)rightSharpness
+                       rightTransient:(float)rightTransient
+                          delaySeconds:(double)delaySeconds;
 -(void) cancelScheduledDualSenseHaptics;
 -(void) updateTimerStateForOsc;
 

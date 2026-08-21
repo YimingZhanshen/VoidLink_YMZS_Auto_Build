@@ -714,6 +714,7 @@ static const double X1_MOUSE_SPEED_DIVISOR = 2.5;
         
         OnScreenWidgetView.buttonVisualFeedbackEnabled = self->settings.buttonVisualFeedback;
         OnScreenWidgetView.gamepadOverlayFLag = profile.gamepadOverlayEnabled;
+        ControllerUtil.dualSenseHapticTransient = profile.dualSenseTransient;
 
         bool hasLegacyWidget = false;
         if(reloadWidgets && !OnScreenWidgetView.editMode){

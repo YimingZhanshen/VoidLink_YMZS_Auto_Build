@@ -58,6 +58,7 @@
     [encoder encodeFloat:self.touchPointerVelocityFactor forKey:@"touchPointerVelocityFactor"];
     [encoder encodeCGPoint:self.normalizedStreamViewOffset forKey:@"normalizedStreamViewOffset"];
     [encoder encodeFloat:self.streamViewScale forKey:@"streamViewScale"];
+    [encoder encodeFloat:self.dualSenseTransient forKey:@"dualSenseTransient"];
     [encoder encodeBool:self.gamepadOverlayEnabled forKey:@"gamepadOverlayEnabled"];
     
     [encoder encodeObject:self.pressureCurvePoints forKey:@"pressureCurvePoints"];
@@ -132,7 +133,8 @@
         
         self.normalizedStreamViewOffset = [decoder containsValueForKey:@"normalizedStreamViewOffset"] ? [decoder decodeCGPointForKey:@"normalizedStreamViewOffset"] : CGPointZero;
         self.streamViewScale = [decoder containsValueForKey:@"streamViewScale"] ? [decoder decodeFloatForKey:@"streamViewScale"] : 1.0;
-        
+        self.dualSenseTransient = [decoder containsValueForKey:@"dualSenseTransient"] ? [decoder decodeFloatForKey:@"dualSenseTransient"] : 1.0;
+
         self.gamepadOverlayEnabled = [decoder containsValueForKey:@"gamepadOverlayEnabled"] ? [decoder decodeBoolForKey:@"gamepadOverlayEnabled"] : false;
 
         self.pressureCurvePoints =

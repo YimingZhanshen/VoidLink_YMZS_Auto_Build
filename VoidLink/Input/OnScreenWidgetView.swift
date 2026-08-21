@@ -2000,12 +2000,13 @@ import ObjectiveC.runtime
         
         let mixRightStickInputToGyro = (oscProfile.mapGyroTo == .mapGyroToControllerStick
                                        && oscProfile.yawPitchToRightStick)
+        
+        stickOffsetVector = ControllerUtil.compensated(offsetVector: CGVector(dx: targetX, dy: targetY), minOffset: minStickOffset, circulate: circulate)
+        
         if !mixRightStickInputToGyro || (self.motionHandler?.gyroMixInputStarted() != true) {
-            
-            stickOffsetVector = ControllerUtil.compensated(offsetVector: CGVector(dx: targetX, dy: targetY), minOffset: minStickOffset, circulate: circulate)
             self.onScreenControls?.sendRightStickTouchPadEvent(stickOffsetVector.dx, stickOffsetVector.dy)
         }
-        self.motionHandler?.mixOnScreenRightStickAndGyroInput(x: targetX, y: targetY)
+        self.motionHandler?.mixOnScreenRightStickAndGyroInput(x: stickOffsetVector.dx, y: stickOffsetVector.dy)
         if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = true}
     }
     
@@ -2015,12 +2016,13 @@ import ObjectiveC.runtime
         
         let mixLeftStickInputToGyro = (oscProfile.mapGyroTo == .mapGyroToControllerStick
                                        && oscProfile.rollToLeftStick)
+        
+        stickOffsetVector = ControllerUtil.compensated(offsetVector: CGVector(dx: targetX, dy: targetY), minOffset: minStickOffset, circulate: circulate)
+
         if !mixLeftStickInputToGyro || (self.motionHandler?.gyroMixInputStarted() != true) {
-            
-            stickOffsetVector = ControllerUtil.compensated(offsetVector: CGVector(dx: targetX, dy: targetY), minOffset: minStickOffset, circulate: circulate)
             self.onScreenControls?.sendLeftStickTouchPadEvent(stickOffsetVector.dx, stickOffsetVector.dy)
         }
-        self.motionHandler?.mixOnScreenLeftStickAndGyroInput(x: targetX, y: targetY)
+        self.motionHandler?.mixOnScreenLeftStickAndGyroInput(x: stickOffsetVector.dx, y: stickOffsetVector.dy)
         if !ControllerUtil.gamepadArrivalReported {ControllerUtil.gamepadArrivalReported = true}
     }
      

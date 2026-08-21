@@ -40,6 +40,7 @@
 @property BOOL asyncNativeTouchPriority;
 @property int gyroMode;
 @property int emulatedControllerType;
+@property int hapticEngine;
 @property int audioConfiguration;
 @property int supportedVideoFormats;
 @property BOOL multiController;

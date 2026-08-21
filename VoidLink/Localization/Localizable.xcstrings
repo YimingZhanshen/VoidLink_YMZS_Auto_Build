@@ -8212,25 +8212,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunshine emulates game controller via VigemBus, which support DS4 & Xbox360. \n\n- Xbox360 does not support gyro.\n\n- When “both” is selected, the app will map built-in gyro as player0 & external game controller as player1"
+            "value" : "Sunshine emulates game controller via VigemBus, which support DS4 & Xbox360. \n- Xbox360 does not support gyro.\n- When “both” is selected, the app will map built-in gyro as player0 & external game controller as player1\n\nWhen DualSense sidecar is running on Sunshine-Foundation, VigemBus will be taken over, left DualSense to be the emulated Controller on your host. In this case:\n- The option “PS (Enhanced Haptic)” provides better haptic feedback for a real DualSense controller.\n- The option “PS” provides DualSense haptic feedback translation to traditional rumbling for all controllers.\n- Enhanced haptics are also available with iPhone motor by setting “Haptic Engine” to “Device”.\n"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunshine 通过 VigemBus 模拟游戏手柄，支持 DS4 和 Xbox 360。\n\n- Xbox 360 不支持陀螺仪。\n\n- 当选择“同时映射”时，app会将内置陀螺仪映射为玩家0，外接手柄映射为玩家1。"
+            "value" : "Sunshine 通过 VigemBus 模拟游戏手柄，支持 DS4 和 Xbox 360。\n- Xbox 360 不支持陀螺仪。\n- 当选择“同时映射”时，app会将内置陀螺仪映射为玩家0，外接手柄映射为玩家1。\n\n当 DualSense 组件在【Sunshine 基地版】上运行时，它会接管 ViGEmBus，并使 DualSense 成为主机端的模拟手柄。在这种情况下：\n- 选择“PS（触觉增强）”将为真实的DualSense 手柄提供更好的触觉反馈。\n- 选择“PS”：将 DualSense 触觉反馈转换为传统震动，适用于所有手柄。\n- 将 “振动引擎” 设置为 “内置”，也可以通过 iPhone 马达获得增强触觉反馈。\n\nDualSense的自适应板机、触觉反馈仅与Sunshine基地版配合使用时有效。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunshine 透過 VigemBus 模擬遊戲控制器，支援 DS4 和 Xbox 360。\n\n- Xbox 360 不支援陀螺儀。\n\n- 當選擇「同時映射」時，app 會將內建陀螺儀對應為玩家0，外接控制器對應為玩家1。"
+            "value" : "Sunshine 透過 VigemBus 模擬遊戲控制器，支援 DS4 和 Xbox 360。\n- Xbox 360 不支援陀螺儀。\n- 當選擇「同時映射」時，app 會將內建陀螺儀對應為玩家0，外接控制器對應為玩家1。\n\n當 DualSense 元件在 「Sunshine 基地版」上執行時，它會接管 ViGEmBus，並使 DualSense 成為主機端的模擬手把。在這種情況下：\n- 選擇「PS（觸覺增強）」將為真實的 DualSense 手把提供更好的觸覺回饋。\n- 選擇「PS」：將 DualSense 觸覺回饋轉換為傳統震動，適用於所有手把。\n- 將「振動引擎」設定為「內建」，也可以透過 iPhone 馬達獲得增強觸覺回饋。\n\nDualSense 的自適應扳機、觸覺回饋僅在與 Sunshine 基地版配合使用時有效。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunshine 透過 VigemBus 模擬遊戲控制器，支援 DS4 和 Xbox 360。\n\n- Xbox 360 不支援陀螺儀。\n\n- 當選擇「同時映射」時，app 會將內建陀螺儀對應為玩家0，外接控制器對應為玩家1。"
+            "value" : "Sunshine 透過 VigemBus 模擬遊戲控制器，支援 DS4 和 Xbox 360。\n- Xbox 360 不支援陀螺儀。\n- 當選擇「同時映射」時，app 會將內建陀螺儀對應為玩家0，外接控制器對應為玩家1。\n\n當 DualSense 元件在 「Sunshine 基地版」上執行時，它會接管 ViGEmBus，並使 DualSense 成為主機端的模擬手把。在這種情況下：\n- 選擇「PS（觸覺增強）」將為真實的 DualSense 手把提供更好的觸覺回饋。\n- 選擇「PS」：將 DualSense 觸覺回饋轉換為傳統震動，適用於所有手把。\n- 將「振動引擎」設定為「內建」，也可以透過 iPhone 馬達獲得增強觸覺回饋。\n\nDualSense 的自適應扳機、觸覺回饋僅在與 Sunshine 基地版配合使用時有效。"
           }
         }
       }
@@ -8256,7 +8256,8 @@
             "value" : "啟用 Metal 渲染？"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "enableOswForNativeTouchSwitchTip" : {
       "extractionState" : "manual",
@@ -9890,25 +9891,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This setting is saved in [Game Profile]. To open game profile selector:\n- Tap the gamepad icon on navigation bar\n- While streaming, swipe inward from the %@ edge of the screen by %@ of screen width, open [Switch Game Profile] in the toolbox menu"
+            "value" : "This setting is saved in [Game Profile]. To open game profile selector:\n- Tap the gamepad icon on navigation bar\n- While streaming, swipe inward from the %@ edge of the screen by %@ of screen width, open [Switch Game Profile] in the toolbox menu\n- Also available by controller radial menu -> [more options]"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "该设置保存在 [游戏配置] 中. 游戏配置切换入口:\n- 点击导航栏的手柄图标\n- 串流时，由屏幕 %@ 边缘向内滑动 %@ 屏宽，在工具箱菜单中打开 [切换游戏配置]"
+            "state" : "needs_review",
+            "value" : "该设置保存在 [游戏配置] 中. 游戏配置切换入口:\n- 点击导航栏的手柄图标\n- 串流时，由屏幕 %@ 边缘向内滑动 %@ 屏宽，在工具箱菜单中打开 [切换游戏配置]\n- 手柄用户请在环形菜单 -> [更多] 中打开"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "此設定保存在［遊戲配置］中。遊戲配置切換入口：\n- 點擊導覽列的手把圖示\n- 串流時，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，在工具箱選單中開啟［切換遊戲配置］"
+            "state" : "needs_review",
+            "value" : "此設定保存在［遊戲配置］中。遊戲配置切換入口：\n- 點擊導覽列的手把圖示\n- 串流時，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，在工具箱選單中開啟［切換遊戲配置］\n- 手把使用者請在環形選單 -> [更多] 中開啟"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "此設定保存在［遊戲配置］中。遊戲配置切換入口：\n- 點擊導覽列的手把圖示\n- 串流時，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，在工具箱選單中開啟［切換遊戲配置］"
+            "state" : "needs_review",
+            "value" : "此設定保存在［遊戲配置］中。遊戲配置切換入口：\n- 點擊導覽列的手把圖示\n- 串流時，由螢幕 %@ 邊緣向內滑動 %@ 螢幕寬度，在工具箱選單中開啟［切換遊戲配置］\n- 手把使用者請在環形選單 -> [更多] 中開啟"
           }
         }
       }

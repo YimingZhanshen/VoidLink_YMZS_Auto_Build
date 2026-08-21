@@ -268,9 +268,6 @@
 @property (strong, nonatomic) IBOutlet UIStackView *pressureCurveStack;
 @property (strong, nonatomic) IBOutlet UISwitch *pressureCurveSwitch;
 
-@property (weak, nonatomic) IBOutlet UIStackView *frameTimebaseStack;
-@property (weak, nonatomic) IBOutlet UISwitch *frameTimebaseSwitch;
-
 @property (weak, nonatomic) IBOutlet UIStackView *asyncFrameDequeueStack;
 @property (weak, nonatomic) IBOutlet UISwitch *asyncFrameDequeueSwitch;
 
@@ -282,6 +279,9 @@
 
 @property (weak, nonatomic) IBOutlet UIStackView *globeAsEscapeStack;
 @property (weak, nonatomic) IBOutlet UISwitch *globeAsEscapeSwitch;
+
+@property (weak, nonatomic) IBOutlet UIStackView *dualSenseTransientStack;
+@property (weak, nonatomic) IBOutlet UISlider *dualSenseTransientSlider;
 
 @property (strong, nonatomic) IBOutlet UIStackView *testStack;
 

@@ -882,6 +882,7 @@ static NSMutableSet* hostList;
     _streamConfig.asyncNativeTouchPriority = streamSettings.asyncNativeTouchPriority; // new streamConfig segment
     _streamConfig.gyroMode = [streamSettings.gyroMode intValue];
     _streamConfig.emulatedControllerType = streamSettings.emulatedControllerType.intValue;
+    _streamConfig.hapticEngine = streamSettings.hapticEngine.intValue;
     //NSLog(@"gyroMode from settings: %ld", _streamConfig.gyroMode);
     
     // multiController must be set before calling getConnectedGamepadMask

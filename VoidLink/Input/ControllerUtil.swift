@@ -260,6 +260,13 @@ import UIKit
     }
 }
 
+@objc enum ControllerEmulation: UInt8 {
+    case xbox = 0x01 // LI_CTYPE_XBOX
+    case ps = 0x02 // LI_CTYPE_PS
+    case psEnhancedHaptic = 0xFE
+    case xboxAndPs = 0x00 // LI_CTYPE_UNKNOWN
+}
+
 @objc protocol ControllerUtilDelegate: AnyObject {
     func isStreaming() -> Bool
     func isInAppView() -> Bool
@@ -269,6 +276,38 @@ import UIKit
     @objc static weak var delegate: ControllerUtilDelegate?
 
 #if !VOIDLINK_PREVIEW
+    @objc static var hasDualSenseController: Bool {
+        if #available(iOS 14.5, *) {
+            for gcController in GCController.controllers() {
+                if gcController.extendedGamepad is GCDualSenseGamepad {return true}
+            }
+            return false
+        }
+        else {return false}
+    }
+
+    @objc static func hasControllerAccelerometer(_ controller: GCController) -> Bool {
+        guard let motion = controller.motion else { return false }
+
+        if #available(iOS 14.0, tvOS 14.0, *) {
+            if motion.hasGravityAndUserAcceleration {
+                return true
+            }
+            
+            if controller.extendedGamepad is GCDualShockGamepad {
+                return true
+            }
+            
+            if #available(iOS 14.5, tvOS 14.5, *) {
+                if controller.extendedGamepad is GCDualSenseGamepad {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+    
     private struct DualSensePCMChunk {
         let controllerNumber: UInt16
         let flags: UInt8
@@ -310,17 +349,57 @@ import UIKit
         }
     }
 
+    private final class AuthoredIrRenderState {
+        var renderHostAnchorUs: UInt64?
+        var renderLocalAnchor = 0.0
+        var diagnosticFrameCounter: UInt32 = 0
+
+        func renderDelay(for timestampUs: UInt64, resetTimeline: Bool) -> TimeInterval {
+            let now = ProcessInfo.processInfo.systemUptime
+            if resetTimeline || renderHostAnchorUs == nil {
+                renderHostAnchorUs = timestampUs
+                renderLocalAnchor = now + 0.002
+            }
+            let anchor = renderHostAnchorUs ?? timestampUs
+            let hostDelta = timestampUs >= anchor ? Double(timestampUs - anchor) / 1_000_000.0 : 0
+            return min(max(renderLocalAnchor + hostDelta - now, 0), 0.025)
+        }
+    }
+
     private static let dualSenseHapticsLock = NSLock()
     private static let dualSenseHapticsWorker = DispatchQueue(
         label: "com.voidlink.dualsense-authored-haptics",
         qos: .userInteractive
     )
     private static let maxQueuedDualSensePCMChunks = 8
-    private static let defaultDualSenseHapticsEQ: [Float] = [0.78, 0.98, 1.59, 0.175, 1.2]
+    private static let defaultDualSenseControllerHapticsEQ: [Float] = [0.78, 0.98, 1.59, 0.175, 1.2]
+    private static let defaultDeviceDualSenseHapticsEQ: [Float] = [18, 0.98, 1.59, 0.9, 1.2]
+    private static let dualSenseControllerAmplitudeScale: Float = 1.15
+    private static let dualSenseControllerTransientScale: Float = 1.0
+    private static let dualSenseControllerSharpnessScale: Float = 1.15
+    private static let dualSenseControllerMirrorMixedHandles = false
     private static var dualSensePCMQueue = Deque<DualSensePCMChunk>()
     private static var dualSenseWorkerScheduled = false
     private static var dualSenseForcedDiscontinuities = Set<UInt16>()
     private static var dualSenseAuthoredEngines = [UInt16: AuthoredEngineState]()
+    private static var dualSenseIrRenderStates = [UInt16: AuthoredIrRenderState]()
+    private static let authoredHapticsRouteLock = NSLock()
+    private static var authoredHapticsPreference = AuthoredHapticsPreference.auto
+    private static var authoredHapticsLastRoutedToDualSense = false
+    private static var authoredHapticsLastRoute = AuthoredHapticsRoute.off
+
+    private enum AuthoredHapticsPreference: Int {
+        case auto = 0
+        case device = 1
+        case swapped = 2
+        case off = 3
+    }
+
+    private enum AuthoredHapticsRoute {
+        case dualSense
+        case device
+        case off
+    }
 
 #if os(iOS)
     private static var dualSenseHapticsEQOverlayWindow: UIWindow?
@@ -329,17 +408,156 @@ import UIKit
 #endif
 
     fileprivate static func dualSenseHapticsEQSnapshot() -> [Float] {
-        defaultDualSenseHapticsEQ
+        defaultDeviceDualSenseHapticsEQ
     }
 
     fileprivate static func defaultDualSenseHapticsEQSnapshot() -> [Float] {
-        defaultDualSenseHapticsEQ
+        defaultDeviceDualSenseHapticsEQ
+    }
+
+    private static func dualSenseHapticsEQSnapshot(for route: AuthoredHapticsRoute) -> [Float] {
+        switch route {
+        case .dualSense:
+            return defaultDualSenseControllerHapticsEQ
+        case .device, .off:
+            return defaultDeviceDualSenseHapticsEQ
+        }
+    }
+
+    private static func compensatedDualSenseControllerValues(
+        _ values: (amplitude: Float, sharpness: Float, transient: Float),
+        highBandRatio: Float
+    ) -> (amplitude: Float, sharpness: Float, transient: Float) {
+        let lowFrequencyTrim = 0.82 + 0.18 * min(max(highBandRatio, 0), 1)
+        let amplitude = min(max(
+            pow(values.amplitude, 0.50) * dualSenseControllerAmplitudeScale * lowFrequencyTrim,
+            0
+        ), 1)
+        let sharpness = min(max(
+            pow(values.sharpness, 0.8) * dualSenseControllerSharpnessScale,
+            0
+        ), 1)
+        let transient = min(max(
+            pow(values.transient, 0.9) * dualSenseControllerTransientScale,
+            0
+        ), 1)
+        return (amplitude, sharpness, transient)
+    }
+
+    private static func authoredHighBandRatio(for lane: AhAuthoredLaneFrame?) -> Float {
+        1 - min(max(lane?.low_band_ratio ?? 1, 0), 1)
+    }
+
+    private static func mixedDualSenseControllerHandleValues(
+        left: (amplitude: Float, sharpness: Float, transient: Float),
+        right: (amplitude: Float, sharpness: Float, transient: Float)
+    ) -> (
+        left: (amplitude: Float, sharpness: Float, transient: Float),
+        right: (amplitude: Float, sharpness: Float, transient: Float)
+    ) {
+        guard dualSenseControllerMirrorMixedHandles else {
+            return (left, right)
+        }
+
+        let amplitude = min(max(sqrt(
+            (left.amplitude * left.amplitude + right.amplitude * right.amplitude) * 0.5
+        ), 0), 1)
+        let amplitudeSum = left.amplitude + right.amplitude
+        let sharpness = amplitudeSum > 0.000_001
+            ? min(max(
+                (left.sharpness * left.amplitude + right.sharpness * right.amplitude) / amplitudeSum,
+                0
+            ), 1)
+            : min(max(max(left.sharpness, right.sharpness), 0), 1)
+        let transient = min(max(max(left.transient, right.transient), 0), 1)
+        let mixed = (amplitude: amplitude, sharpness: sharpness, transient: transient)
+        return (mixed, mixed)
     }
 
     fileprivate static func previewDualSenseHapticsEQ(_ values: [Float]) {
     }
 
     fileprivate static func saveDualSenseHapticsEQ(_ values: [Float]) {
+    }
+
+    private static func refreshAuthoredHapticsPreference() -> AuthoredHapticsPreference {
+        let rawValue = Int(DataManager().getSettings().hapticEngine.intValue)
+        let preference = AuthoredHapticsPreference(rawValue: rawValue) ?? .auto
+        authoredHapticsRouteLock.lock()
+        authoredHapticsPreference = preference
+        authoredHapticsRouteLock.unlock()
+        return preference
+    }
+
+    private static func selectAuthoredHapticsRoute(
+        controllerNumber: UInt16,
+        controllerSupport: ControllerSupport
+    ) -> AuthoredHapticsRoute {
+        switch refreshAuthoredHapticsPreference() {
+        case .off:
+            return .off
+        case .device:
+            return .device
+        case .auto, .swapped:
+            let hasDualSense = controllerSupport.hasDualSenseController(controllerNumber)
+            authoredHapticsRouteLock.lock()
+            authoredHapticsLastRoutedToDualSense = hasDualSense
+            authoredHapticsRouteLock.unlock()
+            return hasDualSense ? .dualSense : .device
+        }
+    }
+
+    private static func stopAuthoredHapticsRoute(
+        _ route: AuthoredHapticsRoute,
+        controllerNumber: UInt16,
+        controllerSupport: ControllerSupport
+    ) {
+        switch route {
+        case .dualSense:
+            controllerSupport.renderDualSenseHaptics(
+                controllerNumber,
+                leftAmplitude: 0,
+                leftSharpness: 0,
+                leftTransient: 0,
+                rightAmplitude: 0,
+                rightSharpness: 0,
+                rightTransient: 0,
+                delaySeconds: 0
+            )
+        case .device:
+            controllerSupport.renderDeviceDualSenseHaptics(
+                controllerNumber,
+                leftAmplitude: 0,
+                leftSharpness: 0,
+                leftTransient: 0,
+                rightAmplitude: 0,
+                rightSharpness: 0,
+                rightTransient: 0,
+                delaySeconds: 0
+            )
+        case .off:
+            break
+        }
+    }
+
+    private static func updateAuthoredHapticsRouteTransition(
+        to route: AuthoredHapticsRoute,
+        controllerNumber: UInt16,
+        controllerSupport: ControllerSupport
+    ) {
+        authoredHapticsRouteLock.lock()
+        let previousRoute = authoredHapticsLastRoute
+        authoredHapticsLastRoute = route
+        authoredHapticsLastRoutedToDualSense = route == .dualSense
+        authoredHapticsRouteLock.unlock()
+
+        if previousRoute != route {
+            stopAuthoredHapticsRoute(
+                previousRoute,
+                controllerNumber: controllerNumber,
+                controllerSupport: controllerSupport
+            )
+        }
     }
 
 #if os(iOS)
@@ -425,6 +643,51 @@ import UIKit
         }
     }
 
+    @objc(enqueueDualSenseHapticsIRV2WithControllerNumber:flags:sourceSequenceNumber:timestampUs:sourceFrameCount:leftRms:leftPeak:leftTransient:leftLowRatio:leftZeroCrossHz:rightRms:rightPeak:rightTransient:rightLowRatio:rightZeroCrossHz:laneCorrelation:)
+    static func enqueueDualSenseHapticsIRV2(
+        controllerNumber: UInt16,
+        flags: UInt8,
+        sourceSequenceNumber: UInt32,
+        timestampUs: UInt64,
+        sourceFrameCount: UInt32,
+        leftRms: Float,
+        leftPeak: Float,
+        leftTransient: Float,
+        leftLowRatio: Float,
+        leftZeroCrossHz: Float,
+        rightRms: Float,
+        rightPeak: Float,
+        rightTransient: Float,
+        rightLowRatio: Float,
+        rightZeroCrossHz: Float,
+        laneCorrelation: Float
+    ) {
+        dualSenseHapticsWorker.async {
+            processDualSenseIRV2Frame(
+                controllerNumber: controllerNumber,
+                flags: flags,
+                sourceSequenceNumber: sourceSequenceNumber,
+                timestampUs: timestampUs,
+                sourceFrameCount: sourceFrameCount,
+                left: makeAuthoredLaneFrame(
+                    rmsAmplitude: leftRms,
+                    peakAmplitude: leftPeak,
+                    transientStrength: leftTransient,
+                    lowBandRatio: leftLowRatio,
+                    zeroCrossingRateHz: leftZeroCrossHz
+                ),
+                right: makeAuthoredLaneFrame(
+                    rmsAmplitude: rightRms,
+                    peakAmplitude: rightPeak,
+                    transientStrength: rightTransient,
+                    lowBandRatio: rightLowRatio,
+                    zeroCrossingRateHz: rightZeroCrossHz
+                ),
+                laneCorrelation: laneCorrelation
+            )
+        }
+    }
+
     @objc static func stopAllDualSenseHaptics() {
         ControllerSupport.sharedInstance()?.cancelScheduledDualSenseHaptics()
 
@@ -434,12 +697,77 @@ import UIKit
         dualSenseHapticsLock.unlock()
 
         dualSenseHapticsWorker.async {
-            let controllerNumbers = Array(dualSenseAuthoredEngines.keys)
+            let controllerNumbers = Array(
+                Set(dualSenseAuthoredEngines.keys).union(dualSenseIrRenderStates.keys)
+            )
             dualSenseAuthoredEngines.removeAll(keepingCapacity: false)
+            dualSenseIrRenderStates.removeAll(keepingCapacity: false)
             for controllerNumber in controllerNumbers {
                 renderDualSenseHaptics(controllerNumber: controllerNumber, left: nil, right: nil, delay: 0)
             }
         }
+    }
+
+    private static func makeAuthoredLaneFrame(
+        rmsAmplitude: Float,
+        peakAmplitude: Float,
+        transientStrength: Float,
+        lowBandRatio: Float,
+        zeroCrossingRateHz: Float
+    ) -> AhAuthoredLaneFrame {
+        var lane = AhAuthoredLaneFrame()
+        lane.rms_amplitude = rmsAmplitude
+        lane.peak_amplitude = peakAmplitude
+        lane.transient_strength = transientStrength
+        lane.low_band_ratio = lowBandRatio
+        lane.zero_crossing_rate_hz = zeroCrossingRateHz
+        return lane
+    }
+
+    private static func processDualSenseIRV2Frame(
+        controllerNumber: UInt16,
+        flags: UInt8,
+        sourceSequenceNumber: UInt32,
+        timestampUs: UInt64,
+        sourceFrameCount: UInt32,
+        left: AhAuthoredLaneFrame,
+        right: AhAuthoredLaneFrame,
+        laneCorrelation: Float
+    ) {
+        let isDiscontinuity = (flags & 0x01) != 0
+        let isStreamEnd = (flags & 0x04) != 0
+        let isSilent = (flags & 0x08) != 0
+        let state = dualSenseIrRenderStates[controllerNumber] ?? AuthoredIrRenderState()
+        dualSenseIrRenderStates[controllerNumber] = state
+        let delay = state.renderDelay(
+            for: timestampUs,
+            resetTimeline: isDiscontinuity || state.diagnosticFrameCounter == 0
+        )
+        state.diagnosticFrameCounter &+= 1
+
+        renderDualSenseHaptics(
+            controllerNumber: controllerNumber,
+            left: isSilent ? nil : left,
+            right: isSilent ? nil : right,
+            laneCorrelation: laneCorrelation,
+            logDiagnostics: state.diagnosticFrameCounter % 100 == 0,
+            appliesEQ: false,
+            delay: delay
+        )
+
+        if isStreamEnd {
+            renderDualSenseHaptics(
+                controllerNumber: controllerNumber,
+                left: nil,
+                right: nil,
+                appliesEQ: false,
+                delay: delay + 0.005
+            )
+            dualSenseIrRenderStates.removeValue(forKey: controllerNumber)
+        }
+
+        _ = sourceSequenceNumber
+        _ = sourceFrameCount
     }
 
     private static func drainDualSensePCMQueue() {
@@ -544,6 +872,7 @@ import UIKit
                 right: silent ? nil : frame.lanes.1,
                 laneCorrelation: frame.lane_correlation,
                 logDiagnostics: state.diagnosticFrameCounter % 100 == 0,
+                appliesEQ: false,
                 delay: delay
             )
         }
@@ -560,26 +889,52 @@ import UIKit
         }
     }
 
+    @objc static var dualSenseHapticTransient: Float = 1.0
     private static func renderDualSenseHaptics(
         controllerNumber: UInt16,
         left: AhAuthoredLaneFrame?,
         right: AhAuthoredLaneFrame?,
         laneCorrelation: Float = 0,
         logDiagnostics: Bool = false,
+        appliesEQ: Bool = true,
         delay: TimeInterval
     ) {
         guard let controllerSupport = ControllerSupport.sharedInstance() else {
             return
         }
 
-        let eq = dualSenseHapticsEQSnapshot()
+        let route = selectAuthoredHapticsRoute(
+            controllerNumber: controllerNumber,
+            controllerSupport: controllerSupport
+        )
+        updateAuthoredHapticsRouteTransition(
+            to: route,
+            controllerNumber: controllerNumber,
+            controllerSupport: controllerSupport
+        )
+
+        guard route != .off else {
+            return
+        }
+
+        let eq = appliesEQ ? dualSenseHapticsEQSnapshot(for: route) : [1, 1, 1, 1, 1] as [Float]
         let masterGain = eq[0]
         let lowBandGain = eq[1]
         let highBandGain = eq[2]
         let transientGain = eq[3]
         let sharpnessGain = eq[4]
 
-        func renderValues(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
+        func rawIrValues(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
+            guard let lane else {
+                return (0, 0, 0)
+            }
+            let amplitude = min(max(lane.rms_amplitude, 0), 1)
+            let sharpness = min(max(1 - lane.low_band_ratio, 0), 1)
+            let transient = min(max(lane.transient_strength, 0), 1)
+            return (amplitude, sharpness, transient)
+        }
+
+        func renderValues1(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
             let lowBandRatio = min(max(lane?.low_band_ratio ?? 1, 0), 1)
             let highBandRatio = 1 - lowBandRatio
             let effectiveLowBandGain = pow(lowBandGain, 1.6)
@@ -604,10 +959,12 @@ import UIKit
                 : immediateSharpness
             let sourceTransient = min(max(lane?.transient_strength ?? 0, 0), 1)
             let rmsAmplitude = min(max(lane?.rms_amplitude ?? 0, 0), 1)
-            let perceptualBandTrim = 0.55 + 0.55 * equalizedHighBandRatio
+            let transientBandTrim = 0.55 + 0.35 * lowBandRatio + 0.10 * equalizedHighBandRatio
+            let lowContinuousTrim = 0.78 + 0.22 * lowBandRatio
+            let highContinuousTrim = 0.62 - 0.30 * equalizedHighBandRatio
             let renderedTransient = min(max(
                 pow(sourceTransient, 0.45) * sqrt(masterGain) * transientGain *
-                    bandGain * perceptualBandTrim * 1.35,
+                    bandGain * transientBandTrim * 1.35,
                 0
             ), 1)
             let continuousShare = 1 - 0.85 * min(
@@ -617,11 +974,11 @@ import UIKit
             let lowBody = pow(rmsAmplitude, 1.85) *
                 (1 - highBandRatio) * effectiveLowBandGain * 0.55
             let highTexture = pow(rmsAmplitude, 0.55) *
-                pow(highBandRatio, 1.15) * effectiveHighBandGain * 0.22
+                pow(highBandRatio, 1.35) * effectiveHighBandGain * 0.09
             let midBodyTrim = 1 - 0.55 * min(max((representativeFrequency - 90) / 140, 0), 1) *
                 (1 - highBandRatio)
-            let continuousAmplitude = (lowBody + highTexture) * masterGain *
-                perceptualBandTrim * midBodyTrim * continuousShare
+            let continuousAmplitude = (lowBody * lowContinuousTrim + highTexture * highContinuousTrim) *
+                masterGain * midBodyTrim * continuousShare
             return (
                 min(max(continuousAmplitude, 0), 1),
                 min(max(synthesizedSharpness * sharpnessGain, 0), 1),
@@ -629,36 +986,83 @@ import UIKit
             )
         }
 
-        var leftValues = renderValues(for: left)
-        var rightValues = renderValues(for: right)
+        func renderValues2(for lane: AhAuthoredLaneFrame?) -> (amplitude: Float, sharpness: Float, transient: Float) {
+            guard let lane else {
+                return (0, 0, 0)
+            }
 
-        let positiveCorrelation = min(max(laneCorrelation, 0), 1)
-        let centerBlend = min(max((positiveCorrelation - 0.1) / 0.9, 0), 1) * 0.85
-        if centerBlend > 0 {
-            let commonAmplitude = sqrt(
-                (leftValues.amplitude * leftValues.amplitude +
-                 rightValues.amplitude * rightValues.amplitude) * 0.5
+            let useBuiltinHaptic = route == .device
+            
+            let rmsAmplitude = min(max(lane.rms_amplitude, 0), 1)
+            
+            let lowBandRatio = min(max(lane.low_band_ratio, 0), 1)
+            let highBandRatio = 1 - lowBandRatio
+            let amplitudeLowBandGain: Float = 1.0
+            let amplitudeHighBandGain: Float = 1.0
+            let bandGain = lowBandRatio * amplitudeLowBandGain + highBandRatio * amplitudeHighBandGain
+            let sourceSharpness = min(max(highBandRatio, 0), 1)
+            let sharpnessLowGain: Float = 0.62
+            let sharpnessMidGain: Float = 0.82
+            let sharpnessHighGain: Float = 1.2
+            let sharpnessLowWeight = min(max((0.50 - sourceSharpness) / 0.50, 0), 1)
+            let sharpnessHighWeight = min(max((sourceSharpness - 0.50) / 0.50, 0), 1)
+            let sharpnessMidWeight = 1 - max(sharpnessLowWeight, sharpnessHighWeight)
+            let sharpnessGain = sharpnessLowWeight * sharpnessLowGain +
+                sharpnessMidWeight * sharpnessMidGain +
+                sharpnessHighWeight * sharpnessHighGain
+            let sharpness = min(max(sourceSharpness * sharpnessGain, 0), 1)
+            
+            let transient = min(max(lane.transient_strength, 0), 1)
+            let amplitudeCeiling: Float = 1.0
+            let transientGain: Float = useBuiltinHaptic ? 1.03 : 0.343
+            let transientCeiling: Float = useBuiltinHaptic ? 1.03 : 0.6
+            let transientBottom: Float = useBuiltinHaptic ? 0.14 : 0.0
+
+            return (
+                min(rmsAmplitude * bandGain, amplitudeCeiling),
+                sharpness,
+                min(max(transientBottom, transient * transientGain * 1.6666666667 * dualSenseHapticTransient), transientCeiling)
             )
-            let amplitudeSum = leftValues.amplitude + rightValues.amplitude
-            let commonSharpness = amplitudeSum > 0.000_001
-                ? (leftValues.sharpness * leftValues.amplitude +
-                   rightValues.sharpness * rightValues.amplitude) / amplitudeSum
-                : max(leftValues.sharpness, rightValues.sharpness)
-            let commonTransient = max(leftValues.transient, rightValues.transient)
-
-            leftValues.amplitude += (commonAmplitude - leftValues.amplitude) * centerBlend
-            rightValues.amplitude += (commonAmplitude - rightValues.amplitude) * centerBlend
-            leftValues.sharpness += (commonSharpness - leftValues.sharpness) * centerBlend
-            rightValues.sharpness += (commonSharpness - rightValues.sharpness) * centerBlend
-            leftValues.transient += (commonTransient - leftValues.transient) * centerBlend
-            rightValues.transient += (commonTransient - rightValues.transient) * centerBlend
         }
 
+        var leftValues = appliesEQ ? renderValues1(for: left) : renderValues2(for: left)
+        var rightValues = appliesEQ ? renderValues1(for: right) : renderValues2(for: right)
+
+        if appliesEQ {
+            let positiveCorrelation = min(max(laneCorrelation, 0), 1)
+            let commonHighBandRatio = (
+                authoredHighBandRatio(for: left) + authoredHighBandRatio(for: right)
+            ) * 0.5
+            let dualSenseCenterBlendScale = 0.10 + 0.55 * commonHighBandRatio
+            let centerBlendScale: Float = route == .dualSense ? dualSenseCenterBlendScale : 0.85
+            let centerBlend = min(max((positiveCorrelation - 0.1) / 0.9, 0), 1) * centerBlendScale
+            if centerBlend > 0 {
+                let commonAmplitude = sqrt(
+                    (leftValues.amplitude * leftValues.amplitude +
+                     rightValues.amplitude * rightValues.amplitude) * 0.5
+                )
+                let amplitudeSum = leftValues.amplitude + rightValues.amplitude
+                let commonSharpness = amplitudeSum > 0.000_001
+                    ? (leftValues.sharpness * leftValues.amplitude +
+                       rightValues.sharpness * rightValues.amplitude) / amplitudeSum
+                    : max(leftValues.sharpness, rightValues.sharpness)
+                let commonTransient = max(leftValues.transient, rightValues.transient)
+
+                leftValues.amplitude += (commonAmplitude - leftValues.amplitude) * centerBlend
+                rightValues.amplitude += (commonAmplitude - rightValues.amplitude) * centerBlend
+                leftValues.sharpness += (commonSharpness - leftValues.sharpness) * centerBlend
+                rightValues.sharpness += (commonSharpness - rightValues.sharpness) * centerBlend
+                leftValues.transient += (commonTransient - leftValues.transient) * centerBlend
+                rightValues.transient += (commonTransient - rightValues.transient) * centerBlend
+            }
+        }
+        
         /*
         if logDiagnostics {
             NSLog(
-                "DS5 authored: c=%u srcL[rms=%.3f high=%.3f hz=%.0f] srcR[rms=%.3f high=%.3f hz=%.0f] corr=%.2f outL[a=%.3f s=%.3f t=%.3f] outR[a=%.3f s=%.3f t=%.3f]",
+                "DS5 authored: c=%u route=%@ srcL[rms=%.3f high=%.3f hz=%.0f] srcR[rms=%.3f high=%.3f hz=%.0f] corr=%.2f outL[a=%.3f s=%.3f t=%.3f] outR[a=%.3f s=%.3f t=%.3f]",
                 controllerNumber,
+                route == .dualSense ? "dualsense" : "device",
                 Double(left?.rms_amplitude ?? 0),
                 Double(1 - min(max(left?.low_band_ratio ?? 1, 0), 1)),
                 Double(min(max((left?.zero_crossing_rate_hz ?? 0) * 0.5, 0), 400)),
@@ -674,18 +1078,47 @@ import UIKit
                 Double(rightValues.transient)
             )
         }
-        */
+         */
 
-        controllerSupport.renderDualSenseHaptics(
-            controllerNumber,
-            leftAmplitude: leftValues.amplitude,
-            leftSharpness: leftValues.sharpness,
-            leftTransient: leftValues.transient,
-            rightAmplitude: rightValues.amplitude,
-            rightSharpness: rightValues.sharpness,
-            rightTransient: rightValues.transient,
-            delaySeconds: delay
-        )
+        switch route {
+        case .dualSense:
+            if appliesEQ {
+                leftValues = compensatedDualSenseControllerValues(
+                    leftValues,
+                    highBandRatio: authoredHighBandRatio(for: left)
+                )
+                rightValues = compensatedDualSenseControllerValues(
+                    rightValues,
+                    highBandRatio: authoredHighBandRatio(for: right)
+                )
+                let mixedValues = mixedDualSenseControllerHandleValues(left: leftValues, right: rightValues)
+                leftValues = mixedValues.left
+                rightValues = mixedValues.right
+            }
+            controllerSupport.renderDualSenseHaptics(
+                controllerNumber,
+                leftAmplitude: leftValues.amplitude,
+                leftSharpness: leftValues.sharpness,
+                leftTransient: leftValues.transient,
+                rightAmplitude: rightValues.amplitude,
+                rightSharpness: rightValues.sharpness,
+                rightTransient: rightValues.transient,
+                delaySeconds: delay
+            )
+        case .device:
+            controllerSupport.renderDeviceDualSenseHaptics(
+                controllerNumber,
+                leftAmplitude: leftValues.amplitude,
+                leftSharpness: leftValues.sharpness,
+                leftTransient: leftValues.transient,
+                rightAmplitude: rightValues.amplitude,
+                rightSharpness: rightValues.sharpness,
+                rightTransient: rightValues.transient,
+                delaySeconds: delay
+            )
+        case .off:
+            break
+        }
     }
 #endif
     
@@ -711,6 +1144,7 @@ import UIKit
         let elementDict = tempMap as NSDictionary
         
         // 单一 gamepad.valueChangedHandler
+                
         gamepad.valueChangedHandler = { gamepad, element in
             handler(elementDict, gamepad, element)
             if #available(iOS 13.0, *) {

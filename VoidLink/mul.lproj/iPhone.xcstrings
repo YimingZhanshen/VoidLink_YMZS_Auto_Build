@@ -4789,18 +4789,6 @@
         }
       }
     },
-    "P4N-i6-1zD.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Enable Timebase\"; ObjectID = \"P4N-i6-1zD\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Enable Timebase"
-          }
-        }
-      }
-    },
     "P9b-Th-Ybc.text" : {
       "comment" : "Class = \"UILabel\"; text = \"      Batch move     \"; ObjectID = \"P9b-Th-Ybc\";",
       "extractionState" : "extracted_with_value",
@@ -5216,43 +5204,55 @@
       }
     },
     "q6v-Jb-ysy.segmentTitles[1]" : {
-      "comment" : "Class = \"UISegmentedControl\"; q6v-Jb-ysy.segmentTitles[1] = \"DS4\"; ObjectID = \"q6v-Jb-ysy\";",
+      "comment" : "Class = \"UISegmentedControl\"; q6v-Jb-ysy.segmentTitles[1] = \"PS\"; ObjectID = \"q6v-Jb-ysy\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "DS4"
+            "value" : "PS"
           }
         }
       }
     },
     "q6v-Jb-ysy.segmentTitles[2]" : {
-      "comment" : "Class = \"UISegmentedControl\"; q6v-Jb-ysy.segmentTitles[2] = \"Both\"; ObjectID = \"q6v-Jb-ysy\";",
+      "comment" : "Class = \"UISegmentedControl\"; q6v-Jb-ysy.segmentTitles[2] = \"PS (Enhanced Haptics)\"; ObjectID = \"q6v-Jb-ysy\";",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Both"
+            "value" : "PS (Enhanced Haptics)"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同时映射"
+            "value" : "PS (触觉增强)"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同時映射"
+            "value" : "PS（觸覺增強）"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "同時映射"
+            "value" : "PS（觸覺增強）"
+          }
+        }
+      }
+    },
+    "q6v-Jb-ysy.segmentTitles[3]" : {
+      "comment" : "Class = \"UISegmentedControl\"; q6v-Jb-ysy.segmentTitles[3] = \"Xbox + PS\"; ObjectID = \"q6v-Jb-ysy\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Xbox + PS"
           }
         }
       }
@@ -6321,6 +6321,36 @@
           "stringUnit" : {
             "state" : "needs_review",
             "value" : "渲染模式"
+          }
+        }
+      }
+    },
+    "vak-fg-iAQ.text" : {
+      "comment" : "Class = \"UILabel\"; text = \"DualSense Haptic Intensity\"; ObjectID = \"vak-fg-iAQ\";",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "DualSense Haptic Intensity"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense振动强度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense振動強度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense振動強度"
           }
         }
       }

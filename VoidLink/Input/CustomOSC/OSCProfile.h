@@ -65,6 +65,7 @@ typedef NS_ENUM(NSInteger, PencilAndHoverMode) {
 @property (nonatomic, assign) CGFloat touchPointerVelocityFactor;
 @property (nonatomic, assign) CGPoint normalizedStreamViewOffset;
 @property (nonatomic, assign) CGFloat streamViewScale;
+@property (nonatomic, assign) CGFloat dualSenseTransient;
 
 @property (nonatomic, assign) bool gamepadOverlayEnabled;
 

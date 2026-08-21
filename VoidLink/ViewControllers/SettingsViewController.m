@@ -211,14 +211,20 @@ CMVideoDimensions resolutionTable[RESOLUTION_TABLE_SIZE];
 -(uint16_t)controllerTypeToSegmentIndex:(uint16_t)type{
     uint16_t index;
     switch (type) {
-        case LI_CTYPE_XBOX:
+        case ControllerEmulationXbox:
             index = 0;
             break;
-        case LI_CTYPE_PS:
+        case ControllerEmulationPs:
             index = 1;
             break;
-        default:
+        case ControllerEmulationPsEnhancedHaptic:
             index = 2;
+            break;
+        case ControllerEmulationXboxAndPs:
+            index = 3;
+            break;
+        default:
+            index = 3;
             break;
     }
     return index;
@@ -228,10 +234,16 @@ CMVideoDimensions resolutionTable[RESOLUTION_TABLE_SIZE];
     uint16_t type;
     switch (index) {
         case 0:
-            type = LI_CTYPE_XBOX;
+            type = ControllerEmulationXbox;
             break;
         case 1:
-            type = LI_CTYPE_PS;
+            type = ControllerEmulationPs;
+            break;
+        case 2:
+            type = ControllerEmulationPsEnhancedHaptic;
+            break;
+        case 3:
+            type = ControllerEmulationXboxAndPs;
             break;
         default:
             type = LI_CTYPE_UNKNOWN;
@@ -428,6 +440,9 @@ BOOL isCustomResolution(int resolutionSelected) {
 
     [self.synthPhysicalInputSwitch setOn:oscProfile.synthesizePhysicalStick];
     
+    [self.dualSenseTransientSlider setValue:oscProfile.dualSenseTransient];
+    [self.dualSenseTransientSlider sendActionsForControlEvents:UIControlEventValueChanged];
+    
     [self.pressureCurveSwitch setOn:oscProfile.pressureCurveEnabled];
     [self.doubleTapShortcutSwitch setOn:oscProfile.doubleTapShorcutEnabled];
     [self.squeezeShortcutSwitch setOn:oscProfile.squeezeShorcutEnabled];
@@ -461,6 +476,7 @@ BOOL isCustomResolution(int resolutionSelected) {
                              && (int16_t)(oscProfile.gyroSensitivityPitch*100) == (int16_t)pitchSensitivityPercent
                              && (int16_t)(oscProfile.gyroSensitivityRoll*100) == (int16_t)rollSensitivityPercent
                              && (int16_t)(oscProfile.gyroToStickMinOffset) == (int16_t)self.gyroToStickMinOffsetSlider.value
+                             && (int16_t)(oscProfile.dualSenseTransient*100) == (int16_t)(self.dualSenseTransientSlider.value*100)
                              && oscProfile.synthesizePhysicalStick == self.synthPhysicalInputSwitch.isOn
                              && oscProfile.controllerGyroSwitchMode == self.controllerGyroSwitchButtonSetter.selectedSegmentIndex
                              && oscProfile.reverseGyroHoldButton == self.reverseHoldButtonSwitch.isOn
@@ -488,6 +504,7 @@ BOOL isCustomResolution(int resolutionSelected) {
         oscProfile.gyroSensitivityPitch = pitchSensitivityPercent/100;
         oscProfile.gyroSensitivityRoll = rollSensitivityPercent/100;
         oscProfile.gyroToStickMinOffset = (int16_t)self.gyroToStickMinOffsetSlider.value;
+        oscProfile.dualSenseTransient = self.dualSenseTransientSlider.value;
         oscProfile.synthesizePhysicalStick = self.synthPhysicalInputSwitch.isOn;
         oscProfile.controllerGyroSwitchMode = (int)self.controllerGyroSwitchButtonSetter.selectedSegmentIndex;
         oscProfile.reverseGyroHoldButton = self.reverseHoldButtonSwitch.isOn;
@@ -996,6 +1013,11 @@ BOOL isCustomResolution(int resolutionSelected) {
     self.emulatedControllerTypeStack.hasInfoTag = YES;
     // self.emulatedControllerTypeStack.isGameProfileSetting = YES;
     [self addSetting:self.emulatedControllerTypeStack ofId:@"emulatedControllerTypeStack" to:controllerSection];
+    
+    self.dualSenseTransientStack.hasInfoTag = YES;
+    self.dualSenseTransientStack.isGameProfileSetting = YES;
+    self.dualSenseTransientStack.hasDynamicLabel = YES;
+    [self addSetting:self.dualSenseTransientStack ofId:@"dualSenseTransientStack" to:controllerSection];
 
     self.gyroModeStack.hasInfoTag = YES;
     // self.gyroModeStack.isGameProfileSetting = YES;
@@ -2321,6 +2343,8 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.hapticEngineSelector setEnabled:!disableControllerRumble forSegmentAtIndex:LeftRightSwapped];
         [self.hapticEngineSelector setEnabled:!disableControllerRumble forSegmentAtIndex:HapticEngineAuto];
         [self.hapticEngineSelector setEnabled:[self isIPhone] forSegmentAtIndex:RumbleDevice];
+        
+        [self.dualSenseTransientSlider addTarget:self action:@selector(dualSenseTransientSliderMoved:) forControlEvents:UIControlEventValueChanged];
 
         self.gyroModeSelector.selectedSegmentIndex = self->tempSettings.gyroMode.intValue;
         [self.gyroSensitivitySlider setValue: (uint16_t)(self->tempSettings.gyroSensitivity.floatValue * 100) animated:NO]; // Load old setting.
@@ -3425,6 +3449,11 @@ BOOL isCustomResolution(int resolutionSelected) {
     }
 }
 
+- (void)dualSenseTransientSliderMoved:(UISlider* )sender {
+    [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %.2f  ", sender.value]; // Update label display
+    ControllerUtil.dualSenseHapticTransient = sender.value;
+}
+
 - (void) gyroSensitivitySliderMoved:(UISlider* )sender {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
 }
@@ -3619,6 +3648,12 @@ BOOL isCustomResolution(int resolutionSelected) {
 - (void)emulatedControllerTypeChanged:(UISegmentedControl* )sender{
     [self setHidden:sender.selectedSegmentIndex == 0 forStack:_gyroModeStack];
     [self setHidden:sender.selectedSegmentIndex == 0 forStack:_gyroSensitivityStack];
+    [self setHidden:sender.selectedSegmentIndex != 2 forStack:_dualSenseTransientStack];
+
+    if(settingsViewJustExpanded) return;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [GenericUtils handleControllerEmulationTipIn:self];
+    });
 }
 
 

@@ -44,10 +44,10 @@ static NSString *const GameSirG8MFiModel = @"G8+ MFi";
 
 - (void)dealloc {
     [NSNotificationCenter.defaultCenter removeObserver:self];
+    NSAssert(NSThread.isMainThread || _session == nil, @"Active GameSir sessions must be closed on the main thread before deallocation");
     if (NSThread.isMainThread) {
-        [self writeStopPacketBestEffort];
+        [self stopAndCloseOnMainThread];
     }
-    [self closeSession];
 }
 
 - (void)applicationWillResignActive:(NSNotification *)notification {
@@ -224,6 +224,7 @@ static NSString *const GameSirG8MFiModel = @"G8+ MFi";
 }
 
 - (void)closeSession {
+    NSAssert(NSThread.isMainThread, @"GameSir sessions must be closed on the main thread");
     if (_session != nil) {
         [_session.inputStream close];
         [_session.outputStream close];
@@ -241,11 +242,17 @@ static NSString *const GameSirG8MFiModel = @"G8+ MFi";
 }
 
 - (void)stopAndCloseOnMainThread {
+    NSAssert(NSThread.isMainThread, @"GameSir sessions must be stopped on the main thread");
     [self writeStopPacketBestEffort];
     [self closeSession];
 }
 
 - (void)stopAndClose {
+    if (NSThread.isMainThread) {
+        [self stopAndCloseOnMainThread];
+        return;
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         [self stopAndCloseOnMainThread];
     });

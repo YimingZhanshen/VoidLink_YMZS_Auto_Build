@@ -10,9 +10,10 @@
 //
 
 #import "ControllerSupport.h"
+#import "GameSirG8MFiRumble.h"
+#import "OnScreenControls.h"
 #import "VoidController.h"
 #import "VoidLink-Swift.h"
-#import "OnScreenControls.h"
 
 #import "DataManager.h"
 #include "Limelight.h"
@@ -118,6 +119,9 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
     TemporarySettings* tempSettings;
     OSCProfile* oscProfile;
     OSCProfilesManager* oscProfileMan;
+#if !TARGET_OS_TV
+    GameSirG8MFiRumble *_gameSirG8MFiRumble;
+#endif
 
 #define EMULATING_SELECT     0x1
 #define EMULATING_SPECIAL    0x2
@@ -173,23 +177,49 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
         // No connected controller for this player
         return;
     }
+
+#if !TARGET_OS_TV
+    BOOL useGameSirG8MFiRumble = [_gameSirG8MFiRumble canHandleController:voidController.gamepad];
+#endif
     
     // physical controller connected:
     switch (preference) {
         case HapticEngineAuto:
+#if !TARGET_OS_TV
+            if (useGameSirG8MFiRumble) {
+                [_gameSirG8MFiRumble setLowFrequencyMotor:lowFreqMotor highFrequencyMotor:highFreqMotor];
+                break;
+            }
+#endif
             // if controller has no haptic profile, it already falled bakc to device engine
             [voidController.lowFreqMotor setMotorAmplitude:lowFreqMotor];
             [voidController.highFreqMotor setMotorAmplitude:highFreqMotor];
             break;
         case RumbleDevice:
+#if !TARGET_OS_TV
+            if (useGameSirG8MFiRumble) {
+                [_gameSirG8MFiRumble setLowFrequencyMotor:0 highFrequencyMotor:0];
+            }
+#endif
             [_oscController.lowFreqMotor setMotorAmplitude:lowFreqMotor];
             [_oscController.highFreqMotor setMotorAmplitude:highFreqMotor];
             break;
         case LeftRightSwapped:
+#if !TARGET_OS_TV
+            if (useGameSirG8MFiRumble) {
+                [_gameSirG8MFiRumble setLowFrequencyMotor:highFreqMotor highFrequencyMotor:lowFreqMotor];
+                break;
+            }
+#endif
             [voidController.lowFreqMotor setMotorAmplitude:highFreqMotor];
             [voidController.highFreqMotor setMotorAmplitude:lowFreqMotor];
             break;
         case RumbleOff:
+#if !TARGET_OS_TV
+            if (useGameSirG8MFiRumble) {
+                [_gameSirG8MFiRumble setLowFrequencyMotor:0 highFrequencyMotor:0];
+            }
+#endif
             break;
         default:
             break;
@@ -2005,6 +2035,9 @@ double rc_expo(double x, double expo) {
     _voidControllers = [[NSMutableDictionary alloc] init];
     [ControllerUtil.activeStreamingGCControllers removeAllObjects];
     _controllerNumbers = 0;
+#if !TARGET_OS_TV
+    _gameSirG8MFiRumble = [[GameSirG8MFiRumble alloc] init];
+#endif
     
     _captureMouse = (streamConfig.localMousePointerMode == 0);
     if (@available(iOS 14.0, tvOS 14.0, *)) {
@@ -2064,6 +2097,11 @@ double rc_expo(double x, double expo) {
         
         VoidController* voidController = [self->_voidControllers objectForKey:[NSNumber numberWithInteger:controller.playerIndex]];
         if (voidController) {
+#if !TARGET_OS_TV
+            if ([self->_gameSirG8MFiRumble isTargetController:controller]) {
+                [self->_gameSirG8MFiRumble stopAndClose];
+            }
+#endif
             [self stopTimerForController:voidController];
             
             // Stop haptics on this controller
@@ -2267,6 +2305,9 @@ double rc_expo(double x, double expo) {
 -(void) cleanup
 {
     [ControllerUtil stopAllDualSenseHaptics];
+#if !TARGET_OS_TV
+    [_gameSirG8MFiRumble invalidate];
+#endif
 
     if (VLSharedControllerSupport == self) {
         VLSharedControllerSupport = nil;

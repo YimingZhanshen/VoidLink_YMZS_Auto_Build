@@ -267,6 +267,11 @@ import UIKit
     case xboxAndPs = 0x00 // LI_CTYPE_UNKNOWN
 }
 
+@objc enum ControllerHardware: UInt8 {
+    case generic
+    case g8PlusMFi
+}
+
 @objc protocol ControllerUtilDelegate: AnyObject {
     func isStreaming() -> Bool
     func isInAppView() -> Bool

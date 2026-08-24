@@ -7,12 +7,15 @@
 //
 
 #import "HapticContext.h"
+#include <stdint.h>
 
 @import GameController;
 @import CoreHaptics;
 #if !TARGET_OS_TV
     @import CoreMotion;
 #endif
+
+typedef NS_ENUM(uint8_t, ControllerHardware);
 
 @interface VoidController : NSObject
 
@@ -69,6 +72,7 @@ typedef NS_ENUM(NSInteger, ControllerDeviceBatteryState) {
 @property(nonatomic, strong) NSMutableSet* _Nullable motionTypes;
 @property(nonatomic, assign) uint16_t reportRateHz;
 @property(nonatomic, assign) uint16_t controllerNumber;
+@property(nonatomic, assign) ControllerHardware hardware;
 @property(nonatomic, assign) BOOL hasAccelerometer;
 @property(nonatomic, assign) BOOL hasGyroscope;
 

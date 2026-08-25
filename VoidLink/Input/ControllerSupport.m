@@ -162,7 +162,7 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
 {
 #if !TARGET_OS_TV
     if (controller.hardware == ControllerHardwareG8PlusMFi) {
-        NSLog(@"[G8Rumble] route native rumble low=%hu high=%hu", lowFreqMotor, highFreqMotor);
+        // NSLog(@"[G8Rumble] route native rumble low=%hu high=%hu", lowFreqMotor, highFreqMotor);
         [_gameSirG8MFiRumbler setLowFrequencyMotor:lowFreqMotor highFrequencyMotor:highFreqMotor];
         return;
     }
@@ -191,12 +191,14 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
         return;
     }
 
+    /*
     NSLog(@"[G8Rumble] rumble request controller=%hu low=%hu high=%hu preference=%ld vendor=%@",
           controllerNumber,
           lowFreqMotor,
           highFreqMotor,
           (long)preference,
           voidController.gamepad.vendorName);
+     */
     
     // physical controller connected:
     switch (preference) {

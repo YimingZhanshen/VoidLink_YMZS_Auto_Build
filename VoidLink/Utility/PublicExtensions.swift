@@ -192,12 +192,26 @@ public extension UISegmentedControl {
     }
 
     private func storePreviousSelectedSegmentIndex(_ value: Int) {
+        guard canStorePreviousSelectedSegmentIndex(value) else {
+            return
+        }
+
         objc_setAssociatedObject(
             self,
             &previousSelectedSegmentIndexKey,
             NSNumber(value: value),
             .OBJC_ASSOCIATION_RETAIN_NONATOMIC
         )
+    }
+
+    private func canStorePreviousSelectedSegmentIndex(_ value: Int) -> Bool {
+        guard value != UISegmentedControl.noSegment else {
+            return true
+        }
+        guard value >= 0 && value < numberOfSegments else {
+            return false
+        }
+        return isEnabledForSegment(at: value)
     }
 
     private func storeLastKnownSelectedSegmentIndex(_ value: Int) {

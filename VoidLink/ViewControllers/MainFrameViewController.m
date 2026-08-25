@@ -1402,8 +1402,13 @@ static NSMutableSet* hostList;
     // Enable frame pacing mode selector only if not in stream view AND not in performance mode
     BOOL shouldEnableFrameQueueSettings = !_settingsExpandedInStreamView && (self.settingsViewController.renderingBackendSelector.selectedSegmentIndex != RENDER_METAL);
     // [self.settingsViewController.framePacingModeSelector setEnabled:shouldEnableFrameQueueSettings];
-    [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeOff];
-    [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeLegacy];
+    
+    if(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex != FramePacingModeOff
+       && self.settingsViewController.framePacingModeSelector.selectedSegmentIndex != FramePacingModeLegacy) {
+        [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeOff];
+        [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeLegacy];
+    }
+    else [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView];
     
     if(FrameInterpolator.deviceSupportsInterpolation){
         [self.settingsViewController.framePacingModeSelector setEnabled:_settingsViewController.framerateSelector.selectedSegmentIndex != _settingsViewController.framerateSelector.numberOfSegments-1

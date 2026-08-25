@@ -331,7 +331,7 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
                             deviceAccelSample.x += voidController.motionManager.deviceMotion.gravity.x;
                             deviceAccelSample.y += voidController.motionManager.deviceMotion.gravity.y;
                             deviceAccelSample.z += voidController.motionManager.deviceMotion.gravity.z;
-                            NSLog(@"sending device accel %f", CACurrentMediaTime());
+                            // NSLog(@"sending device accel %f", CACurrentMediaTime());
 
                             UIInterfaceOrientation interfaceOrientation = [self currentInterfaceOrientation];
                             CMAcceleration mappedDeviceAccelSample = {};
@@ -486,10 +486,10 @@ static void ApplyAdaptiveTriggerEffect(GCDualSenseAdaptiveTrigger* trigger,
                                                                   block:^(NSTimer *timer) {
                                     GCAcceleration lastAccelSample = voidController.lastAccelSample;
                                     GCAcceleration accelSample = voidController.gamepad.motion.acceleration;
-                                    
                                     if (memcmp(&accelSample, &lastAccelSample, sizeof(accelSample)) == 0) {
                                         return;
                                     }
+                                    // NSLog(@"sending controller accel %f", CACurrentMediaTime());
                                     
                                     voidController.lastAccelSample = accelSample;
                                     
@@ -1345,7 +1345,8 @@ double rc_expo(double x, double expo) {
 
 
 - (bool)useMotionHandler{
-    return true;
+    return tempSettings.gyroMode.intValue == GyroModeOff
+    || tempSettings.gyroMode.intValue == AlwaysDevice;
 }
 
 - (void)switchMotionControlOnOffByControllerButton{

@@ -638,6 +638,32 @@ import UIKit
             }
         )
     }
+    
+    @objc public static func isFirstEnablingEmulatedGyroMode() -> Bool {
+        let key = "hasEnabledEmulatedGyroMode20260825"
+        let defaults = UserDefaults.standard
+        let launchedBefore = defaults.bool(forKey: key)
+        if !launchedBefore {
+            defaults.set(true, forKey: key)
+            return true
+        }
+        return false
+    }
+    
+    @objc public static func handleEmulatedGyroModeTip(in vc: UIViewController?) {
+        if isFirstEnablingEmulatedGyroMode() {
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: LocalizationHelper.localizedString(forKey: "Tips"),
+                message: "\n\(LocalizationHelper.localizedString(forKey: "emulatedGyroModeDisablesBuiltinMotionControlTip"))",
+                withCancel: false,
+                buttonTitle: LocalizationHelper.localizedString(forKey: "This tip won't be shown again"),
+                countdown: 7
+            )
+        }
+    }
+    
+    
 
     @objc public static func gamepadOverlayFeatureTipTitle() -> String {
         LocalizationHelper.localizedString(forKey: "Gamepad Overlay")

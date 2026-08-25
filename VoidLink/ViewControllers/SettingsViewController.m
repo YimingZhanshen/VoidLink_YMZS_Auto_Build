@@ -2347,6 +2347,8 @@ BOOL isCustomResolution(int resolutionSelected) {
         [self.dualSenseTransientSlider addTarget:self action:@selector(dualSenseTransientSliderMoved:) forControlEvents:UIControlEventValueChanged];
 
         self.gyroModeSelector.selectedSegmentIndex = self->tempSettings.gyroMode.intValue;
+        [self.gyroModeSelector addTarget:self action:@selector(emulatedGyroModeChanged:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
+        
         [self.gyroSensitivitySlider setValue: (uint16_t)(self->tempSettings.gyroSensitivity.floatValue * 100) animated:NO]; // Load old setting.
         [self.gyroSensitivitySlider addTarget:self action:@selector(gyroSensitivitySliderMoved:) forControlEvents:(UIControlEventValueChanged)]; // Update label display when slider is being moved.
         [self.gyroSensitivitySlider sendActionsForControlEvents:UIControlEventValueChanged]; // Load old setting.
@@ -3456,6 +3458,11 @@ BOOL isCustomResolution(int resolutionSelected) {
 
 - (void) gyroSensitivitySliderMoved:(UISlider* )sender {
     [self findDynamicLabelFromStack:(UIStackView*)sender.superview].text = [NSString stringWithFormat:@"  %d%%  ", (uint16_t)sender.value]; // Update label display
+}
+
+- (void)emulatedGyroModeChanged:(UISegmentedControl* )sender {
+    if(sender.selectedSegmentIndex == GyroModeOff) return;
+    [GenericUtils handleEmulatedGyroModeTipIn:self];
 }
 
 - (void) localVolumeSliderMoved:(UISlider* )sender {

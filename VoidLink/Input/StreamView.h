@@ -80,6 +80,8 @@
 - (void)setAllowSingleTouchEnabled:(BOOL)enabled;
 - (void)toggleTouchDisabled:(bool)disabled;
 
+- (void)startInteractionTimer;
+
 #if !TARGET_OS_TV
 - (void) updateCursorLocation:(CGPoint)location isMouse:(BOOL)isMouse;
 #endif

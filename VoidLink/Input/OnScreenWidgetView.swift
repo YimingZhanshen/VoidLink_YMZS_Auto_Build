@@ -75,6 +75,7 @@ import ObjectiveC.runtime
         func resetMagnifierStreamView(animated:Bool)
         @objc(restoreMagnifierStreamViewWithOffset:scale:)
         func restoreMagnifierStreamView(offset: CGPoint, scale: CGFloat)
+        func startStreamViewInteractionTimer()
     }
     
     @objc enum WidgetTypeEnum: UInt8 {
@@ -3630,6 +3631,7 @@ import ObjectiveC.runtime
     }
     
     @objc private func vl_autoDock_touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.functionalWidgetDelegate?.startStreamViewInteractionTimer()
         guard autoDockEnabled else {
             OnScreenWidgetView.autoDockOriginalTouchesBeganIMP?(self, #selector(OnScreenWidgetView.touchesBegan(_:with:)), touches, event)
             return
@@ -3783,6 +3785,8 @@ import ObjectiveC.runtime
         guard autoDockEnabled else {return}
         
         autoDockIdleDuration = storedAutoDockIdleDuration
+        
+        self.functionalWidgetDelegate?.startStreamViewInteractionTimer()
         
         if !folded {
             restartAutoDockCountdown()

@@ -2044,6 +2044,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 }
 
 - (void)gamepadPresenceChanged {
+    if(PublicUtils.iOS26Available) return;
 #if !TARGET_OS_TV
     if (@available(iOS 11.0, *)) {
         [self setNeedsUpdateOfHomeIndicatorAutoHidden];
@@ -2079,6 +2080,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     // also discard our edges deferring system gestures unless
     // we willingly give up home bar hiding preference.
     _userIsInteracting = YES;
+    if(PublicUtils.iOS26Available) return;
 #if !TARGET_OS_TV
     if (@available(iOS 11.0, *)) {
         [self setNeedsUpdateOfHomeIndicatorAutoHidden];
@@ -2089,6 +2091,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 - (void)userInteractionEnded {
     // Enable home bar hiding again if conditions allow
     _userIsInteracting = NO;
+    if(PublicUtils.iOS26Available) return;
 #if !TARGET_OS_TV
     if (@available(iOS 11.0, *)) {
         [self setNeedsUpdateOfHomeIndicatorAutoHidden];
@@ -2370,6 +2373,9 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     });
 }
 
+- (void)startStreamViewInteractionTimer {
+    [_streamView startInteractionTimer];
+}
 
 - (void)dealloc {
     if (VLSharedStreamFrameViewController == self) {

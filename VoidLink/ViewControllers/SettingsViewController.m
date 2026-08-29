@@ -3649,6 +3649,22 @@ BOOL isCustomResolution(int resolutionSelected) {
     [self setHidden:![self isNotNativeTouchOnly] forStack:self.onScreenWidgetStack];
     [self setHidden:![self isNotNativeTouchOnly] forStack:self.buttonVisualFeedbackStack];
     [self setHidden:sender.selectedSegmentIndex!=AbsoluteTouch forStack:self.delayLeftClickStack];
+    
+    
+    bool gesturePassthroughUnavailable = sender.selectedSegmentIndex==NativeTouch
+    || sender.selectedSegmentIndex==TouchDisabled
+    || (sender.selectedSegmentIndex==AbsoluteTouch && !_passthroughGesturesSwitch.isOn);
+    
+    [self setHidden:gesturePassthroughUnavailable forStack:self.pinchGestureStack];
+    [self setHidden:gesturePassthroughUnavailable forStack:self.scrollSensitivityStack];
+
+    [self setHidden:gesturePassthroughUnavailable
+     || !_pinchGestureSwitch.isOn
+    forStack:self.ctrlDownForPinchStack];
+    [self setHidden:gesturePassthroughUnavailable
+     || !_pinchGestureSwitch.isOn
+    forStack:self.pinchSensitivityStack];
+
     [self handleOswGestureChange];
 }
 

@@ -1,31 +1,191 @@
-name: Build VoidLink IPA
+name: Sync Upstream & Build IPA
 
 on:
+  schedule:
+    - cron: '0 18 * * *'  # UTC 18:00 = 北京时间 02:00
   workflow_dispatch:
-  push:
-    branches: [ "feat/frame_pacing_metal" ]
+    inputs:
+      force_build:
+        description: '即使没有新提交也强制构建'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      version_override:
+        description: '自定义版本号（留空则自动生成日期版本号）'
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: sync-and-build
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: 'The-Fried-Fish/VoidLink-previously-moonlight-zwm'
+  UPSTREAM_BRANCH: 'Integration'
+  TARGET_BRANCH: 'Integration'
+  SCHEME: 'VoidLink'
 
 jobs:
-  build:
-    name: Build VoidLink IPA
-    runs-on: macos-latest
-
+  sync:
+    name: 'Sync Upstream'
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+      commit_count: ${{ steps.check.outputs.commit_count }}
+      latest_sha: ${{ steps.check.outputs.latest_sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+          persist-credentials: true
 
-      - name: Checkout submodules
-        run: "git submodule update --init --recursive"
-
-      - name: Build VoidLink
+      - name: Configure Git
         run: |
-          xcodebuild -verbose -scheme VoidLink -sdk iphoneos -configuration Debug archive -archivePath $PWD/build/VoidLink.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGN_ENTITLEMENTS="" CODE_SIGNING_ALLOWED="NO"
-          mkdir -p ./build/IPA && mkdir -p ./build/IPA/Payload
-          cp -r ./build/VoidLink.xcarchive/Products/Applications/VoidLink.app ./build/IPA/Payload/VoidLink.app
-          cd ./build/IPA && zip -r ../../build/VoidLink.ipa ./Payload/* && cd ../..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Upload VoidLink IPA to Artifacts
+      - name: Add upstream remote
+        run: git remote add upstream "https://github.com/${{ env.UPSTREAM_REPO }}.git"
+
+      - name: Fetch upstream
+        run: git fetch upstream ${{ env.UPSTREAM_BRANCH }}
+
+      - name: Check for new commits
+        id: check
+        run: |
+          LOCAL_SHA=$(git rev-parse HEAD)
+          UPSTREAM_SHA=$(git rev-parse "upstream/${{ env.UPSTREAM_BRANCH }}")
+          echo "local_sha=${LOCAL_SHA}" >> $GITHUB_OUTPUT
+          echo "upstream_sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
+          echo "latest_sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
+
+          if [ "$LOCAL_SHA" = "$UPSTREAM_SHA" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "commit_count=0" >> $GITHUB_OUTPUT
+            echo "No new commits from upstream."
+          else
+            COUNT=$(git rev-list HEAD.."upstream/${{ env.UPSTREAM_BRANCH }}" --count)
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "commit_count=${COUNT}" >> $GITHUB_OUTPUT
+            echo "Found ${COUNT} new commit(s) from upstream."
+          fi
+
+      - name: Merge upstream changes
+        if: steps.check.outputs.has_changes == 'true'
+        run: |
+          git merge "upstream/${{ env.UPSTREAM_BRANCH }}" \
+            --no-edit \
+            -m "sync: merge upstream ${{ env.UPSTREAM_BRANCH }} ($(date -u +%Y-%m-%d))"
+
+      - name: Push to fork
+        if: steps.check.outputs.has_changes == 'true'
+        run: git push origin ${{ env.TARGET_BRANCH }}
+
+  build:
+    name: 'Build VoidLink IPA'
+    needs: sync
+    if: |
+      needs.sync.outputs.has_changes == 'true' ||
+      github.event.inputs.force_build == 'true'
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.version.outputs.version_tag }}
+      ipa_name: ${{ steps.version.outputs.ipa_name }}
+    steps:
+      - name: Checkout synced code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          submodules: recursive
+
+      - name: Generate version tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version_override }}" ]; then
+            VERSION="${{ github.event.inputs.version_override }}"
+          else
+            DATE=$(date -u +%Y.%m.%d)
+            SHORT_SHA=$(echo "${{ needs.sync.outputs.latest_sha }}" | cut -c1-7)
+            VERSION="${DATE}-${SHORT_SHA}"
+          fi
+          echo "version_tag=${VERSION}" >> $GITHUB_OUTPUT
+          echo "ipa_name=VoidLink-${VERSION}" >> $GITHUB_OUTPUT
+          echo "Building version: ${VERSION}"
+
+      - name: Build VoidLink (xcodebuild archive)
+        run: |
+          xcodebuild -verbose \
+            -scheme ${{ env.SCHEME }} \
+            -sdk iphoneos \
+            -configuration Debug \
+            archive \
+            -archivePath $PWD/build/VoidLink.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED="NO" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            CODE_SIGNING_ALLOWED="NO"
+
+      - name: Package IPA
+        run: |
+          mkdir -p ./build/IPA/Payload
+          cp -r ./build/VoidLink.xcarchive/Products/Applications/${{ env.SCHEME }}.app \
+            ./build/IPA/Payload/${{ env.SCHEME }}.app
+          cd ./build/IPA
+          zip -r ../${{ steps.version.outputs.ipa_name }}.ipa ./Payload/*
+          cd ../..
+
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: VoidLink.ipa
-          path: build/VoidLink.ipa
+          name: ${{ steps.version.outputs.ipa_name }}
+          path: build/${{ steps.version.outputs.ipa_name }}.ipa
+          retention-days: 30
+
+  release:
+    name: 'Create GitHub Release'
+    needs: [sync, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.ipa_name }}
+          path: ./release-assets
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          COMMIT_COUNT=${{ needs.sync.outputs.commit_count }}
+          if [ "${COMMIT_COUNT}" -gt 0 ] 2>/dev/null; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" -n 50)
+            echo -e "## What's Changed\n\n${CHANGELOG}\n" > CHANGELOG.md
+          else
+            echo "## Manual Build\n\n手动触发的构建。" > CHANGELOG.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.build.outputs.version }}
+          name: "VoidLink ${{ needs.build.outputs.version }}"
+          body_path: CHANGELOG.md
+          files: ./release-assets/${{ needs.build.outputs.ipa_name }}.ipa
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -18,6 +18,14 @@ on:
         required: false
         default: ''
         type: string
+      clean_cache:
+        description: '清除缓存重新构建'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 concurrency:
   group: sync-and-build
@@ -106,6 +114,35 @@ jobs:
         with:
           ref: ${{ env.TARGET_BRANCH }}
           submodules: recursive
+
+      # === 缓存 1: Xcode Derived Data ===
+      - name: Cache Derived Data
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/VoidLink-*
+          key: derived-data-${{ env.TARGET_BRANCH }}-${{ needs.sync.outputs.latest_sha }}
+          restore-keys: |
+            derived-data-${{ env.TARGET_BRANCH }}-
+
+      # === 缓存 2: 子模块 ===
+      - name: Cache submodules
+        uses: actions/cache@v4
+        with:
+          path: |
+            X1Kit
+            third_party/imgui
+            third_party/moonlight-audio-haptics
+            moonlight-common/moonlight-common-c
+          key: submodules-${{ hashFiles('.gitmodules') }}-${{ needs.sync.outputs.latest_sha }}
+          restore-keys: |
+            submodules-${{ hashFiles('.gitmodules') }}-
+
+      # === 缓存 3: Homebrew packages ===
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: homebrew-macos-latest
 
       - name: Generate version tag
         id: version

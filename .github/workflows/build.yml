@@ -2,6 +2,9 @@ name: Sync Upstream & Build IPA
 
 on:
   schedule:
+    # ⚠️ GitHub 的定时任务只会从仓库【默认分支】读取本文件并触发。
+    #    如果默认分支不是 Integration，cron 永远不会执行（手动触发不受影响）。
+    #    另外：公开仓库 60 天内没有任何提交（含 sync 产生的 merge push）时，定时任务会被自动禁用。
     - cron: '0 18 * * *'  # UTC 18:00 = 北京时间 02:00
   workflow_dispatch:
     inputs:
@@ -19,7 +22,7 @@ on:
         default: ''
         type: string
       clean_cache:
-        description: '清除缓存重新构建'
+        description: '清除 DerivedData 缓存重新构建'
         required: false
         default: 'false'
         type: choice
@@ -27,33 +30,41 @@ on:
           - 'true'
           - 'false'
 
+# 同一时刻只保留一个排队实例；不中断正在运行的构建，避免误杀手动构建
 concurrency:
   group: sync-and-build
-  cancel-in-progress: true
+  cancel-in-progress: false
 
+# 默认最小权限，需要写权限的 job 单独提权
 permissions:
-  contents: write
+  contents: read
 
 env:
   UPSTREAM_REPO: 'The-Fried-Fish/VoidLink-previously-moonlight-zwm'
   UPSTREAM_BRANCH: 'Integration'
   TARGET_BRANCH: 'Integration'
   SCHEME: 'VoidLink'
+  # 发布包建议用 Release；如果上游工程的 Release 配置构建失败，改回 'Debug'
+  BUILD_CONFIGURATION: 'Release'
 
 jobs:
   sync:
     name: 'Sync Upstream'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write        # 需要 push 合并结果
     outputs:
       has_changes: ${{ steps.check.outputs.has_changes }}
       commit_count: ${{ steps.check.outputs.commit_count }}
-      latest_sha: ${{ steps.check.outputs.latest_sha }}
+      base_sha: ${{ steps.check.outputs.base_sha }}
+      already_released: ${{ steps.check.outputs.already_released }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
-          fetch-depth: 0
+          fetch-depth: 0      # 完整历史用于 rev-list/merge，同时带上 tags
           persist-credentials: true
 
       - name: Configure Git
@@ -62,123 +73,173 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Add upstream remote
-        run: git remote add upstream "https://github.com/${{ env.UPSTREAM_REPO }}.git"
+        run: git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
 
       - name: Fetch upstream
-        run: git fetch upstream ${{ env.UPSTREAM_BRANCH }}
+        run: |
+          # 显式 refspec，确保一定生成 refs/remotes/upstream/<branch>
+          git fetch upstream "+refs/heads/${UPSTREAM_BRANCH}:refs/remotes/upstream/${UPSTREAM_BRANCH}"
 
       - name: Check for new commits
         id: check
         run: |
-          LOCAL_SHA=$(git rev-parse HEAD)
-          UPSTREAM_SHA=$(git rev-parse "upstream/${{ env.UPSTREAM_BRANCH }}")
-          echo "local_sha=${LOCAL_SHA}" >> $GITHUB_OUTPUT
-          echo "upstream_sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
-          echo "latest_sha=${UPSTREAM_SHA}" >> $GITHUB_OUTPUT
+          # 保险起见，显式拉取一遍 tags（重试判断依赖 tag 是否指向 HEAD）
+          git fetch --tags origin --quiet || true
 
-          if [ "$LOCAL_SHA" = "$UPSTREAM_SHA" ]; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "commit_count=0" >> $GITHUB_OUTPUT
-            echo "No new commits from upstream."
-          else
-            COUNT=$(git rev-list HEAD.."upstream/${{ env.UPSTREAM_BRANCH }}" --count)
+          LOCAL_SHA=$(git rev-parse HEAD)
+          UPSTREAM_SHA=$(git rev-parse "upstream/${UPSTREAM_BRANCH}")
+          echo "base_sha=${LOCAL_SHA}" >> $GITHUB_OUTPUT
+          echo "local=${LOCAL_SHA} upstream=${UPSTREAM_SHA}"
+
+          # 用「落后提交数」判断，而不是 SHA 相等：
+          # fork 侧一旦产生 merge commit / 自有提交，HEAD 永远不等于 upstream SHA，
+          # SHA 相等判断会导致每天空跑构建、发布空 release
+          COUNT=$(git rev-list --count "HEAD..upstream/${UPSTREAM_BRANCH}")
+
+          if [ "${COUNT}" -gt 0 ]; then
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "commit_count=${COUNT}" >> $GITHUB_OUTPUT
             echo "Found ${COUNT} new commit(s) from upstream."
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "commit_count=0" >> $GITHUB_OUTPUT
+            echo "No new commits from upstream."
+          fi
+
+          # 判断当前 HEAD 是否已被打 tag（= 上次 release 已成功）。
+          # 这是「构建/发布失败后自动重试」的依据：只有 release 成功才会打 tag。
+          if [ -n "$(git tag --points-at HEAD)" ]; then
+            echo "already_released=true" >> $GITHUB_OUTPUT
+            echo "HEAD already released, no rebuild needed."
+          else
+            echo "already_released=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Merge upstream changes
         if: steps.check.outputs.has_changes == 'true'
         run: |
-          git merge "upstream/${{ env.UPSTREAM_BRANCH }}" \
-            --no-edit \
-            -m "sync: merge upstream ${{ env.UPSTREAM_BRANCH }} ($(date -u +%Y-%m-%d))"
+          if ! git merge "upstream/${UPSTREAM_BRANCH}" --no-edit \
+               -m "sync: merge upstream ${UPSTREAM_BRANCH} ($(date -u +%Y-%m-%d))"; then
+            git merge --abort || true
+            echo "::error::与上游合并出现冲突，请手动解决冲突并 push 后重新运行本工作流"
+            exit 1
+          fi
 
       - name: Push to fork
         if: steps.check.outputs.has_changes == 'true'
-        run: git push origin ${{ env.TARGET_BRANCH }}
+        run: git push origin "${TARGET_BRANCH}"
 
   build:
     name: 'Build VoidLink IPA'
     needs: sync
-    if: |
+    # 三种情况需要构建：
+    #   1. 手动 force_build
+    #   2. 上游有新提交
+    #   3. 当前 HEAD 还没成功发布过（上次 build/release 失败 → 自动重试）
+    if: >-
+      github.event.inputs.force_build == 'true' ||
       needs.sync.outputs.has_changes == 'true' ||
-      github.event.inputs.force_build == 'true'
-    runs-on: macos-latest
+      needs.sync.outputs.already_released == 'false'
+    runs-on: macos-15        # 固定 runner 版本，避免 macos-latest 漂移导致某天突然挂
+    timeout-minutes: 120
+    permissions:
+      contents: read
     outputs:
       version: ${{ steps.version.outputs.version_tag }}
       ipa_name: ${{ steps.version.outputs.ipa_name }}
+      head_sha: ${{ steps.xcode.outputs.head_sha }}
     steps:
       - name: Checkout synced code
         uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
+          # 子模块由 checkout 直接拉取。
+          # 注意：不再缓存子模块工作区——checkout 时克隆已经完成，
+          # 事后用 cache 覆盖既无收益，且缓存不含 .git/modules 会留下损坏的子模块状态。
           submodules: recursive
 
-      # === 缓存 1: Xcode Derived Data ===
+      - name: Detect Xcode version
+        id: xcode
+        run: |
+          xcodebuild -version
+          XCODE_VERSION=$(xcodebuild -version | awk '/^Xcode /{print $2}')
+          echo "xcode_version=${XCODE_VERSION}" >> $GITHUB_OUTPUT
+          echo "head_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
       - name: Cache Derived Data
+        # clean_cache=true 时跳过缓存（不 restore 也不 save，即等效全量重建）
+        if: github.event.inputs.clean_cache != 'true'
         uses: actions/cache@v4
         with:
-          path: ~/Library/Developer/Xcode/DerivedData/VoidLink-*
-          key: derived-data-${{ env.TARGET_BRANCH }}-${{ needs.sync.outputs.latest_sha }}
+          path: build/DerivedData
+          # key 携带 Xcode 版本，避免 runner 升级后恢复不兼容的旧缓存
+          key: deriveddata-xcode${{ steps.xcode.outputs.xcode_version }}-${{ steps.xcode.outputs.head_sha }}
           restore-keys: |
-            derived-data-${{ env.TARGET_BRANCH }}-
-
-      # === 缓存 2: 子模块 ===
-      - name: Cache submodules
-        uses: actions/cache@v4
-        with:
-          path: |
-            X1Kit
-            third_party/imgui
-            third_party/moonlight-audio-haptics
-            moonlight-common/moonlight-common-c
-          key: submodules-${{ hashFiles('.gitmodules') }}-${{ needs.sync.outputs.latest_sha }}
-          restore-keys: |
-            submodules-${{ hashFiles('.gitmodules') }}-
-
-      # === 缓存 3: Homebrew packages ===
-      - name: Cache Homebrew
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/Homebrew
-          key: homebrew-macos-latest
+            deriveddata-xcode${{ steps.xcode.outputs.xcode_version }}-
 
       - name: Generate version tag
         id: version
+        env:
+          VERSION_OVERRIDE: ${{ github.event.inputs.version_override }}
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
-          if [ -n "${{ github.event.inputs.version_override }}" ]; then
-            VERSION="${{ github.event.inputs.version_override }}"
+          if [ -n "$VERSION_OVERRIDE" ]; then
+            # tag 名只允许字母数字 . _ -，防止非法字符
+            VERSION=$(printf '%s' "$VERSION_OVERRIDE" | tr -cd '[:alnum:]._-' | cut -c1-40)
+            if [ -z "$VERSION" ]; then
+              echo "::error::version_override 清理后为空，请使用合法的 tag 名"
+              exit 1
+            fi
           else
             DATE=$(date -u +%Y.%m.%d)
-            SHORT_SHA=$(echo "${{ needs.sync.outputs.latest_sha }}" | cut -c1-7)
+            SHORT_SHA=$(git rev-parse --short=7 HEAD)
             VERSION="${DATE}-${SHORT_SHA}"
           fi
+
+          # 同名 tag 已存在（例如同一天强制重建）时，追加 run_number 避免冲突
+          if [ -n "$(git ls-remote --tags origin "refs/tags/${VERSION}")" ]; then
+            VERSION="${VERSION}.${RUN_NUMBER}"
+            echo "Tag already exists, appending run number: ${VERSION}"
+          fi
+
           echo "version_tag=${VERSION}" >> $GITHUB_OUTPUT
           echo "ipa_name=VoidLink-${VERSION}" >> $GITHUB_OUTPUT
           echo "Building version: ${VERSION}"
 
       - name: Build VoidLink (xcodebuild archive)
+        env:
+          DERIVED_DATA: ${{ github.workspace }}/build/DerivedData
         run: |
-          xcodebuild -verbose \
-            -scheme ${{ env.SCHEME }} \
+          # 注意：如果仓库根目录有多个 .xcodeproj/.xcworkspace，
+          # 需要追加 -project XXX.xcodeproj（或 -workspace XXX.xcworkspace）
+          xcodebuild \
+            -scheme "${SCHEME}" \
             -sdk iphoneos \
-            -configuration Debug \
+            -configuration "${BUILD_CONFIGURATION}" \
+            -derivedDataPath "${DERIVED_DATA}" \
             archive \
-            -archivePath $PWD/build/VoidLink.xcarchive \
+            -archivePath "${GITHUB_WORKSPACE}/build/VoidLink.xcarchive" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED="NO" \
             CODE_SIGN_ENTITLEMENTS="" \
-            CODE_SIGNING_ALLOWED="NO"
+            CODE_SIGNING_ALLOWED="NO" \
+            COMPILER_INDEX_STORE_ENABLE="NO"
 
       - name: Package IPA
+        env:
+          IPA_NAME: ${{ steps.version.outputs.ipa_name }}
         run: |
-          mkdir -p ./build/IPA/Payload
-          cp -r ./build/VoidLink.xcarchive/Products/Applications/${{ env.SCHEME }}.app \
-            ./build/IPA/Payload/${{ env.SCHEME }}.app
-          cd ./build/IPA
-          zip -r ../${{ steps.version.outputs.ipa_name }}.ipa ./Payload/*
-          cd ../..
+          APP_PATH="build/VoidLink.xcarchive/Products/Applications/${SCHEME}.app"
+          if [ ! -f "${APP_PATH}/Info.plist" ]; then
+            echo "::error::未找到 ${APP_PATH}，归档可能失败或 .app 名称与 scheme 不一致"
+            exit 1
+          fi
+          mkdir -p build/IPA/Payload
+          # ditto 能正确保留 symlink/权限，比 cp -r 更适合复制 .app
+          ditto "${APP_PATH}" "build/IPA/Payload/${SCHEME}.app"
+          cd build/IPA
+          # -y 保留符号链接
+          zip -ry "../${IPA_NAME}.ipa" Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
@@ -186,17 +247,22 @@ jobs:
           name: ${{ steps.version.outputs.ipa_name }}
           path: build/${{ steps.version.outputs.ipa_name }}.ipa
           retention-days: 30
+          if-no-files-found: error
 
   release:
     name: 'Create GitHub Release'
     needs: [sync, build]
+    # build 被跳过时本 job 也自动跳过
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ env.TARGET_BRANCH }}
-          fetch-depth: 0
+          fetch-depth: 0       # changelog 需要完整历史
 
       - name: Download IPA artifact
         uses: actions/download-artifact@v4
@@ -205,24 +271,52 @@ jobs:
           path: ./release-assets
 
       - name: Generate changelog
-        id: changelog
+        env:
+          BASE_SHA: ${{ needs.sync.outputs.base_sha }}
         run: |
-          COMMIT_COUNT=${{ needs.sync.outputs.commit_count }}
-          if [ "${COMMIT_COUNT}" -gt 0 ] 2>/dev/null; then
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" -n 50)
-            echo -e "## What's Changed\n\n${CHANGELOG}\n" > CHANGELOG.md
+          if [ -n "${BASE_SHA}" ] && git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            TOTAL=$(git rev-list --count "${BASE_SHA}..HEAD" --no-merges)
           else
-            echo "## Manual Build\n\n手动触发的构建。" > CHANGELOG.md
+            TOTAL=0
           fi
 
+          if [ "${TOTAL}" -gt 0 ]; then
+            {
+              echo "## What's Changed"
+              echo ""
+              echo "本次同步共 ${TOTAL} 个新提交："
+              echo ""
+              # 只列本次 sync 新进来的提交，且过滤掉 sync 自身产生的 merge commit
+              git log "${BASE_SHA}..HEAD" --no-merges -n 100 --pretty=format:"- %s (%h)"
+              echo ""
+              if [ "${TOTAL}" -gt 100 ]; then
+                echo ""
+                echo "... 以及另外 $((TOTAL - 100)) 个提交"
+              fi
+            } > CHANGELOG.md
+          else
+            {
+              echo "## Rebuild"
+              echo ""
+              echo "手动触发或自动重试的构建，没有新的上游提交。"
+            } > CHANGELOG.md
+          fi
+          cat CHANGELOG.md
+
       - name: Create GitHub Release
+        # 建议将第三方 action 固定到具体 commit SHA（到 release 页面复制），防止供应链篡改
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.build.outputs.version }}
           name: "VoidLink ${{ needs.build.outputs.version }}"
           body_path: CHANGELOG.md
-          files: ./release-assets/${{ needs.build.outputs.ipa_name }}.ipa
+          # 关键：tag 不存在时必须打在本次构建的提交上（而不是默认分支 HEAD），
+          # 这是下一轮「已发布则跳过、失败则重试」判断的依据
+          target_commitish: ${{ needs.build.outputs.head_sha }}
+          files: ./release-assets/*.ipa
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
+          generate_release_notes: true   # 附带 GitHub 自动生成的 notes，不需要可删
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

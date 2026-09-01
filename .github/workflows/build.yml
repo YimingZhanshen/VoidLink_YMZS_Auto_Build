@@ -158,24 +158,33 @@ jobs:
           # 事后用 cache 覆盖既无收益，且缓存不含 .git/modules 会留下损坏的子模块状态。
           submodules: recursive
 
-      - name: Select newest available Xcode
+      - name: Select Xcode & verify iOS 26 SDK
+        id: xcode
         run: |
           if ls /Applications/Xcode_*.app >/dev/null 2>&1; then
-            XCODE_APP=$(ls -1d /Applications/Xcode_*.app | sort -V | tail -n1)
+            SELECTED=$(ls -1d /Applications/Xcode_*.app | sort -V | tail -n1)
           elif [ -d /Applications/Xcode.app ]; then
-            XCODE_APP=/Applications/Xcode.app
+            SELECTED=/Applications/Xcode.app
           else
             echo "::error::No Xcode installation found under /Applications"
             exit 1
           fi
-          echo "Using ${XCODE_APP}"
-          sudo xcode-select -s "${XCODE_APP}/Contents/Developer"
 
-      - name: Detect Xcode version
-        id: xcode
-        run: |
-          xcodebuild -version
+          echo "Using Xcode: ${SELECTED}"
+          sudo xcode-select -s "${SELECTED}/Contents/Developer"
+
           XCODE_VERSION=$(xcodebuild -version | awk '/^Xcode /{print $2}')
+          SDK_VERSION=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "Xcode version: ${XCODE_VERSION}"
+          echo "iPhoneOS SDK version: ${SDK_VERSION}"
+
+          if [ "${SDK_VERSION%%.*}" -lt 26 ]; then
+            echo "::error::iOS SDK ${SDK_VERSION} 过旧，缺少 iOS 26 所需 API（如 VTFrameProcessor / hidesSharedBackground）"
+            echo "::error::请切换到包含 Xcode 26+ 的 runner，或使用 setup-xcode 指定版本"
+            exit 1
+          fi
+
+          # 这两个输出被缓存 key 和 release target_commitish 依赖，勿删
           echo "xcode_version=${XCODE_VERSION}" >> $GITHUB_OUTPUT
           echo "head_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 

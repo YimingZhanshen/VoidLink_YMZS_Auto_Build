@@ -140,7 +140,7 @@ jobs:
       github.event.inputs.force_build == 'true' ||
       needs.sync.outputs.has_changes == 'true' ||
       needs.sync.outputs.already_released == 'false'
-    runs-on: macos-15        # 固定 runner 版本，避免 macos-latest 漂移导致某天突然挂
+    runs-on: macos-latest    # 需要较新的 Xcode/iOS SDK 以支持上游新增 API
     timeout-minutes: 120
     permissions:
       contents: read
@@ -157,6 +157,19 @@ jobs:
           # 注意：不再缓存子模块工作区——checkout 时克隆已经完成，
           # 事后用 cache 覆盖既无收益，且缓存不含 .git/modules 会留下损坏的子模块状态。
           submodules: recursive
+
+      - name: Select newest available Xcode
+        run: |
+          if ls /Applications/Xcode_*.app >/dev/null 2>&1; then
+            XCODE_APP=$(ls -1d /Applications/Xcode_*.app | sort -V | tail -n1)
+          elif [ -d /Applications/Xcode.app ]; then
+            XCODE_APP=/Applications/Xcode.app
+          else
+            echo "::error::No Xcode installation found under /Applications"
+            exit 1
+          fi
+          echo "Using ${XCODE_APP}"
+          sudo xcode-select -s "${XCODE_APP}/Contents/Developer"
 
       - name: Detect Xcode version
         id: xcode

@@ -1,6 +1,7 @@
 name: Build VoidLink IPA
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "feat/frame_pacing_metal" ]
 

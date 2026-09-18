@@ -33,6 +33,10 @@ private let settingsExcludedControllerNavigationSectionIdentifiers: Set<String> 
     "SettingsSectionPencil"
 ]
 
+private func isProfileSelectorNavigationDelegate(_ delegate: AnyObject) -> Bool {
+    return delegate is ProfileSelectorViewController
+}
+
 @available(iOS 13.0, *)
 private final class ControllerMouseCurvePreviewView: UIView {
     var expo: CGFloat = 1.0 {
@@ -149,42 +153,6 @@ private final class ControllerMouseCurvePreviewView: UIView {
             in: CGRect(x: 12, y: bounds.maxY - footerHeight + 1, width: bounds.width - 24, height: footerHeight - 2),
             withAttributes: footerAttributes
         )
-    }
-}
-
-private final class ControllerDrivenUIKitAnimationWakeToken {
-    private var wakeView: UIView?
-    private var toggled = false
-
-    func wake(attachedTo view: UIView) {
-        let container = view.window ?? view
-        let wakeView = preparedWakeView(in: container)
-
-        toggled.toggle()
-        UIView.animate(
-            withDuration: 0.6,
-            delay: 0,
-            options: [.allowUserInteraction, .beginFromCurrentState],
-            animations: {
-                wakeView.alpha = self.toggled ? 0.002 : 0.001
-            }
-        )
-    }
-
-    private func preparedWakeView(in container: UIView) -> UIView {
-        if let wakeView, wakeView.superview === container {
-            return wakeView
-        }
-
-        wakeView?.removeFromSuperview()
-
-        let wakeView = UIView(frame: CGRect(x: -2, y: -2, width: 1, height: 1))
-        wakeView.isUserInteractionEnabled = false
-        wakeView.backgroundColor = .black
-        wakeView.alpha = 0.001
-        container.addSubview(wakeView)
-        self.wakeView = wakeView
-        return wakeView
     }
 }
 
@@ -317,15 +285,10 @@ final class ControllerNavigator: NSObject {
     static var navigationTimer: SafeTimer?
     private static let navigationInitialRepeatDelay: TimeInterval = 0.23
     private static let navigationContinuousRepeatInterval: TimeInterval = 0.177
-    private static let controllerDrivenUIKitAnimationWakeToken = ControllerDrivenUIKitAnimationWakeToken()
     @objc static weak var controllerNavigationHighlightedView: UIView?
     private static let installAlertControllerNavigationHook: Void = {
         UIAlertController.installControllerNavigationDelegateHook()
     }()
-
-    static func wakeControllerDrivenUIKitAnimationIfNeeded(attachedTo view: UIView) {
-        controllerDrivenUIKitAnimationWakeToken.wake(attachedTo: view)
-    }
 
     @objc static func setRadialMenuDelegate(_ delegate: ControllerNavigatorRadialMenuDelegate?) {
         _ = installAlertControllerNavigationHook
@@ -612,9 +575,12 @@ final class ControllerNavigator: NSObject {
             let targetTheme: UIUserInterfaceStyle = ThemeManager.userInterfaceStyle() == .light ? .dark : .light
             DispatchQueue.main.async {
                 ThemeManager.setUserInterfaceStyle(targetTheme)
+#if !os(tvOS)
                 if let mainFrameVC = radialMenuDelegate as? MainFrameViewController, let settingsViewVC = mainFrameVC.settingsViewController {
                     settingsViewVC.appThemeSelector.selectedSegmentIndex = targetTheme.rawValue
                 }
+                // to be dealt with
+#endif
             }
             let dataMan = DataManager()
             let settings = dataMan.retrieveSettings()
@@ -629,7 +595,9 @@ final class ControllerNavigator: NSObject {
                     DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
                         if let settingViewVC = uiNavigationDelegate as? SettingsViewController {
                             settingViewVC.expandGamepadSection()
-                            settingViewVC.highlightViewForControllerNavigator(by: "controllerNavigationStack")
+                            DispatchQueue.main.asyncAfter(deadline: .now()+0.22) {
+                                settingViewVC.highlightViewForControllerNavigator(by: "controllerNavigationStack")
+                            }
                         }
                     }
                 }
@@ -797,7 +765,7 @@ final class ControllerNavigator: NSObject {
         let leftNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadLeft : .x
         let rightNavButton: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .dpadRight : .b
 
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) {
             let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
@@ -823,6 +791,11 @@ final class ControllerNavigator: NSObject {
                     }
                 case .orderedSame:
                     navigationTimer?.clean()
+                    if let settingsViewController = uiNavigationDelegate as? SettingsViewController,
+                       let store = settingsViewController.swiftUISettingsStore,
+                       store.isActive {
+                        store.cancelPendingHighlightMoves()
+                    }
                 }
             }
             ControllerUtil.listenPrimaryControllerButton(upNavButton) {pressed in 
@@ -839,7 +812,7 @@ final class ControllerNavigator: NSObject {
             }
         }
                 
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) {
             let horizontalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickX : .rightStickX
             ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
@@ -907,7 +880,7 @@ final class ControllerNavigator: NSObject {
             GamepadNavigationIllustrationHud.clearHud()
             return
         }
-                
+                        
         ControllerUtil.stopListeningPrimaryController()
         GamepadNavigationIllustrationHud.resetActionStates()
         
@@ -918,7 +891,7 @@ final class ControllerNavigator: NSObject {
         listenToNavigationCluster()
 
         /*
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is ToolboxViewController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) {
             let verticalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickY : .rightStickY
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
@@ -948,7 +921,7 @@ final class ControllerNavigator: NSObject {
             }
         }
         
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || uiNavigationDelegate is ProfileSelectorViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || uiNavigationDelegate is ToolboxViewController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) {
             let horizontalNavigationAxis: ControllerElement = ControllerNavigator.radialMenuButtonPosition == .right ? .leftStickX : .rightStickX
             ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
@@ -973,7 +946,7 @@ final class ControllerNavigator: NSObject {
         }
          */
 
-        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || uiNavigationDelegate is ProfileSelectorViewController || uiNavigationDelegate is ToolboxViewController {
+        if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) || uiNavigationDelegate is ToolboxViewController {
             let navigations = uiNavigationDelegate.getNavigationElements()
             let buttonNavigations = navigations.filter({$0.control.type == .button})
             // let stickNavigations = navigations.filter({$0.control.type == .stick || $0.control.type == .stickAxis})
@@ -1022,7 +995,30 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         }
     }
 
+    func cancelControllerMouseCurvePreviewDismiss() {
+        PublicUtils.runOnMain { [weak self] in
+            self?.controllerMouseCurvePreviewDismissWorkItem?.cancel()
+            self?.controllerMouseCurvePreviewDismissWorkItem = nil
+        }
+    }
+
+    func scheduleControllerMouseCurvePreviewDismiss() {
+        PublicUtils.runOnMain { [weak self] in
+            self?.scheduleControllerMouseCurvePreviewDismissOnMain()
+        }
+    }
+
+    func dismissControllerMouseCurvePreview() {
+        PublicUtils.runOnMain { [weak self] in
+            self?.dismissControllerMouseCurvePreviewOnMain()
+        }
+    }
+
     @objc func persistControllerNavigationHighlight() {
+        if let store = swiftUISettingsStore, store.isActive {
+            store.persistHighlight()
+            return
+        }
         guard let highlightedView = ControllerNavigator.controllerNavigationHighlightedView,
               let identifier = controllerNavigationPersistenceIdentifier(for: highlightedView) else {
             return
@@ -1057,52 +1053,111 @@ extension SettingsViewController: ControllerUINavigationDelegate {
 
         if previewView.superview == nil {
             previewView.alpha = 0
-            view.addSubview(previewView)
-            let preferredWidth = previewView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor, multiplier: 0.72)
+            guard let containerView = view.window ?? view else { return }
+            containerView.addSubview(previewView)
+            let containerSafeArea = containerView.safeAreaLayoutGuide
+            let preferredWidth = previewView.widthAnchor.constraint(
+                equalTo: containerSafeArea.widthAnchor,
+                multiplier: 0.72
+            )
             preferredWidth.priority = .defaultHigh
             NSLayoutConstraint.activate([
-                previewView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+                previewView.centerXAnchor.constraint(equalTo: containerSafeArea.centerXAnchor),
+                previewView.centerYAnchor.constraint(equalTo: containerSafeArea.centerYAnchor),
                 previewView.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
                 preferredWidth,
-                previewView.heightAnchor.constraint(equalToConstant: 190),
-                previewView.bottomAnchor.constraint(equalTo: controllerMouseExpoStack.topAnchor, constant: -10)
+                previewView.heightAnchor.constraint(equalToConstant: 190)
             ])
         }
 
-        view.bringSubviewToFront(previewView)
+        previewView.superview?.bringSubviewToFront(previewView)
         UIView.animate(withDuration: 0.12) {
             previewView.alpha = 1
         }
+    }
 
+    private func scheduleControllerMouseCurvePreviewDismissOnMain() {
+        guard controllerMouseCurvePreviewView != nil else { return }
         controllerMouseCurvePreviewDismissWorkItem?.cancel()
-        let workItem = DispatchWorkItem { [weak self, weak previewView] in
-            UIView.animate(withDuration: 0.18, animations: {
-                previewView?.alpha = 0
-            }, completion: { _ in
-                previewView?.removeFromSuperview()
-                if self?.controllerMouseCurvePreviewView === previewView {
-                    self?.controllerMouseCurvePreviewView = nil
-                }
-            })
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.dismissControllerMouseCurvePreviewOnMain()
         }
         controllerMouseCurvePreviewDismissWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: workItem)
     }
 
+    private func dismissControllerMouseCurvePreviewOnMain() {
+        controllerMouseCurvePreviewDismissWorkItem?.cancel()
+        controllerMouseCurvePreviewDismissWorkItem = nil
+        guard let previewView = controllerMouseCurvePreviewView else { return }
+        UIView.animate(withDuration: 0.18, animations: {
+            previewView.alpha = 0
+        }, completion: { [weak self, weak previewView] _ in
+            previewView?.removeFromSuperview()
+            if self?.controllerMouseCurvePreviewView === previewView {
+                self?.controllerMouseCurvePreviewView = nil
+            }
+        })
+    }
+
     @objc func restoreControllerNavigationHighlight() {
         guard ControllerNavigator.enabled, ControllerUtil.primaryGCController != nil else {return}
         PublicUtils.runOnMain { [weak self] in
+            if let store = self?.swiftUISettingsStore, store.isActive {
+                store.restoreHighlight()
+                return
+            }
             self?.restoreControllerNavigationHighlightOnMain()
         }
     }
 
     @objc func restoreControllerNavigationHighlightAfterSettingsModeSwitch() {
         PublicUtils.runOnMain { [weak self] in
+            if let store = self?.swiftUISettingsStore, store.isActive {
+                store.restoreHighlight()
+                return
+            }
             self?.restoreControllerNavigationHighlightAfterSettingsModeSwitchOnMain()
         }
     }
     
     @objc func uiButtonActionForControllerNavigator(pressed: Bool, from navigation: ControllerNavigationElement) {
+        if let store = swiftUISettingsStore, store.isActive {
+            if navigation.action == "holdToReorder" {
+                handleControllerNavigationReorderHold(pressed: pressed)
+                return
+            }
+            if navigation.action == "readTip" || navigation.action == "doublePressToDelete" || navigation.action == "doublePressToAddFavorite" {
+                PublicUtils.runOnMain { [weak self] in
+                    self?.handleControllerNavigationReadTip(pressed: pressed)
+                }
+                return
+            }
+            guard pressed else {
+                guard navigation.action == "widgetOperationBackward" ||
+                        navigation.action == "widgetOperationForward" else { return }
+                ControllerNavigator.navigationTimer?.clean()
+                return
+            }
+            PublicUtils.runOnMain {
+                switch navigation.action {
+                case "widgetOperationBackward":
+                    self.startSwiftUIContinuousSliderOperation(
+                        store: store,
+                        forward: false,
+                        navigation: navigation
+                    )
+                case "widgetOperationForward":
+                    self.startSwiftUIContinuousSliderOperation(
+                        store: store,
+                        forward: true,
+                        navigation: navigation
+                    )
+                default: break
+                }
+            }
+            return
+        }
         let isHighlightingUIStack = ControllerNavigator.controllerNavigationHighlightedView is UIStackView
         
         if navigation.action == "holdToReorder", isHighlightingUIStack {
@@ -1128,8 +1183,38 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             }
         }
     }
+
+    /// Mirrors UIKit's UISlider controller path: apply once immediately, then
+    /// after 80 ms repeat every 30 ms while the physical button remains down.
+    /// The store itself uses the same 2% range step as UISlider.step(...).
+    private func startSwiftUIContinuousSliderOperation(
+        store: SettingsSession,
+        forward: Bool,
+        navigation: ControllerNavigationElement
+    ) {
+        ControllerNavigator.navigationTimer?.clean()
+        store.operateHighlighted(forward: forward)
+        guard store.highlightedSettingIsSlider else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+            guard navigation.isInAction, store.highlightedSettingIsSlider else { return }
+            ControllerNavigator.navigationTimer = SafeTimer(interval: 0.03) {
+                PublicUtils.runOnMain {
+                    guard navigation.isInAction, store.highlightedSettingIsSlider else {
+                        ControllerNavigator.navigationTimer?.clean()
+                        return
+                    }
+                    store.operateHighlighted(forward: forward)
+                }
+            }
+            ControllerNavigator.navigationTimer?.restart()
+        }
+    }
     
     func getNavigationElements() -> [ControllerNavigationElement] {
+        if let store = swiftUISettingsStore, store.isActive {
+            return store.navigationElements()
+        }
         var elements: [ControllerNavigationElement] = []
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "readTip"))
         if self.currentSettingsMenuMode == .AllSettings {
@@ -1150,6 +1235,15 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     
     func navigateByController(downward:Bool) {
         guard self.hasNoPresentedVC else {return}
+        if let store = swiftUISettingsStore, store.isActive {
+            if store.menuMode == .FavoriteSettings,
+               ControllerNavigator.settingsFavoriteReorderActive {
+                store.moveHighlightedFavorite(by: downward ? 1 : -1)
+                return
+            }
+            store.moveHighlight(by: downward ? 1 : -1)
+            return
+        }
         if currentSettingsMenuMode == .FavoriteSettings,
            ControllerNavigator.settingsFavoriteReorderActive {
             moveHighlightedFavoriteSettingStack(by: downward ? 1 : -1)
@@ -1164,10 +1258,16 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     
     func uiWidgetActionForControllerNavigator(forward: Bool, from navigation:ControllerNavigationElement) {
         guard self.hasNoPresentedVC else {return}
+        if let store = swiftUISettingsStore, store.isActive {
+            PublicUtils.runOnMain {
+                store.operateHighlighted(forward: forward)
+            }
+            return
+        }
 
         if let highlightedView = ControllerNavigator.controllerNavigationHighlightedView, highlightedView is UIButton {
             if let section = highlightedView.superview as? MenuSectionView {
-                ControllerNavigator.wakeControllerDrivenUIKitAnimationIfNeeded(attachedTo: highlightedView)
+                SettingsControlAnimationWake.wake(attachedTo: highlightedView)
                 DispatchQueue.main.async{
                     section.toggleFold()
                 }
@@ -1186,9 +1286,10 @@ extension SettingsViewController: ControllerUINavigationDelegate {
                         } while !selector.isEnabledForSegment(at: targetIndex)
                         selector.sendActions(for: .valueChanged)
                     }
-                    ControllerNavigator.wakeControllerDrivenUIKitAnimationIfNeeded(attachedTo: selector)
+                    SettingsControlAnimationWake.wake(attachedTo: selector)
                     DispatchQueue.main.async(execute: updateSelector)
                 }
+#if !os(tvOS)
                 if let uiSwitch = view as? UISwitch {
                     guard uiSwitch.isEnabled else {continue}
                     uiSwitch.isOn = !uiSwitch.isOn
@@ -1206,6 +1307,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
                         ControllerNavigator.navigationTimer?.restart()
                     }
                 }
+#endif
             }
         }
     }
@@ -1223,6 +1325,10 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     }
     
     func highlightViewForControllerNavigator(by identifer: String?){
+        if let store = swiftUISettingsStore, store.isActive {
+            store.applyHighlight(identifer, scrollIntoView: true)
+            return
+        }
         let targets = controllerNavigationRestorableTargets()
         let selectableTargets = targets.filter { isControllerNavigationSelectableTarget($0) }
         guard !selectableTargets.isEmpty else {
@@ -1349,6 +1455,16 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     }
 
     private func handleControllerNavigationReorderHold(pressed: Bool) {
+        if let store = swiftUISettingsStore, store.isActive {
+            guard store.menuMode == .FavoriteSettings else {
+                ControllerNavigator.settingsFavoriteReorderActive = false
+                return
+            }
+            ControllerNavigator.settingsFavoriteReorderActive = pressed
+            return
+        }
+        
+#if !os(tvOS)
         guard currentSettingsMenuMode == .FavoriteSettings else {
             ControllerNavigator.settingsFavoriteReorderActive = false
             return
@@ -1362,6 +1478,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         guard ControllerNavigator.settingsFavoriteReorderActive else { return }
         ControllerNavigator.settingsFavoriteReorderActive = false
         saveFavoriteSettingStackIdentifiers()
+#endif
     }
 
     private func handleControllerNavigationReadTip(pressed: Bool) {
@@ -1393,38 +1510,41 @@ extension SettingsViewController: ControllerUINavigationDelegate {
             guard ControllerNavigator.settingsReadTipPendingToken == token else { return }
 
             if ControllerNavigator.settingsReadTipPressedAgain {
-                
-                switch self?.currentSettingsMenuMode {
-                case .FavoriteSettings:
-                    self?.removeHighlightedFavoriteSettingStack()
-                case .AllSettings:
-                    if let highlitedStack = ControllerNavigator.controllerNavigationHighlightedView as? UIStackView {
-                        self?.addSetting(toFavorite: highlitedStack)
-                        DispatchQueue.main.async {
-                            if AlertControllerUtil.autoCompletion {return}
-                            AlertControllerUtil.autoCompletion = true
-                            AlertControllerUtil.showAlert(
-                                in: self,
-                                title: LocalizationHelper.localizedString(forKey: ""),
-                                message: "Setting added to favorite".localized,
-                                withCancel: false,
-                                buttonTitle: "",
-                                countdown: 1,
-                                completion: {
-                            })
-                        }
-                    }
-                default:
-                    break
+                if let store = self?.swiftUISettingsStore, store.isActive {
+                    store.performFavoriteDoublePress()
                 }
-                
+                else {
+#if !os(tvOS)
+                    switch self?.currentSettingsMenuMode {
+                    case .FavoriteSettings:
+                        self?.removeHighlightedFavoriteSettingStack()
+                    case .AllSettings:
+                        if let highlitedStack = ControllerNavigator.controllerNavigationHighlightedView as? UIStackView {
+                            self?.addSetting(toFavorite: highlitedStack)
+                            DispatchQueue.main.async {
+                                if AlertControllerUtil.autoCompletion {return}
+                                AlertControllerUtil.autoCompletion = true
+                                AlertControllerUtil.showAlert(
+                                    in: self,
+                                    title: LocalizationHelper.localizedString(forKey: ""),
+                                    message: "Setting added to favorite".localized,
+                                    withCancel: false,
+                                    buttonTitle: "",
+                                    countdown: 1,
+                                    completion: {
+                                })
+                            }
+                        }
+                    default:
+                        break
+                    }
+#endif
+                }
                 // print("self?.cancelPendingControllerNavigationReadTip(resetSuppressNextRelease: false)");
 
             } else {
                 self?.performControllerNavigationReadTip()
             }
-            
-
             self?.cancelPendingControllerNavigationReadTip(resetSuppressNextRelease: false)
         }
         ControllerNavigator.settingsReadTipPendingWorkItem = workItem
@@ -1442,6 +1562,10 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     }
 
     private func performControllerNavigationReadTip() {
+        if let store = swiftUISettingsStore, store.isActive {
+            store.performReadTip()
+            return
+        }
         guard let stack = ControllerNavigator.controllerNavigationHighlightedView as? UIStackView,
               stack.hasInfoTag || stack.isGameProfileSetting else {
             return
@@ -1454,6 +1578,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         }
     }
 
+#if !os(tvOS)
     private func removeHighlightedFavoriteSettingStack() {
         guard currentSettingsMenuMode == .FavoriteSettings,
               let parentStack = parentStack,
@@ -1484,6 +1609,7 @@ extension SettingsViewController: ControllerUINavigationDelegate {
         let targetIndex = min(nextVisibleIndex, visibleStacksAfterRemoval.count - 1)
         highlightControllerNavigationView(visibleStacksAfterRemoval[targetIndex])
     }
+    #endif
 
     private func visibleFavoriteSettingStacks(in parentStack: UIStackView) -> [UIStackView] {
         return parentStack.arrangedSubviews.compactMap { $0 as? UIStackView }.filter {
@@ -1798,6 +1924,10 @@ extension SettingsViewController: ControllerUINavigationDelegate {
     }
 
     fileprivate func clearControllerNavigationHighlightForControllerNavigator() {
+        if let store = swiftUISettingsStore, store.isActive {
+            store.clearHighlight()
+            return
+        }
         clearControllerNavigationHighlight()
     }
 
@@ -1876,7 +2006,7 @@ extension ControllerCollectionNavigationDelegate {
     }
 
     func applyControllerNavigationHighlight(to cell: UICollectionViewCell, highlighted: Bool) {
-        if self is ProfileSelectorViewController {
+        if isProfileSelectorNavigationDelegate(self) {
             return
         }
         clearControllerNavigationHighlightBorder(in: cell)

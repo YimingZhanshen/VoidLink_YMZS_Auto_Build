@@ -535,17 +535,19 @@ import UIKit
     }
     @objc public static func handleFirstGamepadConnection(in vc: UIViewController?, handler: @escaping () -> Void) {
         if isFirstConnectingGamepad() {
-            AlertControllerUtil.showAlert(
-                in: vc,
-                title: "Tips".localized,
-                message: "controllerNavigationTip".localized,
-                withCancel: false,
-                buttonTitle: "Got it!".localized,
-                countdown: 6,
-                completion: {
-                    handler()
-                }
-            )
+            DispatchQueue.main.asyncAfter(deadline: .now() + (PublicUtils.isTVOS ? 1.2 : 0)) {
+                AlertControllerUtil.showAlert(
+                    in: vc,
+                    title: "Tips".localized,
+                    message: "controllerNavigationTip".localized,
+                    withCancel: false,
+                    buttonTitle: "Got it!".localized,
+                    countdown: 6,
+                    completion: {
+                        handler()
+                    }
+                )
+            }
         }
     }
     
@@ -680,7 +682,7 @@ import UIKit
     @objc public static var pencilInStreaming:Bool = false
     
     @objc public static let menuSeparatorWidth: CGFloat = 0.7
-    @objc public static let menuSectionSeparatorWidth: CGFloat = 0.7
+    @objc public static let menuSectionSeparatorWidth: CGFloat = PublicUtils.isIPhone ? 0.65 : 0.5
     
     @objc public static var legacyToolbarHeight: CGFloat {
         return 44
@@ -745,11 +747,16 @@ import UIKit
                     .foregroundColor: UIColor.placeholderText
                 ])
         } else {
+#if os(tvOS)
+            let foregroundColor = UIColor(white: 1, alpha: 0.6)
+#else
+            let foregroundColor = UIColor.lightText
+#endif
             return NSAttributedString(
                 string: text,
                 attributes: [
                     .font: UIFont.systemFont(ofSize: 15),
-                    .foregroundColor: UIColor.lightText
+                    .foregroundColor: foregroundColor
                 ])
         }
     }

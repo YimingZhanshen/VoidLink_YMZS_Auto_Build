@@ -21,8 +21,42 @@ private var settingsSwiftUIHostAssociationKey: UInt8 = 0
 private let settingsSectionFoldIdentifiers = SettingsSectionID.allCases.map(\.rawValue)
 private let settingsNavigationSelectionKey = "SettingsControllerNavigationHighlightedIdentifier"
 private let settingsFavoriteIdentifiersKey = "FavoriteSettingStackIdentifiers"
-private let settingsSectionFoldAnimationDuration = 0.2
+private let settingsSectionFoldAnimationDuration = PublicUtils.iOS26Available ? 0.2 : 0
 private let settingsEmergingHighlightPhaseDuration = 0.2
+
+/// Purchase results can arrive after SettingsViewController has been dismissed.
+/// Keep this observer independent from a settings session so an interrupted
+/// purchase cannot leave Pencil Pro-only values persisted while the menu is
+/// closed.
+private enum PencilProInterruptedPurchaseReset {
+    private static let observer: NSObjectProtocol = NotificationCenter.default.addObserver(
+        forName: AddOnProduct.PencilProPack.purchaseAbortedNotification(),
+        object: nil,
+        queue: .main
+    ) { _ in
+        let dataManager = DataManager()
+        if let settings = dataManager.retrieveSettings() {
+            settings.pencilTickMode = NSNumber(value: PencilTickMode.PencilTickDisabled.rawValue)
+            settings.pencilTipOffsetX = 0
+            settings.pencilTipOffsetY = 0
+            dataManager.saveData()
+        }
+
+        let profileManager = OSCProfilesManager.sharedManager(CGRect.zero)
+        let profile = profileManager.getSelectedProfile()
+        profile.pressureCurveEnabled = false
+        profile.doubleTapShorcutEnabled = false
+        profile.squeezeShorcutEnabled = false
+        profile.pencilPausesNativeTouch = false
+        profile.disablePencilSlideGestures = false
+        profileManager.replaceSelectedProfile(with: profile, overwriteDefault: true)
+    }
+
+    static func install() {
+        _ = observer
+    }
+}
+
 private let settingsBitrateTable: [Double] = [
     500, 1_000, 1_500, 2_000, 2_500, 3_000, 4_000, 5_000, 6_000, 7_000,
     8_000, 9_000, 10_000, 11_000, 12_000, 13_000, 14_000, 15_000, 16_000, 17_000,
@@ -249,7 +283,6 @@ private let settingsLegacyHelpByStackIdentifier: [String: SettingsLegacyHelpCont
     "renderingBackendStack": .init(messageKey: "renderingBackendStackTip", learnMoreURLKey: nil),
     "performanceGraphStack": .init(messageKey: "performanceGraphStackTip", learnMoreURLKey: nil),
     "sdrPerformanceWorkaroundStack": .init(messageKey: "sdrPerformanceWorkaroundStackTip", learnMoreURLKey: nil),
-    "sendDummyEventStack": .init(messageKey: "sendDummyEventStackTip", learnMoreURLKey: nil)
 ]
 
 // MARK: - Settings identity
@@ -1769,6 +1802,7 @@ final class SettingsSession: NSObject, ObservableObject {
     private var pencilPurchaseNotificationTokens: [NSObjectProtocol] = []
     private let pendingHighlightMoveLock = NSLock()
     private var pendingHighlightMoveOffset: Int?
+    private var pendingHighlightMoveUsesSectionHeadersOnly: Bool?
     private var pendingHighlightMoveScheduled = false
 
     init(presentingController: UIViewController) {
@@ -1926,6 +1960,7 @@ final class SettingsSession: NSObject, ObservableObject {
                 self.refreshConditionalVisibility()
                 self.objectWillChange.send()
             }
+        PencilProInterruptedPurchaseReset.install()
         pencilPurchaseNotificationTokens = [
             NotificationCenter.default.addObserver(
                 forName: AddOnProduct.PencilProPack.purchaseAbortedNotification(),
@@ -2314,6 +2349,9 @@ final class SettingsSession: NSObject, ObservableObject {
                 setValue: { session, model, newValue in
                         guard session.codecOptions.contains(where: { $0.value == newValue }) else { return }
                         model.value = newValue
+                        if model.value != VideoCodec.av1.rawValue {
+                        self.itemRegistry.fullColorRange.value = true
+                    }
                 },
                 options: { $0.codecOptions },
                 distribution: .equal,
@@ -2341,6 +2379,9 @@ final class SettingsSession: NSObject, ObservableObject {
                 \.framePacing,
                 setValue: { session, _, newValue in
                     session.setFramePacing(newValue)
+                    if newValue != FramePacingMode.queue.rawValue {
+                        session.itemRegistry.enableGraphs.value = false
+                    }
                 },
                 options: { $0.framePacingOptions },
                 distribution: .proportionalToContent,
@@ -2656,6 +2697,10 @@ final class SettingsSession: NSObject, ObservableObject {
         [
             toggleItem(
                 \.controllerNavigation,
+                setValue: { session, model, newValue in
+                    if !PublicUtils.isTVOS {model.value = newValue}
+                    else {model.value = true}
+                },
                 hasInfo: true,
                 onValueChanged: { session in
                     session.controllerNavigationValueChanged()
@@ -3158,11 +3203,13 @@ final class SettingsSession: NSObject, ObservableObject {
             options.append(contentsOf: [
                 SettingsPickerOption(
                     value: AudioConfig.SDL51.rawValue,
-                    title: "5.1-channel".localized
+                    title: "5.1-channel".localized,
+                    isEnabled: !isStreaming
                 ),
                 SettingsPickerOption(
                     value: AudioConfig.SDL71.rawValue,
-                    title: "7.1-channel".localized
+                    title: "7.1-channel".localized,
+                    isEnabled: !isStreaming
                 )
             ])
         }
@@ -3188,7 +3235,7 @@ final class SettingsSession: NSObject, ObservableObject {
             ),
             toggleItem(
                 \.redirectMic,
-                isEnabled: { _ in !self.isStreaming },
+                // isEnabled: { _ in !self.isStreaming },
                 hasInfo: true,
                 onValueChanged: { session in
                     session.redirectMicChanged()
@@ -3468,8 +3515,8 @@ final class SettingsSession: NSObject, ObservableObject {
             toggleItem(
                 \.enableGraphs,
                 isVisible: {
-                    $0.itemRegistry.framePacing.value != FramePacingMode.off.rawValue &&
-                    $0.itemRegistry.framePacing.value != FramePacingMode.legacy.rawValue
+                    $0.itemRegistry.framePacing.value == FramePacingMode.queue.rawValue
+                    || $0.itemRegistry.renderingBackend.value == SettingsRenderingBackend.metal.rawValue
                 },
                 isEnabled: { $0.itemRegistry.framePacing.value == FramePacingMode.queue.rawValue },
                 hasInfo: true,
@@ -5057,8 +5104,6 @@ final class SettingsSession: NSObject, ObservableObject {
         if itemRegistry.codec.value == VideoCodec.av1.rawValue {
             itemRegistry.yuv444.value = false
             itemRegistry.fullColorRange.value = false
-        } else {
-            itemRegistry.fullColorRange.value = true
         }
         if usesMetal {
             itemRegistry.framePacing.value = FramePacingMode.queue.rawValue
@@ -5098,6 +5143,7 @@ final class SettingsSession: NSObject, ObservableObject {
 
     func setMenuMode(_ newMode: SettingsMenuMode) {
         stopFavoriteAutoscroll()
+        ControllerNavigator.settingsSectionNavigationHoldActive = false
         menuMode = newMode
         if newMode != .RemoveSettingItem {
             let dataManager = DataManager()
@@ -5525,6 +5571,13 @@ final class SettingsSession: NSObject, ObservableObject {
         }
     }
 
+    private var sectionHeaderNavigationIDs: [String] {
+        guard menuMode == .AllSettings else { return [] }
+        return settingsCatalog.compactMap { descriptor in
+            hasVisibleItems(descriptor) ? "sectionHeader-\(descriptor.id.rawValue)" : nil
+        }
+    }
+
     private var completeNavigationOrderForHighlightRestoration: [String] {
         guard menuMode == .AllSettings else {
             return favoriteSettingIDs.map(\.rawValue)
@@ -5548,19 +5601,28 @@ final class SettingsSession: NSObject, ObservableObject {
             return
         }
         showNavigationHighlightForControllerNavigation()
-        schedulePendingHighlightMove(by: offset)
+        schedulePendingHighlightMove(
+            by: offset,
+            usingSectionHeadersOnly: ControllerNavigator.settingsSectionNavigationHoldActive && menuMode == .AllSettings
+        )
+    }
+
+    func setSectionNavigationHoldActive(_ isActive: Bool) {
+        ControllerNavigator.settingsSectionNavigationHoldActive = isActive && menuMode == .AllSettings
     }
 
     func cancelPendingHighlightMoves() {
         pendingHighlightMoveLock.lock()
         pendingHighlightMoveOffset = nil
+        pendingHighlightMoveUsesSectionHeadersOnly = nil
         pendingHighlightMoveScheduled = false
         pendingHighlightMoveLock.unlock()
     }
 
-    private func schedulePendingHighlightMove(by offset: Int) {
+    private func schedulePendingHighlightMove(by offset: Int, usingSectionHeadersOnly: Bool) {
         pendingHighlightMoveLock.lock()
         pendingHighlightMoveOffset = offset
+        pendingHighlightMoveUsesSectionHeadersOnly = usingSectionHeadersOnly
         guard !pendingHighlightMoveScheduled else {
             pendingHighlightMoveLock.unlock()
             return
@@ -5576,19 +5638,37 @@ final class SettingsSession: NSObject, ObservableObject {
     private func performPendingHighlightMove() {
         pendingHighlightMoveLock.lock()
         let offset = pendingHighlightMoveOffset
+        let usesSectionHeadersOnly = pendingHighlightMoveUsesSectionHeadersOnly
         pendingHighlightMoveOffset = nil
+        pendingHighlightMoveUsesSectionHeadersOnly = nil
         pendingHighlightMoveScheduled = false
         pendingHighlightMoveLock.unlock()
 
-        guard let offset, isActive else { return }
-        performHighlightMove(by: offset)
+        guard let offset, let usesSectionHeadersOnly, isActive else { return }
+        performHighlightMove(by: offset, usingSectionHeadersOnly: usesSectionHeadersOnly)
     }
 
-    private func performHighlightMove(by offset: Int) {
-        let ids = visibleNavigationIDs
+    private func performHighlightMove(by offset: Int, usingSectionHeadersOnly: Bool) {
+        let ids = usingSectionHeadersOnly ? sectionHeaderNavigationIDs : visibleNavigationIDs
         guard !ids.isEmpty else { return }
         let current = highlightedID.flatMap { ids.firstIndex(of: $0) }
-        let index = current.map { ($0 + offset + ids.count) % ids.count } ?? (offset >= 0 ? 0 : ids.count - 1)
+        let index: Int
+        if let current {
+            index = (current + offset + ids.count) % ids.count
+        } else if usingSectionHeadersOnly,
+                  let highlightedID,
+                  let currentLayoutIndex = allSettingsNavigationIDs.firstIndex(of: highlightedID) {
+            let headerLayoutIndices = ids.compactMap { id in
+                allSettingsNavigationIDs.firstIndex(of: id)
+            }
+            if offset >= 0 {
+                index = headerLayoutIndices.firstIndex(where: { $0 > currentLayoutIndex }) ?? 0
+            } else {
+                index = headerLayoutIndices.lastIndex(where: { $0 < currentLayoutIndex }) ?? (ids.count - 1)
+            }
+        } else {
+            index = offset >= 0 ? 0 : ids.count - 1
+        }
         applyHighlight(ids[index])
     }
 
@@ -5891,22 +5971,25 @@ final class SettingsSession: NSObject, ObservableObject {
 
     func navigationElements() -> [ControllerNavigationElement] {
         var elements = [
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "readTip")
+            ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "readTip")
         ]
         if menuMode == .AllSettings {
-            elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "doublePressToAddFavorite"))
+            elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "doublePressToAddFavorite"))
         }
         if menuMode == .FavoriteSettings {
-            elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "doublePressToDelete"))
-            elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "holdToReorder"))
+            elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "doublePressToDelete"))
+            elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "holdToReorder"))
         }
-        elements += [
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButton, action: "radialMenu"),
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .rightStickY : .leftStickY, action: "menuNavigation"),
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "menuNavigation"),
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: "widgetOperationBackward"),
-            ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .b, action: "widgetOperationForward")
-        ]
+        elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButton, action: "radialMenu"))
+        elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .rightStickY : .leftStickY, action: "menuNavigation"))
+        elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "menuNavigation"))
+        
+        if menuMode == .AllSettings {
+            elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "holdToNavSection"))
+        }
+        
+        elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: "widgetOperationBackward"))
+        elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .b, action: "widgetOperationForward"))
         return elements
     }
 }
@@ -6223,7 +6306,7 @@ private struct SettingsSectionLayout {
     let sectionSpacing: CGFloat = PublicUtils.isIPhone ? 10 : 12
     let controlSpacing: CGFloat = 5
     let switchSpacing: CGFloat = 20
-    let switchColumnWidth: CGFloat = 130
+    let switchColumnWidth: CGFloat = PublicUtils.tvOS26Aavailable ? 140 : 150
     let controlMaxWidth: CGFloat = PublicUtils.isTVOS ? 500 : .infinity
     let itemHorizontalPadding: CGFloat = 5
     
@@ -6829,18 +6912,77 @@ private struct SettingsEmergingHighlightBackground: UIViewRepresentable {
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
+private struct SettingsLegacyTVOSNavigationHighlightBorder: View {
+    let isHighlighted: Bool
+    let expandsHorizontally: Bool
+    let expandsVertically: Bool
+    // Settings rows already sit 5pt inside the menu's scroll viewport. Keep a
+    // small 2pt clearance so the expanded stroke and its rounded corners are
+    // not clipped by that viewport.
+    private let outwardInset: CGFloat = 6
+
+    private var borderColor: Color {
+        let alpha: CGFloat = ThemeManager.userInterfaceStyle() == .dark ? 0.85 : 0.93
+        return Color(ThemeManager.appPrimaryColor.withAlphaComponent(alpha))
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            // Rows need the legacy left-side compensation for their 5pt
+            // content inset, but must not expand into the menu's right edge.
+            let leftHorizontalOutset = expandsHorizontally ? outwardInset : 0
+            let verticalOutset = expandsVertically ? outwardInset : 0
+            Group {
+                if expandsHorizontally {
+                    // Item rows have their own 5pt horizontal inset. Keep
+                    // the legacy outward stroke so it aligns with the row
+                    // highlight geometry.
+                    RoundedRectangle(cornerRadius: 8 + outwardInset)
+                        .stroke(isHighlighted ? borderColor : .clear, lineWidth: 4)
+                } else {
+                    // Section headers have no comparable inset. A centered
+                    // stroke would be clipped at the hosting scroll edge.
+                    RoundedRectangle(cornerRadius: 8 + outwardInset)
+                        .strokeBorder(isHighlighted ? borderColor : .clear, lineWidth: 4)
+                }
+            }
+                .frame(
+                    width: geometry.size.width + leftHorizontalOutset,
+                    height: geometry.size.height + verticalOutset * 2
+                )
+                .position(
+                    x: geometry.size.width / 2 - leftHorizontalOutset / 2,
+                    y: geometry.size.height / 2
+                )
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+@available(iOS 13.0, tvOS 13.0, *)
 private struct SettingsNavigationHighlightBackground: View {
     @ObservedObject var state: SettingsNavigationState
     let identifier: String
 
+    private var usesLegacyTVOSBorderHighlight: Bool {
+        PublicUtils.isTVOS && !PublicUtils.tvOS26Aavailable
+    }
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(
-                state.highlightedID == identifier
-                    ? Color(ThemeManager.appPrimaryColorWithAlpha)
-                    : .clear
-            )
-            .allowsHitTesting(false)
+        let isHighlighted = state.highlightedID == identifier
+        Group {
+            if usesLegacyTVOSBorderHighlight {
+                SettingsLegacyTVOSNavigationHighlightBorder(
+                    isHighlighted: isHighlighted,
+                    expandsHorizontally: !identifier.hasPrefix("sectionHeader-"),
+                    expandsVertically: !identifier.hasPrefix("sectionHeader-")
+                )
+            } else {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isHighlighted ? Color(ThemeManager.appPrimaryColorWithAlpha) : .clear)
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 
@@ -7290,7 +7432,16 @@ private extension View {
         isEnabled: Bool = true
     ) -> some View {
         if isEnabled && state.highlightedID != nil {
-            background(SettingsNavigationHighlightBackground(state: state, identifier: identifier))
+            // The legacy tvOS treatment is a stroke which extends beyond the
+            // row bounds.  It must be composited above the section drawer and
+            // later sibling rows; putting it in `background` lets those views
+            // cover the right edge of the stroke.
+            if PublicUtils.isTVOS && !PublicUtils.tvOS26Aavailable {
+                overlay(SettingsNavigationHighlightBackground(state: state, identifier: identifier))
+                    .zIndex(state.highlightedID == identifier ? 1 : 0)
+            } else {
+                background(SettingsNavigationHighlightBackground(state: state, identifier: identifier))
+            }
         } else {
             self
         }

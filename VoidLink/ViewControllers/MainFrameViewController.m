@@ -428,8 +428,8 @@ static NSMutableSet* hostList;
     // [self.collectionView setContentOffset:CGPointZero animated:NO];
     
     [self attachWaterMark];
-    self.navigationItem.rightBarButtonItems = VLBarButtonItems(_upButton, nil);
-    self.revealViewController.mainFrameIsInHostView = false;  
+    self.navigationItem.rightBarButtonItems = VLBarButtonItems(PublicUtils.tvOS26Aavailable ? _upButton : nil, nil);
+    self.revealViewController.mainFrameIsInHostView = false;
     // [self disableNavigation];
     [self updateTitle];
     [self alreadyPaired];
@@ -1376,6 +1376,9 @@ static NSMutableSet* hostList;
         }
     }
     else {
+#if TARGET_OS_TV
+        [self.settingsViewController consumeTvOSInitialSettingsSnapshotForMenuPresentation];
+#endif
         if(self.revealViewController.isStreaming) self.settingsExpandedInStreamView = true; //notify mainFrameViewContorller that this is a setting expansion in stream view, some settings shall be disabled.
         if (@available(iOS 13.0, *)) [ControllerNavigator setUINavigationDelegate:self.settingsViewController];
         self.navigationItem.leftBarButtonItems = PublicUtils.isTVOS
@@ -1728,9 +1731,12 @@ static NSMutableSet* hostList;
 
 - (void)applyNavBarAppearance{
 #if TARGET_OS_TV
-    self.navigationController.navigationBar.backgroundColor = [UIColor clearColor];
-    self.navigationController.navigationBar.barTintColor = PublicUtils.isTVOS ? UIColor.clearColor : ThemeManager.hostViewBackgroundColor;
-    self.navigationController.navigationBar.shadowImage = [UIImage new];
+    UINavigationBar *navigationBar = self.navigationController.navigationBar;
+    UIColor *backgroundColor = ThemeManager.hostViewBackgroundColor;
+    navigationBar.backgroundColor = backgroundColor;
+    navigationBar.barTintColor = backgroundColor;
+    navigationBar.translucent = NO;
+    navigationBar.shadowImage = [UIImage new];
 #else
     if (@available(iOS 13.0, *)) {
         self.navigationController.navigationBar.standardAppearance.backgroundColor = [UIColor clearColor]; // old ios depend on this, do not remove
@@ -1970,6 +1976,17 @@ static NSMutableSet* hostList;
     if (@available(iOS 13.0, *)) [GamepadNavigationIllustrationHud updateCurrentTheme];
 
     [self.hostCollectionVC updateTheme];
+    [self updateAppCollectionTheme];
+}
+
+- (void)updateAppCollectionTheme {
+    for (UICollectionViewCell *cell in self.collectionView.visibleCells) {
+        for (UIView *view in cell.subviews) {
+            if ([view isKindOfClass:[UIAppView class]]) {
+                [(UIAppView *)view updateTheme];
+            }
+        }
+    }
 }
 
 // Called when the system's theme (light/dark mode) changes
@@ -2444,9 +2461,15 @@ static NSMutableSet* hostList;
 {
     [super viewWillAppear:NO];
 
+#if TARGET_OS_TV
+    // StreamFrameViewController hides the navigation bar. Restore it before
+    // rebuilding the collection views so their first layout uses final safe-area geometry.
+    [self.navigationController setNavigationBarHidden:NO animated:NO];
+#endif
+
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateTheme)
-                                                 name:ThemeManager.ThemeDidChangeNotification
+                                             name:ThemeManager.ThemeDidChangeNotification
                                                object:nil];
 
     /* this makes background color works*/
@@ -2904,7 +2927,7 @@ static NSMutableSet* hostList;
     self.hostCollectionVC = [[HostCollectionViewController alloc] init];
     self.hostCollectionVC.cellSize = [self getHostCardSize];
     self.hostCollectionVC.interItemMinimumSpacing = 25;
-    self.hostCollectionVC.minimumLineSpacing = 25;
+    self.hostCollectionVC.minimumLineSpacing = PublicUtils.isTVOS ? 49 : 25;
     // 添加为子控制器
     [self addChildViewController:self.hostCollectionVC];
     

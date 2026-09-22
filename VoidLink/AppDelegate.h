@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@class TemporarySettings;
+
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
@@ -22,5 +24,13 @@
 - (NSURL *)applicationDocumentsDirectory;
 - (NSURL*) getStoreURL;
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession options:(UISceneConnectionOptions *)options API_AVAILABLE(ios(13.0));
+
+#if TARGET_OS_TV
+// The first settings menu uses this launch-time snapshot, then falls back to
+// normal Core Data reads for every later settings session.
+- (TemporarySettings *)peekTvOSInitialSettingsSnapshot;
+- (TemporarySettings *)consumeTvOSInitialSettingsSnapshot;
+- (void)refreshTvOSInitialSettingsSnapshot:(TemporarySettings *)snapshot;
+#endif
 
 @end

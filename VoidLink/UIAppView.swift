@@ -178,9 +178,12 @@ final class UIAppView: UIButton {
 
         let label = UILabel()
         label.backgroundColor = UIColor.black.withAlphaComponent(0.55)
-        label.textColor = UIColor.white
+        label.textColor = .white.withAlphaComponent(UIAppView.appLabelAlpha)
         label.text = app.name == "Steam Big Picture" ? "Steam" : app.name
-        label.font = UIFont.systemFont(ofSize: 15)
+        let baseFont = UIFont.systemFont(ofSize: PublicUtils.isTVOS ? 18 : 15)
+        if let desc = baseFont.fontDescriptor.withDesign(.rounded) {
+            label.font = UIFont(descriptor: desc, size: PublicUtils.isTVOS ? 18 : 15)
+        }
         label.baselineAdjustment = .alignCenters
         label.textAlignment = .center
         label.lineBreakMode = .byTruncatingTail
@@ -200,6 +203,14 @@ final class UIAppView: UIButton {
         }
         addSubview(label)
         #endif
+    }
+    
+    static var appLabelAlpha: CGFloat {
+        return ThemeManager.userInterfaceStyle() == .dark ? (PublicUtils.isTVOS ? 0.97 : 0.8) : 1.0
+    }
+    
+    func updateTheme() {
+        appLabel?.textColor = .white.withAlphaComponent(UIAppView.appLabelAlpha)
     }
 
     @objc private func buttonSelected(_ sender: Any) {

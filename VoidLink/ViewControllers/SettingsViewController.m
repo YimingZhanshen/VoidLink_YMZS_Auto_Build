@@ -60,6 +60,8 @@
     uint16_t oswLayoutFingers;
 #if !TARGET_OS_TV
     CustomEdgeSlideGestureRecognizer *slideToCloseSettingsViewRecognizer;
+#else
+    bool didConsumeTvOSInitialSettingsSnapshot;
 #endif
     NSMutableDictionary *_settingStackDict;
     NSMutableArray *_favoriteSettingStackIdentifiers;
@@ -88,7 +90,13 @@
 
 - (void)viewDidLoad {
     self->dataMan = [[DataManager alloc] init];
-    self->tempSettings = [self->dataMan getSettings];
+#if TARGET_OS_TV
+    AppDelegate *appDelegate = (AppDelegate *)UIApplication.sharedApplication.delegate;
+    self->tempSettings = [appDelegate peekTvOSInitialSettingsSnapshot];
+#endif
+    if (self->tempSettings == nil) {
+        self->tempSettings = [self->dataMan getSettings];
+    }
     self.currentSettingsMenuMode = self->tempSettings.settingsMenuMode.intValue;
 
     if (@available(iOS 14.0, tvOS 14.0, *)) {
@@ -112,6 +120,21 @@
     [self restoreCoreDataSettingsForUIKitMenu:tempSettings];
 #endif
 }
+
+#if TARGET_OS_TV
+- (TemporarySettings *)initialSettingsSnapshotForSwiftUI {
+    return self->tempSettings;
+}
+
+- (void)consumeTvOSInitialSettingsSnapshotForMenuPresentation {
+    if (didConsumeTvOSInitialSettingsSnapshot) {
+        return;
+    }
+    didConsumeTvOSInitialSettingsSnapshot = true;
+    AppDelegate *appDelegate = (AppDelegate *)UIApplication.sharedApplication.delegate;
+    [appDelegate consumeTvOSInitialSettingsSnapshot];
+}
+#endif
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:NO];

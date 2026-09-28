@@ -11,9 +11,6 @@ import GameController
 import Combine
 import CoreGraphics
 import Foundation
-#if !VOIDLINK_PREVIEW
-import Collections
-#endif
 #if os(iOS) && !VOIDLINK_PREVIEW
 import SwiftUI
 import UIKit

@@ -632,6 +632,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				__DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR = No;
 			};
 			name = Debug;
 		};
@@ -692,6 +693,7 @@
 				PROVISIONING_PROFILE = "";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				__DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR = No;
 			};
 			name = Release;
 		};

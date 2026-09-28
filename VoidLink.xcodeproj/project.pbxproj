@@ -9,9 +9,6 @@
 /* Begin PBXBuildFile section */
 		180E6E372E93BFDB0067C73A /* AlertControllerUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 180E6E362E93BFDB0067C73A /* AlertControllerUtil.swift */; };
 		1817B61E2E6FD04D000D938D /* SafeTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1817B61D2E6FD04D000D938D /* SafeTimer.swift */; };
-		182760F72E83E2EA00EC1C5C /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 182760F62E83E2EA00EC1C5C /* DequeModule */; };
-		182760FA2E83E57D00EC1C5C /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 182760F92E83E57D00EC1C5C /* DequeModule */; };
-		182760FD2E83E68B00EC1C5C /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 182760FC2E83E68B00EC1C5C /* Collections */; };
 		1829CE3F2E2154DF0074A99A /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1829CE3E2E2154DF0074A99A /* SceneDelegate.m */; };
 		18341A042DEB662C0094E5F2 /* FixedTintImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 18341A032DEB662C0094E5F2 /* FixedTintImageView.m */; };
 		18416EA42EBB3DCE00AE0124 /* UITouchUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18416EA32EBB3DCE00AE0124 /* UITouchUtil.swift */; };
@@ -238,8 +235,6 @@
 		A703000000000000000003 /* libxml2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 9890CF6A203B7EE1006C4B06 /* libxml2.tbd */; };
 		A703000000000000000004 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		A703000000000000000005 /* libavutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98882A092AF60F9000C5A11C /* libavutil.a */; };
-		A703000000000000000006 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 182760F62E83E2EA00EC1C5C /* DequeModule */; };
-		A703000000000000000007 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 182760FC2E83E68B00EC1C5C /* Collections */; };
 		A703000000000000000008 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF319B2C406004C83CF /* CoreGraphics.framework */; };
 		A703000000000000000009 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB290CF719B2C406004C83CF /* CoreData.framework */; };
 		A70300000000000000000A /* OpenSSL in Frameworks */ = {isa = PBXBuildFile; productRef = F74BEF9B2C1A705600224667 /* OpenSSL */; };
@@ -616,6 +611,7 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		18A0EE282EFBCBFB00BA853A /* SVGs */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SVGs; sourceTree = "<group>"; };
 		2A039E572F72892B00546768 /* VoidLinkPreview */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2AAA4E862F76BDC6001E20DC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 2A93D5662F7D016C00C2207F /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 2AE67B7F30580E1700BBAAFC /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = VoidLinkPreview; sourceTree = "<group>"; };
+		C76000000000000000000001 /* ThirdParty/SwiftCollections */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ThirdParty/SwiftCollections; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -635,8 +631,6 @@
 				A703000000000000000003 /* libxml2.tbd in Frameworks */,
 				A703000000000000000004 /* libmoonlight-common.a in Frameworks */,
 				A703000000000000000005 /* libavutil.a in Frameworks */,
-				A703000000000000000006 /* DequeModule in Frameworks */,
-				A703000000000000000007 /* Collections in Frameworks */,
 				A703000000000000000008 /* CoreGraphics.framework in Frameworks */,
 				A703000000000000000009 /* CoreData.framework in Frameworks */,
 				A70300000000000000000A /* OpenSSL in Frameworks */,
@@ -661,8 +655,6 @@
 				9890CF6B203B7EE1006C4B06 /* libxml2.tbd in Frameworks */,
 				98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */,
 				98882A082AF60F7400C5A11C /* libavutil.a in Frameworks */,
-				182760F72E83E2EA00EC1C5C /* DequeModule in Frameworks */,
-				182760FD2E83E68B00EC1C5C /* Collections in Frameworks */,
 				FB290CF419B2C406004C83CF /* CoreGraphics.framework in Frameworks */,
 				FB290CF819B2C406004C83CF /* CoreData.framework in Frameworks */,
 				98181BED2791281100E43572 /* CoreMotion.framework in Frameworks */,
@@ -672,7 +664,6 @@
 				18780CC72F10D66000B90483 /* StoreKit.framework in Frameworks */,
 				FB290CF219B2C406004C83CF /* Foundation.framework in Frameworks */,
 				FB4679011A57048000377732 /* CoreFoundation.framework in Frameworks */,
-				182760FA2E83E57D00EC1C5C /* DequeModule in Frameworks */,
 				98181BE92791277400E43572 /* libSDL2.a in Frameworks */,
 				98882A062AF60F7000C5A11C /* libavcodec.a in Frameworks */,
 			);
@@ -907,6 +898,7 @@
 				FB89463719F6473800339C8A /* Launch Screen.xib */,
 				FB290D0819B2C406004C83CF /* Images.xcassets */,
 				18A0EE282EFBCBFB00BA853A /* SVGs */,
+				C76000000000000000000001 /* ThirdParty/SwiftCollections */,
 				FB290D0519B2C406004C83CF /* Limelight.xcdatamodeld */,
 				FB1D59981BBCCD7E00F482CA /* AppCollectionView.h */,
 				FB1D59991BBCCD7E00F482CA /* AppCollectionView.m */,
@@ -1224,13 +1216,12 @@
 			);
 			fileSystemSynchronizedGroups = (
 				18A0EE282EFBCBFB00BA853A /* SVGs */,
+				C76000000000000000000001 /* ThirdParty/SwiftCollections */,
 			);
 			name = "VoidLink TV";
 			packageProductDependencies = (
 				18A0EE262EFB9B5A00BA853A /* SVGKitSwift */,
 				18A0EE242EFB9B5A00BA853A /* SVGKit */,
-				182760F62E83E2EA00EC1C5C /* DequeModule */,
-				182760FC2E83E68B00EC1C5C /* Collections */,
 				F74BEF9B2C1A705600224667 /* OpenSSL */,
 			);
 			productName = "VoidLink TV";
@@ -1252,6 +1243,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				18A0EE282EFBCBFB00BA853A /* SVGs */,
+				C76000000000000000000001 /* ThirdParty/SwiftCollections */,
 			);
 			name = VoidLink;
 			productName = Limelight;
@@ -1290,7 +1282,6 @@
 			mainGroup = FB290CE519B2C406004C83CF;
 			packageReferences = (
 				F74BEF9A2C1A705600224667 /* XCRemoteSwiftPackageReference "OpenSSL-Package" */,
-				182760F52E83E2EA00EC1C5C /* XCRemoteSwiftPackageReference "swift-collections" */,
 				18A0EE232EFB9B5A00BA853A /* XCRemoteSwiftPackageReference "SVGKit" */,
 			);
 			productRefGroup = FB290CEF19B2C406004C83CF /* Products */;
@@ -1798,7 +1789,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(TOOLCHAIN_DIR)/usr/include",
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
 					"$(PROJECT_DIR)/libs/FFmpeg/include",
@@ -1870,7 +1861,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(TOOLCHAIN_DIR)/usr/include",
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
 					"$(PROJECT_DIR)/libs/FFmpeg/include",
@@ -1978,6 +1969,7 @@
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				__DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR = No;
 			};
 			name = Debug;
 		};
@@ -2032,6 +2024,7 @@
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				__DIAGNOSE_INVALID_DEPLOYMENT_TARGET_AS_ERROR = No;
 			};
 			name = Release;
 		};
@@ -2049,7 +2042,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(TOOLCHAIN_DIR)/usr/include",
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
 					"$(PROJECT_DIR)/libs/FFmpeg/include",
@@ -2120,7 +2113,7 @@
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/third_party/moonlight-audio-haptics/include",
-					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+						"$(TOOLCHAIN_DIR)/usr/include",
 					"$(PROJECT_DIR)/moonlight-common/moonlight-common-c/src",
 					"$(SDKROOT)/usr/include/libxml2/**",
 					"$(PROJECT_DIR)/libs/FFmpeg/include",
@@ -2219,14 +2212,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		182760F52E83E2EA00EC1C5C /* XCRemoteSwiftPackageReference "swift-collections" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-collections.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.4;
-			};
-		};
 		18A0EE232EFB9B5A00BA853A /* XCRemoteSwiftPackageReference "SVGKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SVGKit/SVGKit.git";
@@ -2246,21 +2231,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		182760F62E83E2EA00EC1C5C /* DequeModule */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 182760F52E83E2EA00EC1C5C /* XCRemoteSwiftPackageReference "swift-collections" */;
-			productName = DequeModule;
-		};
-		182760F92E83E57D00EC1C5C /* DequeModule */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 182760F52E83E2EA00EC1C5C /* XCRemoteSwiftPackageReference "swift-collections" */;
-			productName = DequeModule;
-		};
-		182760FC2E83E68B00EC1C5C /* Collections */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 182760F52E83E2EA00EC1C5C /* XCRemoteSwiftPackageReference "swift-collections" */;
-			productName = Collections;
-		};
 		18A0EE242EFB9B5A00BA853A /* SVGKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 18A0EE232EFB9B5A00BA853A /* XCRemoteSwiftPackageReference "SVGKit" */;

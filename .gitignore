@@ -3,7 +3,13 @@
 **/xcschemes/*.xcscheme
 .DS_Store
 Build
+build/
+build-*/
 DerivedData
+*.xcresult
+.swiftpm/
+SourcePackages/
+.build-cache/
 build-home/
 *.xccheckout
 .github

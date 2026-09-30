@@ -187,6 +187,12 @@ static BOOL VoidLinkTvOSFocusItemIsSink(id item) {
     return _contentViewController;
 }
 
+#if !TARGET_OS_TV
+- (UIViewController *)childViewControllerForPointerLock {
+    return _contentViewController;
+}
+#endif
+
 - (BOOL)shouldAutorotate {
     return _contentViewController.shouldAutorotate;
 }

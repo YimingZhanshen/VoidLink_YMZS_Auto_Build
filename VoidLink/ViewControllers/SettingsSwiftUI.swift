@@ -1754,6 +1754,7 @@ final class SettingsSession: NSObject, ObservableObject {
     @Published private(set) var favoritePromptHighlightedID: SettingsItemID?
     @Published private(set) var emergingHighlightIDs: Set<String> = []
     @Published var themeRevision = 0
+    @Published private(set) var resolutionGeometryRevision = 0
     @Published private(set) var contentLeadingInset: CGFloat = 10
     @Published private(set) var contentTrailingInset: CGFloat = 10
     @Published private(set) var contentWidth: CGFloat = 0
@@ -1791,6 +1792,10 @@ final class SettingsSession: NSObject, ObservableObject {
     private var pendingInitialSettingsMenuOffsetRetryCount = 0
     private var pendingInitialSettingsMenuOffsetRetryScheduled = false
     fileprivate weak var presentingController: UIViewController?
+    private var cachedDisplaySizes: [Int: CGSize] = [:]
+    private var cachedSafeAreaSizes: [Int: CGSize] = [:]
+    private var isPersistingSettings = false
+    private var screenConnectionNotificationTokens: [NSObjectProtocol] = []
     private var controllerNavigationSetupCoordinator: ControllerNavigationSetupCoordinator?
     private weak var capturedGyroSwitchController: GCController?
     private var activeContinuousInteractionSources: [SettingsItemID: SettingsContinuousInteractionSource] = [:]
@@ -1965,8 +1970,35 @@ final class SettingsSession: NSObject, ObservableObject {
                 // handling without per-control setters.
                 self.refreshConditionalVisibility()
                 self.objectWillChange.send()
-            }
+        }
+        
+#if !os(tvOS)
         PencilProInterruptedPurchaseReset.install()
+        
+        screenConnectionNotificationTokens = [
+            NotificationCenter.default.addObserver(
+                forName: UIScreen.didConnectNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.refreshResolutionGeometry()
+            },
+            NotificationCenter.default.addObserver(
+                forName: UIScreen.didDisconnectNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.refreshResolutionGeometry()
+            },
+            NotificationCenter.default.addObserver(
+                forName: Notification.Name("ScreenChanged"),
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.refreshResolutionGeometry()
+            }
+        ]
+        
         pencilPurchaseNotificationTokens = [
             NotificationCenter.default.addObserver(
                 forName: AddOnProduct.PencilProPack.purchaseAbortedNotification(),
@@ -1985,6 +2017,9 @@ final class SettingsSession: NSObject, ObservableObject {
                 self.itemRegistry.pencilTick.value = PencilTickMode.ManualTick.rawValue
             }
         ]
+        
+#endif
+        
         if favoriteSettingIdentifiers != savedFavoriteIdentifiers {
             UserDefaults.standard.set(favoriteSettingIdentifiers, forKey: settingsFavoriteIdentifiersKey)
         }
@@ -2002,6 +2037,7 @@ final class SettingsSession: NSObject, ObservableObject {
 
     deinit {
         favoriteAutoscrollDisplayLink?.invalidate()
+        screenConnectionNotificationTokens.forEach(NotificationCenter.default.removeObserver)
         pencilPurchaseNotificationTokens.forEach(NotificationCenter.default.removeObserver)
     }
 
@@ -2269,7 +2305,8 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     var resolutionText: String {
-        "\(chosenWidth) × \(chosenHeight)"
+        _ = resolutionGeometryRevision
+        return "\(chosenWidth) × \(chosenHeight)"
     }
 
     var bitrateText: String {
@@ -3835,23 +3872,73 @@ final class SettingsSession: NSObject, ObservableObject {
         }
     }
 
+    private var externalDisplayScreen: UIScreen? {
+#if !os(tvOS)
+        if #available(iOS 16.0, *) {
+            if let externalScene = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .first(where: { $0.session.role == .windowExternalDisplayNonInteractive }) {
+                return externalScene.screen
+            }
+        }
+#endif
+        return UIScreen.screens.first(where: { $0 !== UIScreen.main })
+    }
+
     private var targetScreen: UIScreen {
-        if itemRegistry.externalDisplayMode.value == 1, UIScreen.screens.count > 1 {
-            return UIScreen.screens.last ?? UIScreen.main
+        if itemRegistry.externalDisplayMode.value == ExternalDisplayMode.extended.rawValue,
+           let externalDisplayScreen {
+            return externalDisplayScreen
         }
         return presentingController?.view.window?.screen ?? UIScreen.main
     }
 
+    /// Mirrors UIKit's resolution-table inputs while Settings is attached to
+    /// a window. Persistence happens after dismissal, when that window may no
+    /// longer exist, so retain the last measured pixel sizes per display mode.
+    private func refreshDynamicResolutionSizeCache() {
+        guard !isPersistingSettings else { return }
+        guard let window = presentingController?.viewIfLoaded?.window else { return }
+
+        let displayMode = itemRegistry.externalDisplayMode.value
+        let externalScreen = externalDisplayScreen
+        let usesExternalDisplay = displayMode == ExternalDisplayMode.extended.rawValue && externalScreen != nil
+        let displayScreen = usesExternalDisplay
+            ? (externalScreen ?? UIScreen.main)
+            : window.screen
+        let displayBounds = usesExternalDisplay ? displayScreen.bounds : window.bounds
+        cachedDisplaySizes[displayMode] = CGSize(
+            width: displayBounds.width * displayScreen.scale,
+            height: displayBounds.height * displayScreen.scale
+        )
+
+        let insets = window.safeAreaInsets
+        cachedSafeAreaSizes[displayMode] = CGSize(
+            width: (window.bounds.width - insets.left - insets.right) * window.screen.scale,
+            height: window.bounds.height * window.screen.scale
+        )
+    }
+
     private var availableDisplaySize: CGSize {
+        refreshDynamicResolutionSizeCache()
+        let displayMode = itemRegistry.externalDisplayMode.value
+        if let cachedSize = cachedDisplaySizes[displayMode] {
+            return cachedSize
+        }
         let screen = targetScreen
-        let bounds = itemRegistry.externalDisplayMode.value == 1
+        let bounds = displayMode == ExternalDisplayMode.extended.rawValue
             ? screen.bounds
             : (presentingController?.view.window?.bounds ?? screen.bounds)
         return CGSize(width: bounds.width * screen.scale, height: bounds.height * screen.scale)
     }
 
     private var availableSafeAreaSize: CGSize {
-        guard itemRegistry.externalDisplayMode.value != 1, let window = presentingController?.view.window else {
+        refreshDynamicResolutionSizeCache()
+        let displayMode = itemRegistry.externalDisplayMode.value
+        if let cachedSize = cachedSafeAreaSizes[displayMode] {
+            return cachedSize
+        }
+        guard let window = presentingController?.view.window else {
             return availableDisplaySize
         }
         let insets = window.safeAreaInsets
@@ -4331,8 +4418,11 @@ final class SettingsSession: NSObject, ObservableObject {
         themeRevision &+= 1
     }
 
-    func refreshGeometry() {
-        themeRevision &+= 1
+    func refreshResolutionGeometry() {
+        // if itemRegistry.externalDisplayMode.value == ExternalDisplayMode.duplicated.rawValue || UIScreen.screens.count == 1 {
+            refreshDynamicResolutionSizeCache()
+            resolutionGeometryRevision &+= 1
+        // }
     }
     
     func refreshSectionHitTesting() {
@@ -4482,6 +4572,8 @@ final class SettingsSession: NSObject, ObservableObject {
     /// remains only as an integration bridge; persistence itself is not
     /// section-specific.
     func persistSettings() {
+        isPersistingSettings = true
+        defer { isPersistingSettings = false }
 
         if isStreaming,
            let settingsController = presentingController as? SettingsViewController,
@@ -4503,9 +4595,12 @@ final class SettingsSession: NSObject, ObservableObject {
 
         // MARK: Video
 
-        settings.width = NSNumber(value: isStreaming ? customWidth : chosenWidth)
-        settings.height = NSNumber(value: isStreaming ? customHeight : chosenHeight)
-        settings.resolutionSelected = NSNumber(value: itemRegistry.usesCustomResolution.value ? 5 : itemRegistry.resolution.value)
+        if !isStreaming {
+            settings.width = NSNumber(value: chosenWidth)
+            settings.height = NSNumber(value: chosenHeight)
+            settings.resolutionSelected = NSNumber(value: itemRegistry.usesCustomResolution.value ? 5 : itemRegistry.resolution.value)
+        }
+        
         settings.framerate = NSNumber(value: itemRegistry.frameRate.value)
         settings.bitrate = NSNumber(value: Int(itemRegistry.bitrate.value.rounded()))
         settings.preferredCodec = Int32(itemRegistry.codec.value)
@@ -7605,7 +7700,7 @@ extension SettingsViewController {
     }
 
     @objc func refreshSwiftUISettingsGeometry() {
-        swiftUISettingsStore?.refreshGeometry()
+        swiftUISettingsStore?.refreshResolutionGeometry()
         updateSwiftUIContentInsets()
         swiftUISettingsStore?.refreshSectionHitTestingAfterGeometryChange()
     }

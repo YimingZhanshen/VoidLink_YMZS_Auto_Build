@@ -72,6 +72,11 @@ import UIKit
         }
     }()
     
+    @objc public static var iOS272Available: Bool = {
+        if #available(iOS 27.2, *) {return true}
+        else {return false}
+    }()
+    
     @objc public static var iOS18Available: Bool = {
         if #available(iOS 18.0, tvOS 18.0, *) {return true}
         else {return false}

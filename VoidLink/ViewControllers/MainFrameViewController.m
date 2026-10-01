@@ -766,6 +766,7 @@ static NSMutableSet* hostList;
 }
 
 - (void) addHostTapped {
+    [self applyThemeToNavigationControls];
     Log(LOG_D, @"Tapped add host");
     GenericUtils.autoPopSoftKeyboard = !PublicUtils.isIPhone;
     UIAlertController* alertController = [UIAlertController alertControllerWithTitle:[LocalizationHelper localizedStringForKey:@"Add Host Manually"]
@@ -1654,6 +1655,7 @@ static NSMutableSet* hostList;
     button.titleLabel.font = [UIFont systemFontOfSize:liquidGlassEnabled ? 16 : 16 weight:UIFontWeightMedium];
     // 文字颜色设置为 tintColor 控制
     if(liquidGlassEnabled) {
+        button.contentEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 10);
         button.titleEdgeInsets = UIEdgeInsetsMake(0, 0, 0.9, 0);
     }
     button.tintColor = liquidGlassEnabled ? ThemeManager.appPrimaryColor : UIColor.whiteColor;
@@ -1675,7 +1677,7 @@ static NSMutableSet* hostList;
     // 创建 UIBarButtonItem
     UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:button];
 #if !TARGET_OS_TV
-    if (@available(iOS 26.0, *)) barItem.sharesBackground = true;
+    if (@available(iOS 26.0, *)) barItem.sharesBackground = false;
 #endif
     return barItem;
 }
@@ -1718,7 +1720,7 @@ static NSMutableSet* hostList;
     if(PublicUtils.isTVOS) barItem.style = UIBarButtonItemStyleBordered;
 
 #if !TARGET_OS_TV
-    if (@available(iOS 26.0, *)) barItem.sharesBackground = true;
+    if (@available(iOS 26.0, *)) barItem.sharesBackground = false;
 #endif
 
     return barItem;
@@ -1806,7 +1808,7 @@ static NSMutableSet* hostList;
         [self applyThemeToNavigationButton:barButtonItem];
 #if !TARGET_OS_TV
         if (@available(iOS 26.0, *)) {
-            barButtonItem.sharesBackground = barButtonItem == _addHostButton || barButtonItem == _helpButton;
+            // barButtonItem.sharesBackground = barButtonItem == _addHostButton || barButtonItem == _helpButton;
         }
 #endif
     }
@@ -1916,8 +1918,8 @@ static NSMutableSet* hostList;
     if (@available(iOS 26.0, *)) {
         _settingsButton.sharesBackground = false;
         _profilesButton.sharesBackground = false;
-        _addHostButton.sharesBackground = true;
-        _helpButton.sharesBackground = true;
+        _addHostButton.sharesBackground = false;
+        _helpButton.sharesBackground = false;
      }
 #endif
 
@@ -2383,6 +2385,13 @@ static NSMutableSet* hostList;
     [self handlePendingShortcutAction];
 }
 
+- (void)handleAboutViewDismissal:(NSNotification *)notification
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self applyThemeToNavigationControls];
+    });
+}
+
 -(void)handleEnterBackground
 {
     _background = YES;
@@ -2430,6 +2439,11 @@ static NSMutableSet* hostList;
                                              selector: @selector(handleEnterBackground)
                                                  name: UIApplicationWillResignActiveNotification
                                                object: nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleAboutViewDismissal:)
+                                                 name:@"AboutViewDidDismissNotification"
+                                               object:nil];
     //[self simulateSettingsButtonPress]; //force reload resolution table in the setting
     //[self simulateSettingsButtonPress];
     [self updateResolutionAccordingly];

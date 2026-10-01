@@ -980,8 +980,11 @@ const int FrontViewPositionNone = 0xff;
 
 
 - (void)setupNavigationBar {
+    CGFloat trailingInset = (PublicUtils.isIPhone && PublicUtils.iOS272Available) ? 16.0 : 0.0;
+    CGFloat dockedNavBarWidth = _rearViewRevealWidth - trailingInset;
+
     // 创建导航栏
-    if (_dockedNavBar == nil || _rearViewRevealWidth != _dockedNavBar.bounds.size.width) _dockedNavBar = [[UINavigationBar alloc] init];
+    if (_dockedNavBar == nil || dockedNavBarWidth != _dockedNavBar.bounds.size.width) _dockedNavBar = [[UINavigationBar alloc] init];
 
     //_dockedNavBar = [[UINavigationBar alloc] init];
     _dockedNavBar.translatesAutoresizingMaskIntoConstraints = NO;
@@ -1037,7 +1040,7 @@ const int FrontViewPositionNone = 0xff;
         [_dockedNavBar.topAnchor constraintEqualToAnchor:_contentView.rearNavView.topAnchor constant:GenericUtils.dockedNavBarTopAnchorOffset],
         [_dockedNavBar.bottomAnchor constraintEqualToAnchor:_contentView.rearNavView.bottomAnchor],
         [_dockedNavBar.leadingAnchor constraintEqualToAnchor:_contentView.rearNavView.leadingAnchor],
-        [_dockedNavBar.widthAnchor constraintEqualToConstant:_rearViewRevealWidth],
+        [_dockedNavBar.widthAnchor constraintEqualToConstant:dockedNavBarWidth],
     ]];
     [self layoutSettingsView];
     // NSLog(@"leak test %f %lu", CACurrentMediaTime(), _contentView.rearNavView.constraints.count);

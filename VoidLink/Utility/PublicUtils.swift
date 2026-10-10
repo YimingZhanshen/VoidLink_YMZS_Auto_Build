@@ -10,6 +10,7 @@
 import Foundation
 import ObjectiveC
 import UIKit
+import AVFoundation
 
 @objc public class PublicUtils: NSObject {
     
@@ -72,7 +73,7 @@ import UIKit
         }
     }()
     
-    @objc public static var iOS272Available: Bool = {
+    @objc public static var iOS27_2Available: Bool = {
         if #available(iOS 27.2, *) {return true}
         else {return false}
     }()
@@ -81,6 +82,18 @@ import UIKit
         if #available(iOS 18.0, tvOS 18.0, *) {return true}
         else {return false}
     }()
+    
+    @objc public static var iOS17_5Available: Bool = {
+        if #available(iOS 17.5, *) {return true}
+        else {return false}
+    }()
+    
+    @objc public static var isZhHans: Bool = {
+        if Locale.preferredLanguages.first!.hasPrefix("zh-Hans") { return true }
+        else { return false }
+    }()
+        
+    @objc public static var sessionStartTimestamp: TimeInterval = 0
     
     @objc public static var touchSectionAvailable: Bool = {
         return !isTVOS

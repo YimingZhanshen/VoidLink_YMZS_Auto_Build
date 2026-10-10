@@ -3290,6 +3290,35 @@
         }
       }
     },
+    "=pushToTalk" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "🎙️ Talk"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🎙️ 对讲机"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🎙️ 對講機"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "🎙️ 對講機"
+          }
+        }
+      }
+    },
     "=quitApp" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5781,6 +5810,12 @@
           }
         }
       }
+    },
+    "barrelRollReminderTip" : {
+      "extractionState" : "manual"
+    },
+    "barrelRollReminderTipValidIAP" : {
+      "extractionState" : "manual"
     },
     "Batch edit" : {
       "extractionState" : "manual",
@@ -8931,6 +8966,29 @@
         }
       }
     },
+    "EarPhone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳机"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳機"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "耳機"
+          }
+        }
+      }
+    },
     "Edge Trigger Sensitivity" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9901,6 +9959,29 @@
         }
       }
     },
+    "External Audio Output" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外置音频输出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外置音訊輸出"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外置音訊輸出"
+          }
+        }
+      }
+    },
     "External Display Mode" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9943,6 +10024,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "僅外螢幕"
+          }
+        }
+      }
+    },
+    "externalAudioSelectionTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is audio playing through a speaker or earphones? Speaker enables voice processing to reduce echo. EarPhone disables voice processing to preserve playback quality."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前声音通过扬声器还是耳机播放？选择扬声器将启用语音处理以减少回声；选择耳机将关闭语音处理以保留播放音质。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前聲音透過揚聲器還是耳機播放？選擇揚聲器將啟用語音處理以減少回音；選擇耳機將關閉語音處理以保留播放音質。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前聲音透過揚聲器還是耳機播放？選擇揚聲器將啟用語音處理以減少回音；選擇耳機將關閉語音處理以保留播放音質。"
           }
         }
       }
@@ -10743,35 +10853,6 @@
         }
       }
     },
-    "G8PlusMFiRegressionTip" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dear G8+ MFi controller user, due to Apple App Review requirements, VoidLink updates have had to remove the MFi-protocol vibration feature for this controller. We sincerely apologize. As a temporary workaround, you may install the TestFlight version where this functionality remains unaffected. Whether this feature can be restored in a future version depends on VoidLink obtaining MFi authorization from the controller manufacturer."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "尊敬的 G8+ MFi 手柄用户，应 Apple app 审核要求，VoidLink版本更新不得不移除此手柄的 MFi 协议振动功能。 开发者对此深表歉意！您可以安装功能不受影响的TestFlight版本，作为临时解决方案。后续版本是否恢复该功能，取决于 VoidLink 能否获得手柄厂商的 MFi 许可。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "尊敬的 G8+ MFi 手把使用者，因應 Apple app 審核要求，VoidLink 版本更新不得不移除此手把的 MFi 協議震動功能。開發者對此深表歉意！您可以安裝功能不受影響的 TestFlight 版本，作為臨時解決方案。後續版本是否恢復此功能，取決於 VoidLink 能否取得手把廠商的 MFi 授權。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "尊敬的 G8+ MFi 手把使用者，因應 Apple app 審核要求，VoidLink 版本更新不得不移除此手把的 MFi 協議震動功能。開發者對此深表歉意！您可以安裝功能不受影響的 TestFlight 版本，作為臨時解決方案。後續版本是否恢復此功能，取決於 VoidLink 能否取得手把廠商的 MFi 授權。"
-          }
-        }
-      }
-    },
     "G8+ MFi Regression" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10797,6 +10878,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "G8+ MFi 功能回撤"
+          }
+        }
+      }
+    },
+    "G8PlusMFiRegressionTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dear G8+ MFi controller user, due to Apple App Review requirements, VoidLink updates have had to remove the MFi-protocol vibration feature for this controller. We sincerely apologize. As a temporary workaround, you may install the TestFlight version where this functionality remains unaffected. Whether this feature can be restored in a future version depends on VoidLink obtaining MFi authorization from the controller manufacturer."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "尊敬的 G8+ MFi 手柄用户，应 Apple app 审核要求，VoidLink版本更新不得不移除此手柄的 MFi 协议振动功能。 开发者对此深表歉意！您可以安装功能不受影响的TestFlight版本，作为临时解决方案。后续版本是否恢复该功能，取决于 VoidLink 能否获得手柄厂商的 MFi 许可。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "尊敬的 G8+ MFi 手把使用者，因應 Apple app 審核要求，VoidLink 版本更新不得不移除此手把的 MFi 協議震動功能。開發者對此深表歉意！您可以安裝功能不受影響的 TestFlight 版本，作為臨時解決方案。後續版本是否恢復此功能，取決於 VoidLink 能否取得手把廠商的 MFi 授權。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "尊敬的 G8+ MFi 手把使用者，因應 Apple app 審核要求，VoidLink 版本更新不得不移除此手把的 MFi 協議震動功能。開發者對此深表歉意！您可以安裝功能不受影響的 TestFlight 版本，作為臨時解決方案。後續版本是否恢復此功能，取決於 VoidLink 能否取得手把廠商的 MFi 授權。"
           }
         }
       }
@@ -10843,6 +10953,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "遊戲配置"
+          }
+        }
+      }
+    },
+    "gameControllerRequiredTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please connect a game controller to use this app. If you have not paired a controller yet, quit the app to complete pairing."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请连接游戏手柄以使用此 app。如果您尚未配对游戏手柄，可以先退出此 app 以完成配对。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請連接遊戲控制器以使用此 app。如果您尚未配對遊戲控制器，可以先退出此 app 以完成配對。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請連接遊戲控制器以使用此 app。如果您尚未配對遊戲控制器，可以先退出此 app 以完成配對。"
           }
         }
       }
@@ -14894,35 +15033,6 @@
         }
       }
     },
-    "No purchase found" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Purchase [%@] for:\n-  Pro-level pencil pressure curve tool.\n- Improved stroke transmission & responsiveness,  and user-defined keyboard/mouse shortcut for double tap & squeeze, in the remote drawing workflow.\n- Exclusive drawing-related on-screen buttons.\n- And more …\nNote: basic pencil function remains available without purchasing this add-on component."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "基础Pencil功能之上，购买 [%@] 可解锁：\n- 专业级笔压曲线工具。\n- 远程绘画笔迹传输优化、笔触响应性能优化。\n- 支持用户自定义的双击及捏合键盘/鼠标快捷键。\n- 专属绘图相关的屏显按钮。\n..."
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在基礎Pencil功能之上，購買 [%@] 可解鎖：\n- 專業級筆壓曲線工具。\n- 最佳化遠端繪畫的筆跡傳輸與筆觸響應效能。\n- 並支援使用者自訂的雙擊及捏合鍵盤/滑鼠快捷鍵。\n- 專屬繪圖相關的螢幕顯示按鈕。\n..."
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在基礎Pencil功能之上，購買 [%@] 可解鎖：\n- 專業級筆壓曲線工具。\n- 最佳化遠端繪畫的筆跡傳輸與筆觸響應效能。\n- 並支援使用者自訂的雙擊及捏合鍵盤/滑鼠快捷鍵。\n- 專屬繪圖相關的螢幕顯示按鈕。\n..."
-          }
-        }
-      }
-    },
     "No video received from host." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15011,6 +15121,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有足夠空間插入觸發間隔格"
+          }
+        }
+      }
+    },
+    "Not interested" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂不感兴趣"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫不感興趣"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暫不感興趣"
           }
         }
       }
@@ -16209,7 +16342,33 @@
       }
     },
     "PencilProPackDescription" : {
-      "extractionState" : "manual"
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase [%@] for:\n-  Pro-level pencil pressure curve tool.\n- Improved stroke transmission & responsiveness,  and user-defined keyboard/mouse shortcut for double tap & squeeze, in the remote drawing workflow.\n- Exclusive drawing-related on-screen buttons.\n- And more …\nNote: basic pencil function remains available without purchasing this add-on component."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基础Pencil功能之上，购买 [%@] 可解锁：\n- 专业级笔压曲线工具。\n- 远程绘画笔迹传输优化、笔触响应性能优化。\n- 支持用户自定义的双击及捏合键盘/鼠标快捷键。\n- 专属绘图相关的屏显按钮。\n..."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在基礎Pencil功能之上，購買 [%@] 可解鎖：\n- 專業級筆壓曲線工具。\n- 最佳化遠端繪畫的筆跡傳輸與筆觸響應效能。\n- 並支援使用者自訂的雙擊及捏合鍵盤/滑鼠快捷鍵。\n- 專屬繪圖相關的螢幕顯示按鈕。\n..."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在基礎Pencil功能之上，購買 [%@] 可解鎖：\n- 專業級筆壓曲線工具。\n- 最佳化遠端繪畫的筆跡傳輸與筆觸響應效能。\n- 並支援使用者自訂的雙擊及捏合鍵盤/滑鼠快捷鍵。\n- 專屬繪圖相關的螢幕顯示按鈕。\n..."
+          }
+        }
+      }
     },
     "PencilProPackLowOSVersionTip" : {
       "extractionState" : "manual",
@@ -16950,6 +17109,29 @@
         }
       }
     },
+    "Prefer iPhone/iPad Mic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "优先使用 iPhone/iPad 麦克风"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優先使用 iPhone/iPad 麥克風"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "優先使用 iPhone/iPad 麥克風"
+          }
+        }
+      }
+    },
     "Preferred Codec" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16969,6 +17151,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "視訊編解碼"
+          }
+        }
+      }
+    },
+    "Press ‹ to quit app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press ‹ to quit app"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按 ‹ 退出 app"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按 ‹ 退出 app"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按 ‹ 退出 app"
           }
         }
       }
@@ -17569,6 +17780,64 @@
         }
       }
     },
+    "pushToTalkExternalAudioTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Push to Talk cannot be activated directly while external earphones are connected. Please disconnect first, then enable “Redirect Mic” in Settings → Audio."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外接耳机时无法直接激活对讲机，请先断开连接，在 设置菜单 → 音频分区 中打开“重定向麦克风”。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外接耳機時無法直接啟用對講機，請先中斷連線，在 設定選單 → 音訊區 中開啟「重新導向麥克風」。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外接耳機時無法直接啟用對講機，請先中斷連線，在 設定選單 → 音訊區 中開啟「重新導向麥克風」。"
+          }
+        }
+      }
+    },
+    "pushToTalkTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hold to send mic audio; release to stop. With “redirect mic” off, speaker playback retains high quality while not talking."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "按住发送麦克风声音，松开停止。关闭麦克风重定向时，外放可在未对讲时保持高音质。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "按住傳送麥克風聲音，放開停止。關閉麥克風重新導向時，揚聲器可在未對講時保持高音質。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "按住傳送麥克風聲音，放開停止。關閉麥克風重新導向時，揚聲器可在未對講時保持高音質。"
+          }
+        }
+      }
+    },
     "Queue Buffering" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17957,6 +18226,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新導向麥克風"
+          }
+        }
+      }
+    },
+    "redirectMicPushToTalkTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When using the speaker, turn this option off and use the “Push to Talk” button directly to preserve high audio quality when you are not talking."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外放模式下，关闭该选项并直接使用“对讲机”按键，可保持非语音状态下的高音质。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "揚聲器模式下，關閉此選項並直接使用「對講機」按鍵，可保持非語音狀態下的高音質。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "揚聲器模式下，關閉此選項並直接使用「對講機」按鍵，可保持非語音狀態下的高音質。"
           }
         }
       }
@@ -20420,6 +20718,29 @@
         }
       }
     },
+    "Speaker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扬声器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "揚聲器"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "揚聲器"
+          }
+        }
+      }
+    },
     "Sprint and walk keys are set" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22879,6 +23200,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "等待控制器接入……"
+          }
+        }
+      }
+    },
+    "Waiting for Game Controller ..." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waiting for Game Controller ..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在等待手柄接入 ..."
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在等待遊戲控制器連接 ..."
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在等待遊戲控制器連接 ..."
           }
         }
       }

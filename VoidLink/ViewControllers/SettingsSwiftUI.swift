@@ -160,7 +160,13 @@ private struct SettingsInfoButtonControl: UIViewRepresentable {
 
     private var configuredImage: UIImage? {
         if isGameProfileSetting {
-            if #available(iOS 18.0, *) {
+            if PublicUtils.isTVOS {
+                return UIImage(
+                    systemName: "gamecontroller.circle",
+                    withConfiguration: UIImage.SymbolConfiguration(pointSize: 18.3, weight: .regular)
+                )
+            }
+            if PublicUtils.iOS18Available {
                 return UIImage(
                     systemName: "gamecontroller.circle",
                     withConfiguration: UIImage.SymbolConfiguration(pointSize: 16.5, weight: .medium)
@@ -168,7 +174,13 @@ private struct SettingsInfoButtonControl: UIViewRepresentable {
             }
             return UIImage(named: "gamecontroller.circle.17")?.withRenderingMode(.alwaysTemplate)
         }
-        if #available(iOS 18.0, *) {
+        if PublicUtils.isTVOS {
+            return UIImage(
+                systemName: "info.circle",
+                withConfiguration: UIImage.SymbolConfiguration(pointSize: 18.3, weight: .regular)
+            )
+        }
+        if PublicUtils.iOS18Available {
             return UIImage(
                 systemName: "info.circle",
                 withConfiguration: UIImage.SymbolConfiguration(pointSize: 16.4, weight: .medium)
@@ -494,7 +506,7 @@ enum SettingsItemID: String, Hashable, Identifiable {
         case .audioOnPC: return "Play Audio on PC"
         case .localVolume: return "Local Volume"
         case .redirectMic: return "Redirect Mic"
-        case .useBuiltinMic: return "Use Built-in Mic"
+        case .useBuiltinMic: return PublicUtils.isTVOS ? "Prefer iPhone/iPad Mic" : "Use Built-in Mic"
         case .micVolume: return "Mic Volume"
         case .duckOtherApps: return "Duck Other Apps"
         case .muteInBackground: return "Mute in Background"
@@ -3208,18 +3220,22 @@ final class SettingsSession: NSObject, ObservableObject {
                 \.localMousePointerMode,
                 options: { $0.localMousePointerModeOptions },
                 distribution: .equal,
+                isAvailable: !PublicUtils.isTVOS,
                 hasInfo: true
             ),
             pickerItem(
                 \.reverseMouseWheelDirection,
                 options: { $0.reverseMouseWheelDirectionOptions },
-                distribution: .equal
+                distribution: .equal,
+                isAvailable: !PublicUtils.isTVOS,
             ),
             toggleItem(
-                \.citrixX1Mouse
+                \.citrixX1Mouse,
+                isAvailable: !PublicUtils.isTVOS,
             ),
             toggleItem(
                 \.globeAsEscape,
+                isAvailable: PublicUtils.isIPad || PublicUtils.isRunningOnMacAsiPadApp,
                 hasInfo: true
             )
         ]
@@ -3278,7 +3294,22 @@ final class SettingsSession: NSObject, ObservableObject {
             ),
             toggleItem(
                 \.redirectMic,
-                // isEnabled: { _ in !self.isStreaming },
+                isAvailable: {
+#if os(tvOS)
+                    if #available(tvOS 17.0, *) { return true }
+                    return false
+#else
+                    return true
+#endif
+                }(),
+                isEnabled: { _ in
+#if os(tvOS)
+                    // A stream started without a host mic channel must reconnect to negotiate one.
+                    return !self.isStreaming || StreamFrameViewController.sharedInstance()?.micStreamInitialized == true
+#else
+                    return true
+#endif
+                },
                 hasInfo: true,
                 onValueChanged: { session in
                     session.redirectMicChanged()
@@ -4736,9 +4767,17 @@ final class SettingsSession: NSObject, ObservableObject {
 
     fileprivate func redirectMicChanged() {
         guard itemRegistry.redirectMic.value else { return }
+#if os(tvOS)
         if !MicHandler.permissionGranted() {
-            MicHandler.requestPermission(nil)
+            // Keep the toggle off until the asynchronous permission request succeeds.
+            itemRegistry.redirectMic.value = false
+            MicHandler.requestPermission { [weak self] granted in
+                self?.itemRegistry.redirectMic.value = granted
+            }
         }
+#else
+        GenericUtils.handleRedirectMicEnabledTip(in: presentingController)
+#endif
     }
 
     fileprivate func muteInBackgroundChanged() {
@@ -6411,7 +6450,7 @@ private struct SettingsSectionLayout {
     let sectionSpacing: CGFloat = PublicUtils.isIPhone ? 10 : 12
     let controlSpacing: CGFloat = 5
     let switchSpacing: CGFloat = 20
-    let switchColumnWidth: CGFloat = PublicUtils.tvOS26Aavailable ? 140 : 150
+    let switchColumnWidth: CGFloat = PublicUtils.tvOS26Aavailable ? 175 : (PublicUtils.isTVOS ? 170 : 150)
     let controlMaxWidth: CGFloat = PublicUtils.isTVOS ? 500 : .infinity
     let itemHorizontalPadding: CGFloat = 5
     

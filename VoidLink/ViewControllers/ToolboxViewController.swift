@@ -975,7 +975,9 @@ extension ToolboxViewController: ControllerCollectionNavigationDelegate {
         elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "doublePressPinExecute"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .y, action: "holdToReorder"))
         elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .y, action: "doublePressToDelete"))
-        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: "addEntry"))
+        if !PublicUtils.isTVOS {
+            elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadLeft : .x, action: "addEntry"))
+        }
         elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .b, action: "exit"))
         return elements
     }

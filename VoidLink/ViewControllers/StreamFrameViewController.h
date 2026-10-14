@@ -68,6 +68,7 @@
 - (void)setMagnifierViewportInteractionEnabled:(BOOL)enabled;
 - (void)resetMagnifierStreamViewWithAnimated:(BOOL)animated;
 - (void)returnToMainFrame;
+- (void)disconnectRemoteSession;
 - (void)bringUpToolboxMenu;
 - (void)bringUpToolboxMenuWithoutWidgetLayoutTool;
 - (void)remoteTextInputForTvOS;

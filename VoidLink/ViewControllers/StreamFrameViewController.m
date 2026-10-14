@@ -334,7 +334,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
     toolBoxViewController.specialEntries = [oldToolboxVC.specialEntries mutableCopy];
     if(hideWidgetLayoutToolEntry) [toolBoxViewController.specialEntries removeObject:@"widgetLayoutTool"];
     toolBoxViewController.modalPresentationStyle = UIModalPresentationOverCurrentContext;
-    if([GenericUtils isFirstOpeningNewToolbox]){
+    if([GenericUtils isFirstOpeningNewToolbox] && !PublicUtils.isTVOS){
         [GenericUtils handleFirstOpeningNewToolboxIn:self handler:^{
             [self presentViewController:self->toolBoxViewController animated:YES completion:^{}];
         }];
@@ -770,8 +770,17 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
                                                  name:@"SettingsOverlayButtonPressedNotification"
                                                object:nil];
 
-#if !TARGET_OS_TV
+    if(ControllerUtil.primaryGCController && _settings.framePacingMode.intValue != FramePacingModeInterpolation){
+        NSString* radialMenuButton = [ControllerUtil stringFor:_settings.streamingRadialMenuButton.intValue];
+        [self updateTransientHUDText:[LocalizationHelper localizedStringForKey:@"Long press [%@] to activate controller menu", radialMenuButton]];
+        __weak StreamFrameViewController *weakSelf = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [weakSelf updateTransientHUDText:nil];
+        });
+    }
     
+#if !TARGET_OS_TV
+
     [[NSNotificationCenter defaultCenter] addObserver: self
                                              selector: @selector(extScreenDidConnect:)
                                                  name: UIScreenDidConnectNotification
@@ -1417,7 +1426,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
         _transientHUDView.textAlignment = NSTextAlignmentLeft;
         _transientHUDView.textColor = [UIColor.whiteColor colorWithAlphaComponent:0.7];
         _transientHUDView.backgroundColor = [UIColor.blackColor colorWithAlphaComponent:0.5];
-        _transientHUDView.font = [UIFont systemFontOfSize:PublicUtils.isIPhone ? 18 : 22
+        _transientHUDView.font = [UIFont systemFontOfSize: PublicUtils.isIPhone ? 18 : (PublicUtils.isTVOS ? 32 : 22)
                                                   weight:UIFontWeightSemibold];
         _transientHUDView.layer.cornerRadius = 8;
         _transientHUDView.layer.masksToBounds = YES;
@@ -1689,7 +1698,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 - (void)disconnectAndQuitApp{
     [self returnToMainFrame];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        sleep(1.5);
+        sleep(2);
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.mainFrameViewcontroller quitLaunchedApp];
         });

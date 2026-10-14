@@ -348,6 +348,9 @@ class ThemeManager: NSObject {
     }
     
     @objc static var appPrimaryColorWithAlpha: UIColor {
+        if userInterfaceStyle() == .dark {
+            return appPrimaryColor.withAlphaComponent(PublicUtils.isTVOS ? 0.313 : 0.275)
+        }
         return appPrimaryColor.withAlphaComponent(0.24)
     }
     

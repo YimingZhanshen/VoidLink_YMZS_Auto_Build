@@ -548,7 +548,7 @@ final class ControllerNavigator: NSObject {
             if radialMenuState == .disconnectAndQuit {
                 radialMenuView?.dismiss()
                 radialMenuView = nil
-                StreamFrameViewController.sharedInstance().returnToMainFrame()
+                StreamFrameViewController.sharedInstance().disconnectRemoteSession()
                 break
             }
             else {

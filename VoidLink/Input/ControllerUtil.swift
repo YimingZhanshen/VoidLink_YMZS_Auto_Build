@@ -1337,16 +1337,24 @@ import UIKit
             if #available(iOS 13.0, *) {
                 ControllerNavigator.stop()
             }
+            
+            if PublicUtils.isTVOS {
+                handleGameControllerRequiredTip(in: ControllerUtil.delegate as? UIViewController)
+            }
+            
             return
         }
         
+        /*
         if PublicUtils.isTVOS {
             guard GCController.controllers().count == 1
                     || GCController.controllers().count == 2 else { return }
         }
         else {
             guard GCController.controllers().count == 1 else { return }
-        }
+        } */
+        
+        guard GCController.controllers().filter({$0.extendedGamepad != nil}).count == 1 else {return}
         
         if let mainFrameVC = delegate as? MainFrameViewController {
             let vc = mainFrameVC.isStreaming() ? StreamFrameViewController.sharedInstance() : mainFrameVC
@@ -1682,16 +1690,17 @@ import UIKit
     }
     
     // MARK: - tvOS controller tip
-    @objc public static func handleGameControllerRequiredTip(in vc: UIViewController?) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+    @objc public static func handleGameControllerRequiredTip(in vc: UIViewController?, delay:TimeInterval = 0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             let controllers = GCController.controllers().filter({ $0.extendedGamepad != nil })
+            let sideControllers = GCController.controllers().filter({ $0.microGamepad != nil })
             if controllers.count == 0 {
                 AlertControllerUtil.showAlert(
                     in: vc,
                     title: "Waiting for Game Controller ...".localized,
                     message: "gameControllerRequiredTip".localized,
                     withCancel: false,
-                    buttonTitle: LocalizationHelper.localizedString(forKey: "Press ‹ to quit app"),
+                    buttonTitle: sideControllers.count == 0 ? "Press  🖥️  to quit app".localized : "Press ‹ to quit app".localized,
                     countdown: 0,
                     action: {
                         for controller in GCController.controllers() {

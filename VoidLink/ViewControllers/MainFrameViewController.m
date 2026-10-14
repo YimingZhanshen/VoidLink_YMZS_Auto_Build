@@ -2475,7 +2475,7 @@ static NSMutableSet* hostList;
         [GenericUtils handleBarrelRollRedminderIn:self];
     }
 #else
-    [ControllerUtil handleGameControllerRequiredTipIn:self];
+    [ControllerUtil handleGameControllerRequiredTipIn:self delay:1];
 #endif
 }
 

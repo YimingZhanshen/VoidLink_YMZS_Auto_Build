@@ -13730,6 +13730,35 @@
         }
       }
     },
+    "Long press [%@] to activate controller menu" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Long press [%@] to activate controller menu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "长按 [%@] 激活手柄菜单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按 [%@] 啟用控制器選單"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "長按 [%@] 啟用控制器選單"
+          }
+        }
+      }
+    },
     "lowest latency" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17151,6 +17180,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "視訊編解碼"
+          }
+        }
+      }
+    },
+    "Press  🖥️  to quit app" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press  🖥️  to quit app"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按  🖥️  退出 app"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按  🖥️  退出 app"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按  🖥️  退出 app"
           }
         }
       }
@@ -22707,6 +22765,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "從 iPhone/iPad 輸入文字 · ❮ 換行 · ⏯︎ 結束文字輸入"
+          }
+        }
+      }
+    },
+    "Text Input" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Input"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文本输入"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字輸入"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字輸入"
           }
         }
       }

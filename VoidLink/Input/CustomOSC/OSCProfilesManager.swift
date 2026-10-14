@@ -176,7 +176,7 @@ class OSCProfilesManager: NSObject {
 
     func importEncodedProfiles(_ profilesEncoded: NSMutableArray) {
         let localProfiles = currentProfiles.mutableCopy() as? NSMutableArray ?? NSMutableArray()
-        let profilesDecoded = decodeProfiles(from: profilesEncoded)
+        var profilesDecoded = decodeProfiles(from: profilesEncoded)
         let importedIncludesDefault = (profilesDecoded.firstObject as? OSCProfile)?.name == "Default"
         let isSingleProfile = profilesEncoded.count == 1
 
@@ -228,6 +228,12 @@ class OSCProfilesManager: NSObject {
             if let profile = profilesDecoded[profilesDecoded.count-1] as? OSCProfile {
                 profile.isSelected = true
             }
+        }
+        
+        if(PublicUtils.isTVOS){
+            let tvProfiles = NSMutableArray()
+            tvProfiles.insert(profilesDecoded.firstObject as Any, at: 0)
+            profilesDecoded = tvProfiles
         }
         
         persistEncodedProfiles(encodedProfiles(from: profilesDecoded))

@@ -1452,12 +1452,34 @@ import UIKit
         }
     }
     
+    @objc static func clearPrimaryControllerButtonHandler(_ button: ControllerElement, ignoreSwapABXY: Bool = true){
+        if var elementMap = ControllerUtil.primaryControllerElementMap {
+            if ignoreSwapABXY {
+                elementMap[.a] = ControllerUtil.primaryGCController?.extendedGamepad?.buttonA
+                elementMap[.b] = ControllerUtil.primaryGCController?.extendedGamepad?.buttonB
+                elementMap[.x] = ControllerUtil.primaryGCController?.extendedGamepad?.buttonX
+                elementMap[.y] = ControllerUtil.primaryGCController?.extendedGamepad?.buttonY
+            }
+            if let gcButton = elementMap[button] as? GCControllerButtonInput {
+                gcButton.pressedChangedHandler = nil
+            }
+        }
+    }
+    
     @objc static func listenPrimaryControllerStick(_ stick: ControllerElement, handler: @escaping (_ offsetVector: CGVector) -> Void){
         if let elementMap = ControllerUtil.primaryControllerElementMap {
             if let gcStick = elementMap[stick] as? GCControllerDirectionPad {
                 gcStick.valueChangedHandler = { _, xValue, yValue in
                     handler(CGVector(dx: CGFloat(xValue), dy: CGFloat(yValue)))
                 }
+            }
+        }
+    }
+    
+    @objc static func clearPrimaryControllerStickHandler(_ stick: ControllerElement){
+        if let elementMap = ControllerUtil.primaryControllerElementMap {
+            if let gcStick = elementMap[stick] as? GCControllerDirectionPad {
+                gcStick.valueChangedHandler = nil
             }
         }
     }

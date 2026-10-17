@@ -30,6 +30,7 @@
 		98AB2E481CAD425A0089BB98 /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E311CAD423B0089BB98 /* Platform.c */; };
 		98AB2E491CAD425A0089BB98 /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E331CAD423B0089BB98 /* PlatformSockets.c */; };
 		98AB2E4B1CAD425A0089BB98 /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E391CAD423B0089BB98 /* RtspConnection.c */; };
+		98AB2E591CAD425A0089BB98 /* DynamicHdr.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E5A1CAD425A0089BB98 /* DynamicHdr.c */; };
 		98AB2E4C1CAD425A0089BB98 /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3A1CAD423B0089BB98 /* RtspParser.c */; };
 		98AB2E4D1CAD425A0089BB98 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
 		98AB2E4E1CAD425A0089BB98 /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */; };
@@ -64,6 +65,7 @@
 		FB1A680221324F4900507771 /* Platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E311CAD423B0089BB98 /* Platform.c */; };
 		FB1A680321324F4900507771 /* PlatformSockets.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E331CAD423B0089BB98 /* PlatformSockets.c */; };
 		FB1A680521324F4900507771 /* RtspConnection.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E391CAD423B0089BB98 /* RtspConnection.c */; };
+		FB1A681321324F4900507771 /* DynamicHdr.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E5A1CAD425A0089BB98 /* DynamicHdr.c */; };
 		FB1A680621324F4900507771 /* RtspParser.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3A1CAD423B0089BB98 /* RtspParser.c */; };
 		FB1A680721324F4900507771 /* SdpGenerator.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */; };
 		FB1A680821324F4900507771 /* VideoDepacketizer.c in Sources */ = {isa = PBXBuildFile; fileRef = 98AB2E3D1CAD423B0089BB98 /* VideoDepacketizer.c */; };
@@ -158,6 +160,7 @@
 		98AB2E351CAD423B0089BB98 /* PlatformThreads.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PlatformThreads.h; sourceTree = "<group>"; };
 		98AB2E381CAD423B0089BB98 /* Rtsp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Rtsp.h; sourceTree = "<group>"; };
 		98AB2E391CAD423B0089BB98 /* RtspConnection.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RtspConnection.c; sourceTree = "<group>"; };
+		98AB2E5A1CAD425A0089BB98 /* DynamicHdr.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = DynamicHdr.c; sourceTree = "<group>"; };
 		98AB2E3A1CAD423B0089BB98 /* RtspParser.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = RtspParser.c; sourceTree = "<group>"; };
 		98AB2E3B1CAD423B0089BB98 /* SdpGenerator.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = SdpGenerator.c; sourceTree = "<group>"; };
 		98AB2E3C1CAD423B0089BB98 /* Video.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Video.h; sourceTree = "<group>"; };
@@ -300,6 +303,7 @@
 				98AB2E241CAD423B0089BB98 /* LinkedBlockingQueue.c */,
 				98AB2E251CAD423B0089BB98 /* LinkedBlockingQueue.h */,
 				98AB2E261CAD423B0089BB98 /* Misc.c */,
+				98AB2E5A1CAD425A0089BB98 /* DynamicHdr.c */,
 				98AB2E311CAD423B0089BB98 /* Platform.c */,
 				98AB2E321CAD423B0089BB98 /* Platform.h */,
 				98B8C2B5262BC1220027F659 /* PlatformCrypto.c */,
@@ -438,6 +442,7 @@
 				FB1A67FF21324F4900507771 /* InputStream.c in Sources */,
 				FB1A680021324F4900507771 /* LinkedBlockingQueue.c in Sources */,
 				FB1A680121324F4900507771 /* Misc.c in Sources */,
+				FB1A681321324F4900507771 /* DynamicHdr.c in Sources */,
 				FB1A680221324F4900507771 /* Platform.c in Sources */,
 				FB1A680321324F4900507771 /* PlatformSockets.c in Sources */,
 				FB1A680521324F4900507771 /* RtspConnection.c in Sources */,
@@ -480,6 +485,7 @@
 				983091DE24CEB69B00A0835D /* ConnectionTester.c in Sources */,
 				98AB2E461CAD425A0089BB98 /* LinkedBlockingQueue.c in Sources */,
 				98AB2E471CAD425A0089BB98 /* Misc.c in Sources */,
+				98AB2E591CAD425A0089BB98 /* DynamicHdr.c in Sources */,
 				98AB2E481CAD425A0089BB98 /* Platform.c in Sources */,
 				98AB2E491CAD425A0089BB98 /* PlatformSockets.c in Sources */,
 				98AB2E4B1CAD425A0089BB98 /* RtspConnection.c in Sources */,

@@ -928,7 +928,7 @@ void ClDs5HapticsIrV2(const LI_DS5_HAPTICS_IR_FRAME_V2* frame)
     _streamConfig.supportedVideoFormats = config.supportedVideoFormats;
     _streamConfig.audioConfiguration = config.audioConfiguration;
     // Negotiate the channel for in-session push-to-talk; local capture remains opt-in.
-    _streamConfig.redirectMic = [MicHandler permissionGranted];
+    _streamConfig.redirectMic = true;
     [Connection setVolume:config.localVolume];
     
     // Since we require iOS 12 or above, we're guaranteed to be running

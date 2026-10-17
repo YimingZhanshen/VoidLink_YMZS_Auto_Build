@@ -132,12 +132,6 @@ static NSString * const KeyboardInputSentinel = @"\u200B";
     
     keysDown = [[NSMutableSet alloc] init];
     keyInputField = [[KeyboardInputField alloc] initWithFrame:CGRectZero];
-#if TARGET_OS_TV
-    __weak typeof(self) weakSelf = self;
-    keyInputField.backspaceHandler = ^{
-        [weakSelf sendTvOSRemoteBackspace];
-    };
-#endif
     [keyInputField setKeyboardType:UIKeyboardTypeDefault];
     [keyInputField setAutocorrectionType:UITextAutocorrectionTypeNo];
     [keyInputField setAutocapitalizationType:UITextAutocapitalizationTypeNone];
@@ -508,6 +502,7 @@ static NSString * const KeyboardInputSentinel = @"\u200B";
         [GamepadNavigationIllustrationHud setTvOSSystemTextInputActive:YES];
         
         keyInputField.placeholder = [LocalizationHelper localizedStringForKey:@"tvOSRemoteTextInputPlaceholder"];
+        keyInputField.accessibilityIdentifier = @"streamRemoteTextField";
         keyInputField.inputView.hidden = true;
         if (!tvOSRemoteTextInputTip) {
             tvOSRemoteTextInputTip = [[UILabel alloc] init];
@@ -520,7 +515,7 @@ static NSString * const KeyboardInputSentinel = @"\u200B";
             tvOSRemoteTextInputTip.clipsToBounds = YES;
             tvOSRemoteTextInputTip.translatesAutoresizingMaskIntoConstraints = NO;
         }
-        tvOSRemoteTextInputTip.text = keyInputField.placeholder;
+        tvOSRemoteTextInputTip.text = [LocalizationHelper localizedStringForKey:@"tvOSRemoteTextInputTip"];
         if (!tvOSRemoteTextInputTip.superview) {
             [self addSubview:tvOSRemoteTextInputTip];
             [NSLayoutConstraint activateConstraints:@[
@@ -537,7 +532,7 @@ static NSString * const KeyboardInputSentinel = @"\u200B";
 - (void)restartTVOSTextInputSession {
     [self addSubview:keyInputField];
     keyInputField.delegate = self;
-    keyInputField.text = KeyboardInputSentinel;
+    keyInputField.text = @"";
     [keyInputField becomeFirstResponder];
     [keyInputField removeTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
     [keyInputField addTarget:self action:@selector(onKeyboardPressed:) forControlEvents:UIControlEventEditingChanged];
@@ -564,13 +559,6 @@ static NSString * const KeyboardInputSentinel = @"\u200B";
     [tvOSRemoteTextInputTip removeFromSuperview];
 }
 
-- (void)sendTvOSRemoteBackspace {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-        LiSendKeyboardEvent(0x08, KEY_ACTION_DOWN, 0);
-        usleep(50 * 1000);
-        LiSendKeyboardEvent(0x08, KEY_ACTION_UP, 0);
-    });
-}
 #endif
 
 
@@ -1782,6 +1770,20 @@ static CGFloat previousRollAngle = 0;
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
+#if TARGET_OS_TV
+    if (textField == keyInputField) {
+        NSString *inputText = textField.text ?: @"";
+        NSString *textToSend = [inputText stringByReplacingOccurrencesOfString:KeyboardInputSentinel withString:@""];
+        textField.text = @"";
+
+        if (textToSend.length > 0) {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                const char *utf8String = textToSend.UTF8String;
+                LiSendUtf8TextEvent(utf8String, (int)strlen(utf8String));
+            });
+        }
+    }
+#endif
     for (NSNumber* keyCode in keysDown) {
         LiSendKeyboardEvent([keyCode shortValue], KEY_ACTION_UP, 0);
     }
@@ -1798,6 +1800,10 @@ static CGFloat previousRollAngle = 0;
 - (void)onKeyboardPressed:(UITextField *)textField {
 
     if (textField.markedTextRange) return;
+
+#if TARGET_OS_TV
+    return;
+#else
 
     NSString* inputText = textField.text;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
@@ -1843,6 +1849,7 @@ static CGFloat previousRollAngle = 0;
     // Move the insertion point back to the end of the text box
     UITextRange *textRange = [textField textRangeFromPosition:textField.endOfDocument toPosition:textField.endOfDocument];
     [textField setSelectedTextRange:textRange];
+#endif
 }
 
 - (void)specialCharPressed:(UIKeyCommand *)cmd {

@@ -198,6 +198,7 @@ protocol ControllerCollectionNavigationDelegate: ControllerUINavigationDelegate 
 final class ControllerNavigator: NSObject {
     typealias Handler = (_ buttonDict: NSDictionary, _ gamepad: GCExtendedGamepad, _ element: GCControllerElement) -> Void
 
+    @objc static var shouldBlockAppControllerNavigator:Bool = false
     private static weak var listeningController: GCController?
     static weak var radialMenuDelegate: ControllerNavigatorRadialMenuDelegate?
     @objc static weak var uiNavigationDelegate: ControllerUINavigationDelegate?
@@ -699,6 +700,7 @@ final class ControllerNavigator: NSObject {
     private static func listenToRadialMenuStick() {
         let radialMenuStick: ControllerElement = radialMenuButtonPosition == .right ? .leftStick : .rightStick
         ControllerUtil.listenPrimaryControllerStick(radialMenuStick) { offsetVector in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: radialMenuStick, isInAction: hypot(offsetVector.dx, offsetVector.dy) >= 0.1)
             if let selectedItem = radialMenuView?.updateSelection(
                 xOffset: offsetVector.dx,
@@ -722,6 +724,7 @@ final class ControllerNavigator: NSObject {
         radialMenuState = .main
         radialMenuButton = mainFrameVC.isStreaming() ? streamingRadialMenuButton : localRadialMenuButton
         ControllerUtil.listenPrimaryControllerButton(radialMenuButton) { pressed in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: radialMenuButton, isInAction: pressed)
             if pressed {
                 radialMenuPressDownTimestamp = CACurrentMediaTime()
@@ -747,21 +750,25 @@ final class ControllerNavigator: NSObject {
                 }
             }
             else {
-                guard CACurrentMediaTime() - radialMenuPressDownTimestamp > 0.035 else {
-                    return
-                }
-                radialMenuButtonPressed = false
-                radialMenuDelayTimer?.clean()
-                stickReleasedInRadialMenu = false
-                if radialMenuView == nil, let vc = uiNavigationDelegate as? StreamFrameViewController, vc.hasNoPresentedVC {
-                    ControllerSupport.sharedInstance()?.sendNavigationButtonPress()
-                    return
-                }
-                radialMenuView?.dismiss()
-                radialMenuView = nil
-                ControllerNavigator.updateUINavigationDelegateState()
+                dimissRadialMenu()
             }
         }
+    }
+    
+    @objc static func dimissRadialMenu() {
+        guard CACurrentMediaTime() - radialMenuPressDownTimestamp > 0.035 else {
+            return
+        }
+        radialMenuButtonPressed = false
+        radialMenuDelayTimer?.clean()
+        stickReleasedInRadialMenu = false
+        if radialMenuView == nil, let vc = uiNavigationDelegate as? StreamFrameViewController, vc.hasNoPresentedVC {
+            ControllerSupport.sharedInstance()?.sendNavigationButtonPress()
+            return
+        }
+        radialMenuView?.dismiss()
+        radialMenuView = nil
+        ControllerNavigator.updateUINavigationDelegateState()
     }
     
     private static func listenToNavigationCluster() {
@@ -777,6 +784,7 @@ final class ControllerNavigator: NSObject {
             ControllerUtil.listenPrimaryControllerStickAxis(verticalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: verticalNavigationAxis, isInAction: state != .orderedSame)
                 guard radialMenuView == nil else {return}
+                if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                 switch state {
                 case .orderedAscending:
                     if navigationTimer?.isRunning() != true {
@@ -808,12 +816,14 @@ final class ControllerNavigator: NSObject {
             ControllerUtil.listenPrimaryControllerButton(upNavButton) {pressed in 
                 GamepadNavigationIllustrationHud.updateActionState(for: upNavButton, isInAction: pressed)
                 if pressed {
+                    if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                     uiNavigationDelegate.navigateByController(downward: false)
                 }
             }
             ControllerUtil.listenPrimaryControllerButton(downNavButton) {pressed in
                 GamepadNavigationIllustrationHud.updateActionState(for: downNavButton, isInAction: pressed)
                 if pressed {
+                    if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                     uiNavigationDelegate.navigateByController(downward: true)
                 }
             }
@@ -824,6 +834,7 @@ final class ControllerNavigator: NSObject {
             ControllerUtil.listenPrimaryControllerStickAxis(horizontalNavigationAxis, threshold: 0.6) {state in
                 GamepadNavigationIllustrationHud.updateActionState(for: horizontalNavigationAxis, isInAction: state != .orderedSame)
                 guard radialMenuView == nil else {return}
+                if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                 switch state {
                 case .orderedAscending:
                     if navigationTimer?.isRunning() != true {
@@ -844,12 +855,14 @@ final class ControllerNavigator: NSObject {
             ControllerUtil.listenPrimaryControllerButton(leftNavButton) {pressed in
                 GamepadNavigationIllustrationHud.updateActionState(for: leftNavButton, isInAction: pressed)
                 if pressed {
+                    if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                     uiNavigationDelegate.navigateByController(forward: false)
                 }
             }
             ControllerUtil.listenPrimaryControllerButton(rightNavButton) {pressed in
                 GamepadNavigationIllustrationHud.updateActionState(for: rightNavButton, isInAction: pressed)
                 if pressed {
+                    if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                     uiNavigationDelegate.navigateByController(forward: true)
                 }
             }
@@ -860,14 +873,17 @@ final class ControllerNavigator: NSObject {
     @objc static func listenToControllerMouse() {
         guard radialMenuState == .mouseModeEnabled else { return }
         ControllerUtil.listenPrimaryControllerButton(controllerMouseLeftButton){ pressed in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: controllerMouseLeftButton, isInAction: pressed)
             LiSendMouseButtonEvent(CChar(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE), BUTTON_LEFT)
         }
         ControllerUtil.listenPrimaryControllerButton(controllerMouseRightButton){ pressed in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: controllerMouseRightButton, isInAction: pressed)
             LiSendMouseButtonEvent(CChar(pressed ? BUTTON_ACTION_PRESS : BUTTON_ACTION_RELEASE), BUTTON_RIGHT)
         }
         ControllerUtil.listenPrimaryControllerStick(controllerMouseStick){ offsetVector in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: controllerMouseStick, isInAction: hypot(offsetVector.dx, offsetVector.dy) >= 0.1)
             // print("performRadialMenuAction mouse \(offsetVector) \(CACurrentMediaTime())")
             controllerMouseInputX = offsetVector.dx
@@ -875,6 +891,7 @@ final class ControllerNavigator: NSObject {
         }
         let wheelStick: ControllerElement = controllerMouseStick == .rightStick ? .leftStick : .rightStick
         ControllerUtil.listenPrimaryControllerStick(wheelStick) { offsetVector in
+            if ControllerNavigator.shouldBlockAppControllerNavigator {return}
             GamepadNavigationIllustrationHud.updateActionState(for: wheelStick, isInAction: hypot(offsetVector.dx, offsetVector.dy) >= 0.1)
             controllerMouseWheelInputX = offsetVector.dx
             controllerMouseWheelInputY = offsetVector.dy
@@ -963,6 +980,7 @@ final class ControllerNavigator: NSObject {
                 if buttonNavigation.control == radialMenuButton {continue}
                 if listenedControls.contains(buttonNavigation.control) {continue}
                 ControllerUtil.listenPrimaryControllerButton(buttonNavigation.control) {pressed in
+                    if ControllerNavigator.shouldBlockAppControllerNavigator {return}
                     buttonNavigation.isInAction = pressed
                     GamepadNavigationIllustrationHud.updateActionState(for: buttonNavigation.control, isInAction: pressed)
                     uiNavigationDelegate.uiButtonActionForControllerNavigator(pressed: pressed, from: buttonNavigation)

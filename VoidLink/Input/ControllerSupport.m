@@ -892,9 +892,15 @@ static __weak ControllerSupport *VLSharedControllerSupport = nil;
             //NSLog(@"gamepadMask: %@", [self binaryRepresentationOfInteger:buttonFlags]); // we got the pressed OSC buttons here.
             
             // Player 0 is always present for OSC
+#if TARGET_OS_TV
+            if(!PublicUtils.tvOSSoftkeyboardIsWorking) LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
+                                       buttonFlags, leftTrigger, rightTrigger,
+                                       leftStickX, leftStickY, rightStickX, rightStickY);
+#else
             LiSendMultiControllerEvent(_multiController ? controller.playerIndex : 0, [self getActiveGamepadMask],
                                        buttonFlags, leftTrigger, rightTrigger,
                                        leftStickX, leftStickY, rightStickX, rightStickY);
+#endif
         }
     }
     [_controllerStreamLock unlock];

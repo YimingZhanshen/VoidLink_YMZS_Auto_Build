@@ -1909,7 +1909,7 @@ static __weak StreamFrameViewController *VLSharedStreamFrameViewController = nil
 - (void) stageComplete:(const char*)stageName {
     _micStreamInitialized = false;
     if (strcmp(stageName, "mic stream establishment") == 0) {
-        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC));
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, (int64_t)((_streamConfig.redirectMic ? 5 : 0.05) * NSEC_PER_SEC));
         dispatch_after(delay, dispatch_get_main_queue(), ^{
             [self initializeMicrophoneForStream];
         });

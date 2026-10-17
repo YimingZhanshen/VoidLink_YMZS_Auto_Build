@@ -67,8 +67,10 @@ public class MicHandler: NSObject {
     private var isRecording = false
     private var useBuiltinMic = false
     private var voiceProcessing = false
+    private let redirectMicEnabledBySettings: Bool = {
+        DataManager().getSettings()?.redirectMic ?? false
+    }()
     private var micMuted = false // Capture pause; protected by bufferQueue.
-    private var softwareMicMuted = false // Send gain only; protected by bufferQueue.
     private var voiceProcessingSendResumeUptime: UInt64 = 0 // Protected by bufferQueue.
     private var resumeCaptureAfterMute = false // Platform capture control queue.
     private var voiceProcessingBeforeMute: Bool?
@@ -410,10 +412,14 @@ public class MicHandler: NSObject {
     }
 
     @objc public func setMicMuted(_ muteMic: Bool) {
+        setMicMuted(muteMic, compensateVolume: false)
+    }
+
+    @objc public func setMicMuted(_ muteMic: Bool, compensateVolume: Bool) {
 #if os(tvOS)
-        Self.onTVMain { self.applyMicMute(muteMic) }
+        Self.onTVMain { self.applyMicMute(muteMic, compensateVolume: compensateVolume) }
 #else
-        iosControlQueue.async { [weak self] in self?.applyMicMute(muteMic) }
+        iosControlQueue.async { [weak self] in self?.applyMicMute(muteMic, compensateVolume: compensateVolume) }
 #endif
     }
 
@@ -481,23 +487,21 @@ public class MicHandler: NSObject {
     }
 #endif
 
-    private func applyMicMute(_ muteMic: Bool) {
+    private func applyMicMute(_ muteMic: Bool, compensateVolume: Bool) {
 #if os(tvOS)
         guard !tvDisposed else { return }
 #else
         guard !iosDisposed else { return }
 #endif
-        // Redirect enabled at startup: keep capture, sending and VPIO running.
-        // Apply mute at encoding so samples already queued are also silenced.
-        if playbackSessionBeforeCapture == nil {
-            let changed = bufferQueue.sync { () -> Bool in
-                guard softwareMicMuted != muteMic else { return false }
-                softwareMicMuted = muteMic
-                return true
-            }
-            if changed { NSLog("[Mic] software mute=%d", muteMic) }
+        // Use the redirect setting captured at initialization to select the mute behavior.
+        // Redirect enabled: pause capture without changing the shared session or VPIO.
+        if redirectMicEnabledBySettings {
+            applyCapturePause(muteMic)
             return
         }
+        
+        GenericUtils.handleFirstTappingPushToTalk(in: StreamFrameViewController.sharedInstance())
+        
         guard bufferQueue.sync(execute: { micMuted != muteMic }) else { return }
         let resume = muteMic ? isRecording : (resumeCaptureAfterMute || playbackSessionBeforeCapture != nil)
         let startsPlaybackCapture = !muteMic && playbackSessionBeforeCapture != nil
@@ -600,9 +604,10 @@ public class MicHandler: NSObject {
                 }
             }
             logPlaybackResetState("after mic mute=\(muteMic)")
-            if restoreProcessing {
+            if restoreProcessing && compensateVolume {
                 let volume = min(max(savedVolume, 0), 1)
                 // Gentle slider compensation only when disabling active VPIO.
+                if muteMic {print("og volume \(volume) \(savedVolume) \(CACurrentMediaTime())")}
                 let targetVolume = muteMic ? volume + (PublicUtils.isIPhone ? 0.181 : 0.41) * volume * (1 - volume) : volume
                 restoreSystemVolume(targetVolume, generation: volumeGeneration)
             }
@@ -625,6 +630,61 @@ public class MicHandler: NSObject {
             notify(error)
         }
 #endif
+    }
+
+    private func applyCapturePause(_ paused: Bool) {
+        guard bufferQueue.sync(execute: { micMuted != paused }) else { return }
+        if !paused, !Self.permissionGranted() { return }
+        let resume = paused ? isRecording : resumeCaptureAfterMute
+        bufferQueue.sync { micMuted = paused }
+        if paused {
+            // Retain the capture graph and its voice-processing state. Playback is
+            // owned by Connection; do not reset it or reconfigure AVAudioSession.
+            isRecording = false
+            timer?.pause()
+#if os(tvOS)
+            tvInputRetry?.cancel()
+            tvInputRetry = nil
+#else
+            iosResumeAfterPlaybackReset = false
+#endif
+            engine.stop()
+#if os(tvOS)
+            tvCaptureQueue.sync {} // Drain pending samples before clearing the buffer.
+#endif
+            bufferQueue.sync {
+                pcm16BufferDeque.removeAll()
+                pcm16BufferArray.removeAll()
+                if let encoder = opusEncoder { opus_encoder_ctl_wrapper(encoder, Int32(OPUS_RESET_STATE), 0) }
+            }
+            resumeCaptureAfterMute = resume
+        } else if resume {
+#if os(tvOS)
+            // A retained tap can resume without rebuilding VPIO or the session.
+            if tvTapInstalled {
+                do {
+                    engine.prepare()
+                    try engine.start()
+                } catch {
+                    bufferQueue.sync { micMuted = true }
+                    notify(error)
+                    return
+                }
+            }
+#endif
+            resumeCaptureAfterMute = false
+            startTapping()
+#if os(tvOS)
+            timer?.start()
+#else
+            if !engine.isRunning {
+                bufferQueue.sync { micMuted = true }
+                resumeCaptureAfterMute = true
+                return
+            }
+#endif
+        }
+        NSLog("[Mic] capture paused=%d", paused)
     }
 
     private func preferredMicrophoneInput(from inputs: [AVAudioSessionPortDescription]) -> AVAudioSessionPortDescription? {
@@ -725,7 +785,7 @@ public class MicHandler: NSObject {
         bufferQueue.sync {
             guard !micMuted else { return }
             if pcm16BufferDeque.count >= 960 {
-                let chunk = softwareMicMuted ? [Int16](repeating: 0, count: 960) : Array(pcm16BufferDeque.prefix(960))
+                let chunk = Array(pcm16BufferDeque.prefix(960))
                 var packet = [UInt8](repeating: 0, count: 4000)
                 guard let enc = self.opusEncoder else {return}
                 let outBytes = opus_encode(enc, chunk, 960, &packet, Int32(packet.count))
@@ -761,7 +821,7 @@ public class MicHandler: NSObject {
         bufferQueue.sync {
             guard !micMuted else { return }
             if pcm16BufferArray.count >= 960 {
-                let chunk = softwareMicMuted ? [Int16](repeating: 0, count: 960) : Array(pcm16BufferArray.prefix(960))
+                let chunk = Array(pcm16BufferArray.prefix(960))
                 var packet = [UInt8](repeating: 0, count: 4000)
                 guard let enc = self.opusEncoder else {return}
                 let outBytes = opus_encode(enc, chunk, 960, &packet, Int32(packet.count))

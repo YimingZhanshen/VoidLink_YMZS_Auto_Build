@@ -10334,6 +10334,35 @@
         }
       }
     },
+    "firstTappingPushToTalkTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The system saves separate volume levels for voice capture and normal audio modes. You may need to manually adjust the volume in each mode to balance their perceived loudness."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语音采集与正常音频两种模式的音量由系统分开保存，您可能需要手动调整两种模式下的听感音量平衡"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音擷取與一般音訊兩種模式的音量由系統分別儲存，您可能需要手動調整兩種模式下的聽感音量平衡"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音擷取與一般音訊兩種模式的音量由系統分別儲存，您可能需要手動調整兩種模式下的聽感音量平衡"
+          }
+        }
+      }
+    },
     "Floating keyboard not supported" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21871,6 +21900,35 @@
         }
       }
     },
+    "Text Input" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Input"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文本输入"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字輸入"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字輸入"
+          }
+        }
+      }
+    },
     "The connection was terminated, Error code: %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22746,54 +22804,36 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enter text from iPhone/iPad · ❮ New line · ⏯︎ End text input"
+            "value" : "Hold [LT] to end with Enter. Or Type on iPhone"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 iPhone/iPad 输入文本 · ❮ 换行 · ⏯︎ 结束文本输入"
+            "state" : "needs_review",
+            "value" : "按住 [LT] 完成发送 Enter，或用 iPhone 输入文本"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "從 iPhone/iPad 輸入文字 · ❮ 換行 · ⏯︎ 結束文字輸入"
+            "state" : "needs_review",
+            "value" : "按住 [LT] 完成發送Enter，或用 iPhone 輸入文本"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "從 iPhone/iPad 輸入文字 · ❮ 換行 · ⏯︎ 結束文字輸入"
+            "state" : "needs_review",
+            "value" : "按住 [LT] 完成發送Enter，或用 iPhone 輸入文本"
           }
         }
       }
     },
-    "Text Input" : {
+    "tvOSRemoteTextInputTip" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Text Input"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "文本输入"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "文字輸入"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "文字輸入"
+            "value" : "Enter text from iPhone/iPad · ❮ New line · ⏯︎ End text input"
           }
         }
       }
@@ -23241,6 +23281,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可見(絕對座標)"
+          }
+        }
+      }
+    },
+    "Voice Capture Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice Capture Mode"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "语音采集模式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音擷取模式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "語音擷取模式"
           }
         }
       }

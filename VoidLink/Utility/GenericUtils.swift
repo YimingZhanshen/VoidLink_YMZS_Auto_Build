@@ -135,6 +135,24 @@ import UIKit
         )
     }
 
+    @objc public static func handleFirstTappingPushToTalk(in vc: UIViewController?) {
+        DispatchQueue.main.async {
+            let key = "isFirstTappingPushToTalk"
+            guard !UserDefaults.standard.bool(forKey: key) else {
+                return
+            }
+            UserDefaults.standard.set(true, forKey: key)
+
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: LocalizationHelper.localizedString(forKey: "Voice Capture Mode"),
+                message: LocalizationHelper.localizedString(forKey: "firstTappingPushToTalkTip"),
+                withCancel: false,
+                buttonTitle: LocalizationHelper.localizedString(forKey: "Got it!"),
+                countdown: 6
+            )
+        }
+    }
         
     @objc public static func needUpdateDefaultSettings() -> Bool {
         // let key = "needUpdateDefaultSettings20260226-1"

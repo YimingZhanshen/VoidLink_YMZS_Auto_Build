@@ -3307,7 +3307,7 @@ final class SettingsSession: NSObject, ObservableObject {
                     // A stream started without a host mic channel must reconnect to negotiate one.
                     return !self.isStreaming || StreamFrameViewController.sharedInstance()?.micStreamInitialized == true
 #else
-                    return true
+                    return !self.isStreaming
 #endif
                 },
                 hasInfo: true,

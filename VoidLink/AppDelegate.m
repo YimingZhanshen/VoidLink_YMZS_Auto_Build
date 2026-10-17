@@ -49,23 +49,18 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 
 #if !TARGET_OS_TV
 
-/*
-// orietation limitatioin test
 - (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
-    UIViewController *topController = window.rootViewController;
-    while (topController.presentedViewController) {
-        topController = topController.presentedViewController;
-    }
-    return [topController supportedInterfaceOrientations];
-}
-*/
+    DataManager *dataMan = [[DataManager alloc] init];
+    Settings *currentSettings = [dataMan retrieveSettings];
 
-/*
-- (UIInterfaceOrientationMask)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
-    NSLog(@"orientation limit");
-        return UIInterfaceOrientationMaskLandscape;
+    if (currentSettings.unlockDisplayOrientation) {
+        return UIInterfaceOrientationMaskAll;
+    }
+
+    return PublicUtils.isIPhone
+        ? UIInterfaceOrientationMaskLandscape
+        : [PublicUtils getCurrentOrientationForWindow:window];
 }
-*/
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for command tool customization after application launch (works only when user default is nil)
@@ -107,6 +102,7 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [CommandManager presetDefaultCommands];
     [GenericUtils installSegmentedControlPreviousSelectionTracking];
+    [PublicUtils installTextFieldControllerUserInteractionTracking];
     [IAPManager shared];
 
     // tvOS mounts the settings view lazily when its reveal menu first opens.

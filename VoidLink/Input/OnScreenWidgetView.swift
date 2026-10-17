@@ -3059,6 +3059,12 @@ import ObjectiveC.runtime
             let redirectMic = DataManager().getSettings()?.redirectMic ?? false
             guard GenericUtils.canActivatePushToTalk(in: self.parentViewController, redirectMic: redirectMic) else { return }
             pushToTalkActivated = true
+            MicHandler.requestPermission { granted in
+                guard granted else {
+                    MicHandler.requestPermission(nil)
+                    return
+                }
+            }
 #endif
             MicHandler.sharedInstance?.setMicMuted(false)
         default:
@@ -4362,6 +4368,11 @@ import ObjectiveC.runtime
                 if ControllerUtil.gamepadArrivalReported {self.sendComboButtonsUpEvent(comboStrings: self.comboButtonStrings)}
                 self.functionalWidgetDelegate?.alterAbsTouchDragWith(mouseButton:BUTTON_LEFT)
             }
+            
+            if self.functionalButtonString == "PUSHTOTALK" && self.logicallyDown {
+                MicHandler.sharedInstance?.setMicMuted(true)
+            }
+            
             buttonDownVisualEffectLayer.removeFromSuperlayer()
             for trackPoint in trackPointPool {
                 trackPoint.removeFromSuperlayer()

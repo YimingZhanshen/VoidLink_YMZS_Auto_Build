@@ -11,6 +11,7 @@
 @import ImageIO;
 
 #import "MainFrameViewController.h"
+#import "SceneDelegate.h"
 #import "CryptoManager.h"
 #import "HttpManager.h"
 #import "Connection.h"

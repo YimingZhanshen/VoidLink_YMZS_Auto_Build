@@ -8,7 +8,7 @@
 
 
 #import "StreamView.h"
-#import "DataManager.h"
+#import "TemporarySettings.h"
 #include <Limelight.h>
 
 NS_ASSUME_NONNULL_BEGIN

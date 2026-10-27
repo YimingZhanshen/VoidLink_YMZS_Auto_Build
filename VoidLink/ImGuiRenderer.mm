@@ -138,7 +138,7 @@
     io.DisplaySize.x = view.bounds.size.width;
     io.DisplaySize.y = view.bounds.size.height;
 
-    CGFloat framebufferScale = view.window.screen.scale ?: UIScreen.mainScreen.scale;
+    CGFloat framebufferScale = view.window.screen.scale ?: view.traitCollection.displayScale;
     io.DisplayFramebufferScale = ImVec2(framebufferScale, framebufferScale);
 
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];

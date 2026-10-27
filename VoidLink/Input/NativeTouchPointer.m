@@ -23,8 +23,12 @@ static StreamView* streamView;
 }
 
 - (instancetype)initWithTouch:(UITouch *)touch{
+    return [self initWithTouch:touch view:streamView];
+}
+
+- (instancetype)initWithTouch:(UITouch *)touch view:(StreamView *)view{
     self = [super init];
-    _initialPoint = [touch locationInView:streamView];
+    _initialPoint = [touch locationInView:view];
     _latestPoint = _initialPoint;
     _latestRelativePoint = _initialPoint;
     return self;
@@ -42,15 +46,19 @@ static StreamView* streamView;
 }
 
 - (void)updatePointerCoords:(UITouch *)touch{
+    [self updatePointerCoords:touch inView:streamView velocityFactor:pointerVelocityFactor];
+}
+
+- (void)updatePointerCoords:(UITouch *)touch inView:(StreamView *)view velocityFactor:(CGFloat)velocityFactor{
     _previousPoint = _latestPoint;
-    _latestPoint = [touch locationInView:streamView];
+    _latestPoint = [touch locationInView:view];
     _previousRelativePoint = _latestRelativePoint;
     if(_needResetCoords){// boundary detection & coordinates reset to the central screen point for HK:StarTrail(needs a very high pointer velocity); // boundary detection & coordinates reset to specific point for HK:StarTrail(needs a very high pointer velocity)
         _previousRelativePoint.x = fixedResetCoordX;
         _previousRelativePoint.y = fixedResetCoordY;
     }
-    _latestRelativePoint.x = _previousRelativePoint.x + pointerVelocityFactor * (_latestPoint.x - _previousPoint.x);
-    _latestRelativePoint.y = _previousRelativePoint.y + pointerVelocityFactor * (_latestPoint.y - _previousPoint.y);
+    _latestRelativePoint.x = _previousRelativePoint.x + velocityFactor * (_latestPoint.x - _previousPoint.x);
+    _latestRelativePoint.y = _previousRelativePoint.y + velocityFactor * (_latestPoint.y - _previousPoint.y);
 }
 
 + (void)initContextWithView:(StreamView*)view profile:(OSCProfile*)profile {

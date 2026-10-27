@@ -634,6 +634,31 @@ import UIKit
             )
         }
     }
+    
+    @objc public static func handleFirstSettingNativeTrackpad(in vc: UIViewController?) {
+        DispatchQueue.main.async {
+            let key = "isFirstSettingNativeTrackpad"
+            guard !UserDefaults.standard.bool(forKey: key) else {
+                return
+            }
+            UserDefaults.standard.set(true, forKey: key)
+
+            AlertControllerUtil.showAlert(
+                in: vc,
+                title: LocalizationHelper.localizedString(forKey: "Tips"),
+                message: LocalizationHelper.localizedString(forKey: "nativeTrackpadTip"),
+                withCancel: true,
+                buttonTitle: LocalizationHelper.localizedString(forKey: "Go for Sunshine-Foundation"),
+                countdown: 0,
+                completion: {
+                    if !AlertControllerUtil.actionCancelled {
+                        PublicUtils.openUrl("https://github.com/AlkaidLab/foundation-sunshine")
+                    }
+                }
+            )
+        }
+    }
+
 
     @objc public static func isFirstOpeningNewToolbox() -> Bool {
         let key = "isFirstOpeningNewToolbox6"
@@ -893,6 +918,9 @@ import UIKit
     
     @objc public static var settingsMenuNavigationBarHeight: CGFloat {
         // return isIPhone() ? 44 : hostViewNavigationBarHeight
+        if PublicUtils.isFoldableRAMCached {
+            return hostViewNavigationBarHeight+11
+        }
         switch UIDevice.current.userInterfaceIdiom {
         case .phone:
             return PublicUtils.liquidGlassEnabled ? hostViewNavigationBarHeight+5 : hostViewNavigationBarHeight
@@ -958,7 +986,7 @@ import UIKit
 
         let container = CALayer()
         container.frame = view.bounds
-        container.contentsScale = UIScreen.main.scale
+        container.contentsScale = PublicUtils.screen(for: view).scale
 
         let step: CGFloat = 0.05
         let totalSteps = Int(1.0 / step)
@@ -979,7 +1007,7 @@ import UIKit
             // 数值
             if true {
                 let t = CATextLayer()
-                t.contentsScale = UIScreen.main.scale
+                t.contentsScale = PublicUtils.screen(for: view).scale
                 t.font = UIFont.systemFont(ofSize: 13, weight: .medium)
                 t.fontSize = 13
                 t.foregroundColor = UIColor.red.cgColor

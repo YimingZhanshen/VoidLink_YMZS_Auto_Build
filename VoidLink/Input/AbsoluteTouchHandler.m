@@ -30,6 +30,7 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
 
 @implementation AbsoluteTouchHandler {
     __weak StreamView* streamView;
+    RelativeTouchGestureHandler* gestureHandler;
     
     bool multiTouchesDetected;
     bool passthroughGestures;
@@ -66,6 +67,7 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
 - (id)initWithView:(StreamView*)view andSettings:(TemporarySettings*)settings {
     self = [self init];
     self->streamView = view;
+    gestureHandler = [[RelativeTouchGestureHandler alloc] initWithStreamView:view touchMode:TouchModeAbsolute settings:settings];
     
     multiTouchesDetected = false;
     passthroughGestures = settings.passthroughGestures;
@@ -78,8 +80,8 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
     
     // upper screen check
     _edgeTolerance = settings.edgeSlidingSensitivity.floatValue;
-    slideGestureVerticalThreshold = CGRectGetHeight([[UIScreen mainScreen] bounds]) * 0.4;
-    screenWidthWithThreshold = CGRectGetWidth([[UIScreen mainScreen] bounds]) - _edgeTolerance;
+    slideGestureVerticalThreshold = CGRectGetHeight([[PublicUtils currentScreen] bounds]) * 0.4;
+    screenWidthWithThreshold = CGRectGetWidth([[PublicUtils currentScreen] bounds]) - _edgeTolerance;
     self->touchPointSpawnedAtUpperScreenEdge = false;
         
     leftClickDelay = ((CGFloat)settings.leftClickDelayMs.intValue)/1000;
@@ -116,6 +118,9 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
     }
     
     CGPoint initialPoint = [[touches anyObject] locationInView:streamView];
+    UIView *edgeReferenceView = streamView;
+    slideGestureVerticalThreshold = CGRectGetHeight(edgeReferenceView.bounds) * 0.4;
+    screenWidthWithThreshold = CGRectGetWidth(edgeReferenceView.bounds) - _edgeTolerance;
     if(initialPoint.y < slideGestureVerticalThreshold && (initialPoint.x < _edgeTolerance || initialPoint.x > screenWidthWithThreshold)) {
         self->touchPointSpawnedAtUpperScreenEdge = true;
         return; // we're done here. this touch event will not be sent to the remote PC.
@@ -185,7 +190,7 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
     
     if(currentTouchesCount == 2){
         if(mouseButtonForCursorMove!=BUTTON_LEFT) LiSendMouseButtonEvent(BUTTON_ACTION_RELEASE, mouseButtonForCursorMove);
-        if(passthroughGestures) [TouchPadGestureHandler handleGestureIn:streamView with:event];
+        if(passthroughGestures) [gestureHandler handleGestureWith:event];
     }
      
     if(currentTouchesCount > 1) return;
@@ -215,7 +220,7 @@ static int mouseButtonForCursorMove = BUTTON_LEFT;
     [longPressTimer invalidate];
     longPressTimer = nil;
     
-    if(TouchPadGestureHandler.ctrlDown) LiSendKeyboardEvent(CommandManager.keyboardButtonMappings[@"CTRL"].shortValue,KEY_ACTION_UP,0);
+    [gestureHandler endGestureWithStartInertialScroll:NO];
     
     if(touchPointSpawnedAtUpperScreenEdge) return; // we're done here. this touch event will not be sent to the remote PC.
     

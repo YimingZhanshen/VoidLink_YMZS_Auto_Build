@@ -105,7 +105,23 @@ private typealias VLDeviceMotion = CMDeviceMotion
     @objc public var previousWidgetPitchFactor:CGFloat = 1.0
     @objc public var previousWidgetRollFactor:CGFloat = 1.0
     public var motionStarter:Any?
-    private var windowScene: Any?
+    // The streaming view, never an individual (possibly rotated) gyro button.
+    @objc weak var motionReferenceView: UIView? {
+        didSet {
+#if !os(tvOS)
+            if oldValue !== motionReferenceView {
+                refreshBuiltinMotionUpdates(restart: true)
+            }
+#endif
+        }
+    }
+#if !os(tvOS)
+    private var usesViewMotion = false
+    private var motionGeometryKey: String?
+    private var viewGyroBias = SIMD3<Double>(repeating: 0)
+    private var calibrationSampleHandler: ((CMDeviceMotion) -> Void)?
+    private var builtinMotionGeneration = 0
+#endif
     
     @objc public var onScreenControls: OnScreenControls?
     public let stickMaxOffset: CGFloat = 0x7FFE
@@ -149,6 +165,7 @@ private typealias VLDeviceMotion = CMDeviceMotion
 #if !os(tvOS)
             motionManager.accelerometerUpdateInterval = updateInterval
             motionManager.gyroUpdateInterval = updateInterval
+            motionManager.deviceMotionUpdateInterval = updateInterval
 #endif
         }
     }
@@ -156,15 +173,10 @@ private typealias VLDeviceMotion = CMDeviceMotion
     @objc public override init() {
         // _ = OSCProfilesManager.sharedManager(CGRectZero)
         super.init()
-        if #available(iOS 13.0, *) {
-            let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene
-            self.windowScene = scene
-        } else {
-            // Fallback on earlier versions
-        }
 #if !os(tvOS)
         motionManager.accelerometerUpdateInterval = updateInterval
         motionManager.gyroUpdateInterval = updateInterval
+        motionManager.deviceMotionUpdateInterval = updateInterval
 #endif
     }
     
@@ -202,15 +214,10 @@ private typealias VLDeviceMotion = CMDeviceMotion
             // print("startGyroUpdate useBuiltinGyro \(useBuiltinGyro) \(CACurrentMediaTime())")
             if useBuiltinGyro {
 #if !os(tvOS)
-                if motionManager.isGyroAvailable {
-                    if rollToLeftStick {
-                        leftStickMotion = leftStickTouchInputX
-                    }
-                    motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motionData, _ in
-                        guard let self = self, let data = motionData else { return }
-                        self.handleMotionData(deviceMotion: data)
-                    }
+                if rollToLeftStick {
+                    leftStickMotion = leftStickTouchInputX
                 }
+                refreshBuiltinMotionUpdates()
 #endif
             }
             else {
@@ -247,14 +254,7 @@ private typealias VLDeviceMotion = CMDeviceMotion
     @objc public func startAccelUpdate() {
         accelControlStarted = true
 #if !os(tvOS)
-        if motionManager.isAccelerometerAvailable {
-            motionManager.startAccelerometerUpdates(to: .main) { [weak self] accelData, _ in
-                guard let self = self, let data = accelData else { return }
-                self.handleAccelerometerData(x: data.acceleration.x,
-                                            y: data.acceleration.y,
-                                            z: data.acceleration.z)
-            }
-        }
+        refreshBuiltinMotionUpdates()
 #endif
     }
     
@@ -266,9 +266,7 @@ private typealias VLDeviceMotion = CMDeviceMotion
         motionIsWorking = false
         resetGravityYOffsetTracking()
 #if !os(tvOS)
-        if motionManager.isDeviceMotionActive{
-            motionManager.stopDeviceMotionUpdates()
-        }
+        refreshBuiltinMotionUpdates()
 #endif
         if #available(iOS 14.0, *) {
             activeGCController?.motion?.sensorsActive = false
@@ -279,13 +277,100 @@ private typealias VLDeviceMotion = CMDeviceMotion
     @objc public func stopAccelUpdate() {
         accelControlStarted = false
 #if !os(tvOS)
-        if motionManager.isAccelerometerActive {
-            motionManager.stopAccelerometerUpdates()
-        }
+        refreshBuiltinMotionUpdates()
 #endif
         // self.onScreenControls.clearLeftStickTouchPadFlag()
         // self.onScreenControls.clearRightStickTouchPadFlag()
     }
+
+#if !os(tvOS)
+    @available(iOS 13.0, *)
+    private var currentMotionScene: UIWindowScene? {
+        return motionReferenceView?.window?.windowScene
+            ?? UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                .first { $0.activationState == .foregroundActive }
+    }
+
+    private var canUseViewMotion: Bool {
+#if compiler(>=6.4)
+        if #available(iOS 27.0, *), PublicUtils.isFoldableRAMCached, !PublicUtils.isRunningOnMacAsiPadApp {
+            return motionReferenceView?.window != nil
+        }
+#endif
+        return false
+    }
+
+    // These are additional manual biases, not Core Motion's own bias correction.
+    // Keep view-space calibration separate from the persisted legacy hardware bias.
+    // Never reuse a calibration across display, orientation, size or view transforms.
+    private func viewMotionGeometryKey() -> String? {
+        guard #available(iOS 27.0, *), let view = motionReferenceView, let window = view.window,
+              let scene = window.windowScene else { return nil }
+        let screen = scene.screen
+        let orientation = scene.effectiveGeometry.interfaceOrientation
+        let t = view.transform
+        return "MotionHandler.viewBias.v1.\(screen.nativeBounds).\(screen.nativeScale).\(orientation.rawValue).\(view.bounds.size).\(t)"
+    }
+
+    private func updateViewMotionGeometry() {
+        let key = usesViewMotion ? viewMotionGeometryKey() : nil
+        guard key != motionGeometryKey else { return }
+        motionGeometryKey = key
+        resetGravityYOffsetTracking()
+        if let key, let bias = UserDefaults.standard.array(forKey: key) as? [Double], bias.count == 3 {
+            viewGyroBias = SIMD3(bias[0], bias[1], bias[2])
+        } else {
+            viewGyroBias = .zero
+        }
+    }
+
+    // One device-motion subscription serves gyro, gravity, acceleration and calibration.
+    // Starting/stopping one consumer must not replace another consumer's callback.
+    private func refreshBuiltinMotionUpdates(restart: Bool = false) {
+        let needsDeviceMotion = (motionControlStarted && useBuiltinGyro)
+            || calibrationSampleHandler != nil || (accelControlStarted && canUseViewMotion)
+        let wantsViewMotion = needsDeviceMotion && canUseViewMotion
+        if restart || wantsViewMotion != usesViewMotion || !needsDeviceMotion {
+            builtinMotionGeneration += 1
+            motionManager.stopDeviceMotionUpdates()
+            usesViewMotion = wantsViewMotion
+            motionGeometryKey = nil
+            resetGravityYOffsetTracking()
+        }
+#if compiler(>=6.4)
+        if #available(iOS 27.0, *) {
+            // CMMotionManager retains the body; release it when the last consumer stops.
+            motionManager.deviceMotionBody = wantsViewMotion ? motionReferenceView : nil
+        }
+#endif
+        if needsDeviceMotion && motionManager.isDeviceMotionAvailable && !motionManager.isDeviceMotionActive {
+            let generation = builtinMotionGeneration
+            motionManager.startDeviceMotionUpdates(to: .main) { [weak self] data, _ in
+                guard let self, let data, self.builtinMotionGeneration == generation else { return }
+                self.updateViewMotionGeometry()
+                self.calibrationSampleHandler?(data)
+                if self.accelControlStarted && self.usesViewMotion {
+                    // Match CMAccelerometerData.acceleration: total acceleration in g.
+                    self.handleAccelerometerData(x: data.gravity.x + data.userAcceleration.x,
+                                                 y: data.gravity.y + data.userAcceleration.y,
+                                                 z: data.gravity.z + data.userAcceleration.z)
+                }
+                if self.motionControlStarted && self.useBuiltinGyro && !self.isCalibrating {
+                    self.handleMotionData(deviceMotion: data)
+                }
+            }
+        }
+        let needsRawAccel = accelControlStarted && !canUseViewMotion
+        if !needsRawAccel {
+            motionManager.stopAccelerometerUpdates()
+        } else if motionManager.isAccelerometerAvailable && !motionManager.isAccelerometerActive {
+            motionManager.startAccelerometerUpdates(to: .main) { [weak self] data, _ in
+                guard let self, self.accelControlStarted, let data else { return }
+                self.handleAccelerometerData(x: data.acceleration.x, y: data.acceleration.y, z: data.acceleration.z)
+            }
+        }
+    }
+#endif
 
     // MARK: - 私有方法处理数据
     private func handleAccelerometerData(x: Double, y: Double, z: Double) {
@@ -332,8 +417,15 @@ private typealias VLDeviceMotion = CMDeviceMotion
             self.clearGyroInput(interruptNonGyroInput: false)
             return
 #else
-            if #available(iOS 13.0, *) {
-                let orientation = (windowScene as! UIWindowScene).interfaceOrientation
+            if usesViewMotion {
+                yawBias = -viewGyroBias.y
+                pitchBias = -viewGyroBias.x
+                rollBias = -viewGyroBias.z
+                yawSource = -y - yawBias
+                pitchSource = -x - pitchBias
+                rollSource = -z - rollBias
+            } else if #available(iOS 13.0, *) {
+                let orientation = currentMotionScene?.interfaceOrientation ?? .unknown
                 switch orientation {
                 case .landscapeLeft:
                     yawBias = gyroBiasX
@@ -507,58 +599,89 @@ private typealias VLDeviceMotion = CMDeviceMotion
     
     @objc public func calibrateGyroBias(duration: TimeInterval = 5.0, completion: @escaping () -> Void) {
 
+        guard !isCalibrating else { completion(); return }
+        let calibratingBuiltin = useBuiltinGyro
         isCalibrating = true
-        var sumX = 0.0, sumY = 0.0, sumZ = 0.0
+        var sum = SIMD3<Double>(repeating: 0)
         var sampleCount = 0
-
-        if useBuiltinGyro {
 #if !os(tvOS)
-            guard motionManager.isGyroAvailable else { return }
-            motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motionData, _ in
-                guard let self = self, self.isCalibrating, let data = motionData else { return }
-                sumX += data.rotationRate.x
-                sumY += data.rotationRate.y
-                sumZ += data.rotationRate.z
+        let calibratingView = calibratingBuiltin && canUseViewMotion
+        let calibrationGeometry = calibratingView ? viewMotionGeometryKey() : nil
+        var geometryChanged = false
+#endif
+        var previousControllerHandler: ((GCMotion) -> Void)?
+        let calibrationController = activeGCController
+
+        if calibratingBuiltin {
+#if !os(tvOS)
+            guard motionManager.isDeviceMotionAvailable else {
+                isCalibrating = false
+                completion()
+                return
+            }
+            calibrationSampleHandler = { [weak self] data in
+                guard let self else { return }
+                if self.usesViewMotion != calibratingView
+                    || (calibratingView && self.viewMotionGeometryKey() != calibrationGeometry) {
+                    geometryChanged = true
+                }
+                guard !geometryChanged else { return }
+                sum += SIMD3(data.rotationRate.x, data.rotationRate.y, data.rotationRate.z)
                 sampleCount += 1
             }
+            refreshBuiltinMotionUpdates()
+#else
+            isCalibrating = false
+            completion()
+            return
 #endif
-        }
-        else if #available(iOS 14.0, *) {
-            if let motion = activeGCController?.motion {
-                if motion.sensorsRequireManualActivation {
-                    motion.sensorsActive = true
-                }
+        } else if #available(iOS 14.0, *) {
+            if let motion = calibrationController?.motion {
+                if motion.sensorsRequireManualActivation { motion.sensorsActive = true }
                 if motion.sensorsActive {
-                    motion.valueChangedHandler = { [weak self] motion in
-                        guard let self = self, self.isCalibrating else { return }
-                        sumX += motion.rotationRate.x
-                        sumY += motion.rotationRate.y
-                        sumZ += motion.rotationRate.z
+                    previousControllerHandler = motion.valueChangedHandler
+                    motion.valueChangedHandler = { motion in
+                        sum += SIMD3(motion.rotationRate.x, motion.rotationRate.y, motion.rotationRate.z)
                         sampleCount += 1
                     }
                 }
             }
         }
 
-        // 5秒后计算平均值
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
+            if calibratingBuiltin {
 #if !os(tvOS)
-            self.motionManager.stopDeviceMotionUpdates()
-#endif
-            if sampleCount > 0 {
-                if useBuiltinGyro {
-                    gyroBiasX = sumX / Double(sampleCount)
-                    gyroBiasY = sumY / Double(sampleCount)
-                    gyroBiasZ = sumZ / Double(sampleCount)
+                self.calibrationSampleHandler = nil
+                if sampleCount > 0 && !geometryChanged {
+                    let bias = sum / Double(sampleCount)
+                    if calibratingView, let key = calibrationGeometry,
+                       self.viewMotionGeometryKey() == key {
+                        UserDefaults.standard.set([bias.x, bias.y, bias.z], forKey: key)
+                        self.viewGyroBias = bias
+                    } else if !calibratingView {
+                        self.gyroBiasX = bias.x
+                        self.gyroBiasY = bias.y
+                        self.gyroBiasZ = bias.z
+                    }
                 }
-                else {
-                    controllerGyroBiasX = sumX / Double(sampleCount)
-                    controllerGyroBiasY = sumY / Double(sampleCount)
-                    controllerGyroBiasZ = sumZ / Double(sampleCount)
+#endif
+            } else {
+                if sampleCount > 0 {
+                    let bias = sum / Double(sampleCount)
+                    self.controllerGyroBiasX = bias.x
+                    self.controllerGyroBiasY = bias.y
+                    self.controllerGyroBiasZ = bias.z
+                }
+                if #available(iOS 14.0, *) {
+                    calibrationController?.motion?.valueChangedHandler = self.motionControlStarted ? previousControllerHandler : nil
                 }
             }
             self.isCalibrating = false
+            self.resetGravityYOffsetTracking()
+#if !os(tvOS)
+            self.refreshBuiltinMotionUpdates()
+#endif
             completion()
         }
     }

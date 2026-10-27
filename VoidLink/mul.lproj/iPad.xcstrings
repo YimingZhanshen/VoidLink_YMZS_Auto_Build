@@ -75,7 +75,7 @@
     },
     "2Dp-Qg-chi.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; 2Dp-Qg-chi.segmentTitles[0] = \"Off\"; ObjectID = \"2Dp-Qg-chi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -105,7 +105,7 @@
     },
     "2Dp-Qg-chi.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; 2Dp-Qg-chi.segmentTitles[1] = \"Legacy\"; ObjectID = \"2Dp-Qg-chi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -135,7 +135,7 @@
     },
     "2Dp-Qg-chi.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; 2Dp-Qg-chi.segmentTitles[2] = \"Queue Buffering\"; ObjectID = \"2Dp-Qg-chi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -165,7 +165,7 @@
     },
     "2Dp-Qg-chi.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; 2Dp-Qg-chi.segmentTitles[3] = \"×2 Interpolation\"; ObjectID = \"2Dp-Qg-chi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -201,18 +201,6 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Button"
-          }
-        }
-      }
-    },
-    "2w1-Vw-GVy.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"HDR\"; ObjectID = \"2w1-Vw-GVy\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "HDR"
           }
         }
       }
@@ -279,7 +267,7 @@
     },
     "3rP-dh-TJi.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Enable PiP\"; ObjectID = \"3rP-dh-TJi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -309,7 +297,7 @@
     },
     "3XV-jL-NYF.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Left Stick Minimum Offset\"; ObjectID = \"3XV-jL-NYF\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -339,7 +327,7 @@
     },
     "4FU-iP-c6T.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; 4FU-iP-c6T.segmentTitles[0] = \"Captured\"; ObjectID = \"4FU-iP-c6T\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -369,7 +357,7 @@
     },
     "4FU-iP-c6T.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; 4FU-iP-c6T.segmentTitles[1] = \"Hidden\"; ObjectID = \"4FU-iP-c6T\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -399,7 +387,7 @@
     },
     "4FU-iP-c6T.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; 4FU-iP-c6T.segmentTitles[2] = \"Visible\"; ObjectID = \"4FU-iP-c6T\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -429,7 +417,7 @@
     },
     "4Qy-hB-oa5.text" : {
       "comment" : "Class = \"UILabel\"; text = \"External Display Mode\"; ObjectID = \"4Qy-hB-oa5\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -459,7 +447,7 @@
     },
     "5aI-Zx-dNf.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Citrix X1 Mouse\"; ObjectID = \"5aI-Zx-dNf\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -489,7 +477,7 @@
     },
     "5q5-ug-Fg4.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Point Tracking\"; ObjectID = \"5q5-ug-Fg4\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -549,7 +537,7 @@
     },
     "6Cy-aH-DXp.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Curve Exponent\"; ObjectID = \"6Cy-aH-DXp\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -579,7 +567,7 @@
     },
     "6GU-ZN-w6X.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Theme\"; ObjectID = \"6GU-ZN-w6X\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -609,7 +597,7 @@
     },
     "6gY-8I-NWq.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Map Gyro to\"; ObjectID = \"6gY-8I-NWq\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -639,7 +627,7 @@
     },
     "6w5-Md-NpV.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Preferred Codec\"; ObjectID = \"6w5-Md-NpV\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -669,7 +657,7 @@
     },
     "7tq-jU-C6l.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Gyro Mode\"; ObjectID = \"7tq-jU-C6l\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -697,45 +685,9 @@
         }
       }
     },
-    "8hF-kb-2uV.segmentTitles[0]" : {
-      "comment" : "Class = \"UISegmentedControl\"; 8hF-kb-2uV.segmentTitles[0] = \"30 FPS\"; ObjectID = \"8hF-kb-2uV\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "30 FPS"
-          }
-        }
-      }
-    },
-    "8hF-kb-2uV.segmentTitles[1]" : {
-      "comment" : "Class = \"UISegmentedControl\"; 8hF-kb-2uV.segmentTitles[1] = \"60 FPS\"; ObjectID = \"8hF-kb-2uV\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "60 FPS"
-          }
-        }
-      }
-    },
-    "8hF-kb-2uV.segmentTitles[2]" : {
-      "comment" : "Class = \"UISegmentedControl\"; 8hF-kb-2uV.segmentTitles[2] = \"120 FPS\"; ObjectID = \"8hF-kb-2uV\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "120 FPS"
-          }
-        }
-      }
-    },
     "8wW-Sq-EOE.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Play Audio on PC\"; ObjectID = \"8wW-Sq-EOE\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -765,7 +717,7 @@
     },
     "9d1-RN-lqW.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Streaming Radial Menu Delay\"; ObjectID = \"9d1-RN-lqW\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -795,7 +747,7 @@
     },
     "9pX-93-bC2.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Background Session\"; ObjectID = \"9pX-93-bC2\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -825,7 +777,7 @@
     },
     "9XL-xt-Q57.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Gyro Sensitivity\"; ObjectID = \"9XL-xt-Q57\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -855,7 +807,7 @@
     },
     "9Yx-H8-E3N.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Delay Left Click\"; ObjectID = \"9Yx-H8-E3N\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -885,7 +837,7 @@
     },
     "26O-xW-5EH.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Switch Gyro by Controller\"; ObjectID = \"26O-xW-5EH\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -915,7 +867,7 @@
     },
     "53H-ST-OtY.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; 53H-ST-OtY.segmentTitles[0] = \"Standard\"; ObjectID = \"53H-ST-OtY\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -945,7 +897,7 @@
     },
     "53H-ST-OtY.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; 53H-ST-OtY.segmentTitles[1] = \"Metal (Experimental)\"; ObjectID = \"53H-ST-OtY\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -975,7 +927,7 @@
     },
     "85A-d5-pLE.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; 85A-d5-pLE.segmentTitles[0] = \"System\"; ObjectID = \"85A-d5-pLE\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1003,21 +955,9 @@
         }
       }
     },
-    "85A-d5-pLE.segmentTitles[1]" : {
-      "comment" : "Class = \"UISegmentedControl\"; 85A-d5-pLE.segmentTitles[1] = \"SDL\"; ObjectID = \"85A-d5-pLE\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "SDL"
-          }
-        }
-      }
-    },
     "aa5-3y-I4d.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; aa5-3y-I4d.segmentTitles[0] = \"Off\"; ObjectID = \"aa5-3y-I4d\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1047,7 +987,7 @@
     },
     "aa5-3y-I4d.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; aa5-3y-I4d.segmentTitles[1] = \"Auto\"; ObjectID = \"aa5-3y-I4d\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1077,7 +1017,7 @@
     },
     "aa5-3y-I4d.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; aa5-3y-I4d.segmentTitles[2] = \"Built-in\"; ObjectID = \"aa5-3y-I4d\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1107,7 +1047,7 @@
     },
     "aa5-3y-I4d.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; aa5-3y-I4d.segmentTitles[3] = \"Controller\"; ObjectID = \"aa5-3y-I4d\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1137,7 +1077,7 @@
     },
     "aDg-5A-6M9.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Left Click Delay\"; ObjectID = \"aDg-5A-6M9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1167,7 +1107,7 @@
     },
     "AeU-kl-XFa.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Local Volume\"; ObjectID = \"AeU-kl-XFa\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1197,7 +1137,7 @@
     },
     "aFy-0w-YPe.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; aFy-0w-YPe.segmentTitles[0] = \"H.264\"; ObjectID = \"aFy-0w-YPe\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1215,7 +1155,7 @@
     },
     "aFy-0w-YPe.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; aFy-0w-YPe.segmentTitles[1] = \"HEVC\"; ObjectID = \"aFy-0w-YPe\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1233,7 +1173,7 @@
     },
     "aFy-0w-YPe.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; aFy-0w-YPe.segmentTitles[2] = \"AV1\"; ObjectID = \"aFy-0w-YPe\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1263,7 +1203,7 @@
     },
     "aGg-ET-e9F.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Edge Trigger Sensitivity\"; ObjectID = \"aGg-ET-e9F\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1305,7 +1245,7 @@
     },
     "Aiv-r8-9k2.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Frame Rate\"; ObjectID = \"Aiv-r8-9k2\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1377,7 +1317,7 @@
     },
     "aol-mw-Kn1.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Yaw Sensitivity\"; ObjectID = \"aol-mw-Kn1\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1407,7 +1347,7 @@
     },
     "aup-5k-z6P.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Show Local Keyboard Toolbar                                                      \"; ObjectID = \"aup-5k-z6P\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1497,7 +1437,7 @@
     },
     "b1N-z8-12w.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pressure Curve\"; ObjectID = \"b1N-z8-12w\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1527,7 +1467,7 @@
     },
     "bfV-QT-eKw.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Use Built-in Mic\"; ObjectID = \"bfV-QT-eKw\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1557,7 +1497,7 @@
     },
     "bhC-da-VGd.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; bhC-da-VGd.segmentTitles[0] = \"Touchpad\"; ObjectID = \"bhC-da-VGd\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1587,7 +1527,7 @@
     },
     "bhC-da-VGd.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; bhC-da-VGd.segmentTitles[1] = \"Native Touch\"; ObjectID = \"bhC-da-VGd\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1617,7 +1557,7 @@
     },
     "bhC-da-VGd.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; bhC-da-VGd.segmentTitles[2] = \"Single Point\"; ObjectID = \"bhC-da-VGd\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1647,7 +1587,7 @@
     },
     "bhC-da-VGd.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; bhC-da-VGd.segmentTitles[3] = \"Disabled\"; ObjectID = \"bhC-da-VGd\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1707,7 +1647,7 @@
     },
     "Bkf-0d-XuA.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; Bkf-0d-XuA.segmentTitles[0] = \"Touchpad\"; ObjectID = \"Bkf-0d-XuA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1737,7 +1677,7 @@
     },
     "Bkf-0d-XuA.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; Bkf-0d-XuA.segmentTitles[1] = \"Native Touch\"; ObjectID = \"Bkf-0d-XuA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1767,7 +1707,7 @@
     },
     "Bkf-0d-XuA.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; Bkf-0d-XuA.segmentTitles[2] = \"Single Point\"; ObjectID = \"Bkf-0d-XuA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1797,7 +1737,7 @@
     },
     "Bkf-0d-XuA.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; Bkf-0d-XuA.segmentTitles[3] = \"Disabled\"; ObjectID = \"Bkf-0d-XuA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1899,7 +1839,7 @@
     },
     "BQH-nQ-IyM.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Reverse Hold Button\"; ObjectID = \"BQH-nQ-IyM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1929,7 +1869,7 @@
     },
     "BsJ-eo-2Ac.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Ctrl Down for Pinch\"; ObjectID = \"BsJ-eo-2Ac\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1959,7 +1899,7 @@
     },
     "Bue-gF-hRI.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Designate Soft Keyboard Height\"; ObjectID = \"Bue-gF-hRI\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1989,7 +1929,7 @@
     },
     "bVv-CW-kN8.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; bVv-CW-kN8.segmentTitles[0] = \"Regular\"; ObjectID = \"bVv-CW-kN8\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2019,7 +1959,7 @@
     },
     "bVv-CW-kN8.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; bVv-CW-kN8.segmentTitles[1] = \"HD\"; ObjectID = \"bVv-CW-kN8\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2079,7 +2019,7 @@
     },
     "ccv-UD-RYW.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Custom Squeeze Keyboard Shortcut\"; ObjectID = \"ccv-UD-RYW\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2109,7 +2049,7 @@
     },
     "Ce3-FM-vIh.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Frames to Buffer\"; ObjectID = \"Ce3-FM-vIh\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2137,57 +2077,9 @@
         }
       }
     },
-    "ckc-Dm-8ex.segmentTitles[0]" : {
-      "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[0] = \"360p\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "360p"
-          }
-        }
-      }
-    },
-    "ckc-Dm-8ex.segmentTitles[1]" : {
-      "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[1] = \"720p\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "720p"
-          }
-        }
-      }
-    },
-    "ckc-Dm-8ex.segmentTitles[2]" : {
-      "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[2] = \"1080p\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "1080p"
-          }
-        }
-      }
-    },
-    "ckc-Dm-8ex.segmentTitles[3]" : {
-      "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[3] = \"4K\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "4K"
-          }
-        }
-      }
-    },
     "ckc-Dm-8ex.segmentTitles[4]" : {
       "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[4] = \"Safe Area\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2217,7 +2109,7 @@
     },
     "ckc-Dm-8ex.segmentTitles[5]" : {
       "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[5] = \"FullScr/Window\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2247,7 +2139,7 @@
     },
     "ckc-Dm-8ex.segmentTitles[6]" : {
       "comment" : "Class = \"UISegmentedControl\"; ckc-Dm-8ex.segmentTitles[6] = \"Custom\"; ObjectID = \"ckc-Dm-8ex\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2565,7 +2457,7 @@
     },
     "d1N-HH-Aq9.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Optimize Game Settings\"; ObjectID = \"d1N-HH-Aq9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2607,7 +2499,7 @@
     },
     "dfj-BB-Vby.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Passthrough Gestures\"; ObjectID = \"dfj-BB-Vby\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2667,7 +2559,7 @@
     },
     "DhB-EF-mDt.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pencil Mode\"; ObjectID = \"DhB-EF-mDt\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2806,7 +2698,7 @@
     },
     "EFR-Ee-KiK.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Roll → Left Stick\"; ObjectID = \"EFR-Ee-KiK\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2836,7 +2728,7 @@
     },
     "egA-7n-Dpe.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Pointer Velocity\"; ObjectID = \"egA-7n-Dpe\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2896,7 +2788,7 @@
     },
     "eOT-gu-uEu.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Audio Configuration\"; ObjectID = \"eOT-gu-uEu\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2974,7 +2866,7 @@
     },
     "Evh-LH-rdh.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pinch Gesture\"; ObjectID = \"Evh-LH-rdh\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3016,7 +2908,7 @@
     },
     "f3L-bA-RW6.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Right Stick Minimum Offset\"; ObjectID = \"f3L-bA-RW6\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3044,33 +2936,9 @@
         }
       }
     },
-    "FIp-Lv-Lbl.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Interpolation Resolution\"; ObjectID = \"FIp-Lv-Lbl\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Interpolation Resolution"
-          }
-        }
-      }
-    },
-    "FIp-Sc-Lbl.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"Scaled Stream Resolution\"; ObjectID = \"FIp-Sc-Lbl\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Scaled Stream Resolution"
-          }
-        }
-      }
-    },
     "FJv-HJ-UYJ.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Move Event Interval\"; ObjectID = \"FJv-HJ-UYJ\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3130,7 +2998,7 @@
     },
     "FwK-oG-vuz.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Physical Mouse Wheel Scroll\"; ObjectID = \"FwK-oG-vuz\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3160,7 +3028,7 @@
     },
     "fY9-M2-tiS.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Audio Engine\"; ObjectID = \"fY9-M2-tiS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3190,7 +3058,7 @@
     },
     "Gmb-bu-KCv.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Button Visual Feedback\"; ObjectID = \"Gmb-bu-KCv\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3220,7 +3088,7 @@
     },
     "gTZ-RS-VIl.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; gTZ-RS-VIl.segmentTitles[0] = \"Mouse\"; ObjectID = \"gTZ-RS-VIl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3250,7 +3118,7 @@
     },
     "gTZ-RS-VIl.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; gTZ-RS-VIl.segmentTitles[1] = \"Controller Stick\"; ObjectID = \"gTZ-RS-VIl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3280,7 +3148,7 @@
     },
     "gTZ-RS-VIl.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; gTZ-RS-VIl.segmentTitles[2] = \"Drift Correction\"; ObjectID = \"gTZ-RS-VIl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3310,7 +3178,7 @@
     },
     "Gus-CK-wpc.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Send Dummy Event\"; ObjectID = \"Gus-CK-wpc\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3490,7 +3358,7 @@
     },
     "hAo-1k-oYF.text" : {
       "comment" : "Class = \"UILabel\"; text = \"90° Display Rotation\"; ObjectID = \"hAo-1k-oYF\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3520,7 +3388,7 @@
     },
     "hDf-9O-NGp.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Scroll Sensitivity\"; ObjectID = \"hDf-9O-NGp\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3562,7 +3430,7 @@
     },
     "hPX-cJ-dgH.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Mute in Background\"; ObjectID = \"hPX-cJ-dgH\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3592,7 +3460,7 @@
     },
     "hq8-dy-8BF.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Custom Resolution\"; ObjectID = \"hq8-dy-8BF\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3622,7 +3490,7 @@
     },
     "HqA-an-KEe.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Minimum Offset (Gyro→Stick)\"; ObjectID = \"HqA-an-KEe\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3652,7 +3520,7 @@
     },
     "hZw-pC-Qxm.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Drawing Pauses Native Touch\"; ObjectID = \"hZw-pC-Qxm\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3724,7 +3592,7 @@
     },
     "iPd-Ra-Lbl.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Full Color Range\"; ObjectID = \"iPd-Ra-Lbl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3754,7 +3622,7 @@
     },
     "IvI-tw-APj.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Open Settings in Streaming\"; ObjectID = \"IvI-tw-APj\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3826,7 +3694,7 @@
     },
     "iZL-dA-jk9.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; iZL-dA-jk9.segmentTitles[0] = \"Stereo\"; ObjectID = \"iZL-dA-jk9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3856,7 +3724,7 @@
     },
     "iZL-dA-jk9.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; iZL-dA-jk9.segmentTitles[1] = \"Stereo(SDL)\"; ObjectID = \"iZL-dA-jk9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3886,7 +3754,7 @@
     },
     "iZL-dA-jk9.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; iZL-dA-jk9.segmentTitles[2] = \"5.1‑channel\"; ObjectID = \"iZL-dA-jk9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3916,7 +3784,7 @@
     },
     "iZL-dA-jk9.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; iZL-dA-jk9.segmentTitles[3] = \"7.1‑channel\"; ObjectID = \"iZL-dA-jk9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3946,7 +3814,7 @@
     },
     "jaM-yS-ldb.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Redirect Mic\"; ObjectID = \"jaM-yS-ldb\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3974,33 +3842,9 @@
         }
       }
     },
-    "JaY-XA-1V6.segmentTitles[0]" : {
-      "comment" : "Class = \"UISegmentedControl\"; JaY-XA-1V6.segmentTitles[0] = \"Xbox 360\"; ObjectID = \"JaY-XA-1V6\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Xbox 360"
-          }
-        }
-      }
-    },
-    "JaY-XA-1V6.segmentTitles[1]" : {
-      "comment" : "Class = \"UISegmentedControl\"; JaY-XA-1V6.segmentTitles[1] = \"PS\"; ObjectID = \"JaY-XA-1V6\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "PS"
-          }
-        }
-      }
-    },
     "JaY-XA-1V6.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; JaY-XA-1V6.segmentTitles[2] = \"PS (Enhanced Haptics)\"; ObjectID = \"JaY-XA-1V6\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4028,21 +3872,9 @@
         }
       }
     },
-    "JaY-XA-1V6.segmentTitles[3]" : {
-      "comment" : "Class = \"UISegmentedControl\"; JaY-XA-1V6.segmentTitles[3] = \"Xbox + PS\"; ObjectID = \"JaY-XA-1V6\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Xbox + PS"
-          }
-        }
-      }
-    },
     "jcj-D4-VnY.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pitch Sensitivity\"; ObjectID = \"jcj-D4-VnY\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4174,7 +4006,7 @@
     },
     "JTl-un-QJJ.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Emulated Controller Type\"; ObjectID = \"JTl-un-QJJ\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4204,7 +4036,7 @@
     },
     "jYn-fE-27r.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Slide Distance Threshold\"; ObjectID = \"jYn-fE-27r\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4246,7 +4078,7 @@
     },
     "kho-5R-daP.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; kho-5R-daP.segmentTitles[0] = \"3 Finger Tap\"; ObjectID = \"kho-5R-daP\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4276,7 +4108,7 @@
     },
     "kho-5R-daP.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; kho-5R-daP.segmentTitles[1] = \"4 Finger Tap\"; ObjectID = \"kho-5R-daP\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4306,7 +4138,7 @@
     },
     "kho-5R-daP.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; kho-5R-daP.segmentTitles[2] = \"5 Finger Tap\"; ObjectID = \"kho-5R-daP\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4336,7 +4168,7 @@
     },
     "kho-5R-daP.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; kho-5R-daP.segmentTitles[3] = \"Disabled\"; ObjectID = \"kho-5R-daP\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4366,7 +4198,7 @@
     },
     "KJd-PE-5cS.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; KJd-PE-5cS.segmentTitles[0] = \"No\"; ObjectID = \"KJd-PE-5cS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4396,7 +4228,7 @@
     },
     "KJd-PE-5cS.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; KJd-PE-5cS.segmentTitles[1] = \"Yes\"; ObjectID = \"KJd-PE-5cS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4438,7 +4270,7 @@
     },
     "KNe-bN-CDb.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; KNe-bN-CDb.segmentTitles[0] = \"Disabled\"; ObjectID = \"KNe-bN-CDb\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4468,7 +4300,7 @@
     },
     "KNe-bN-CDb.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; KNe-bN-CDb.segmentTitles[1] = \"Allowed\"; ObjectID = \"KNe-bN-CDb\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4522,7 +4354,7 @@
     },
     "LGV-5y-piG.text" : {
       "comment" : "Class = \"UILabel\"; text = \"On-Screen Widgets   \"; ObjectID = \"LGV-5y-piG\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4552,7 +4384,7 @@
     },
     "lMt-4H-fkV.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Bitrate\"; ObjectID = \"lMt-4H-fkV\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4582,7 +4414,7 @@
     },
     "lVF-ve-kTt.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; lVF-ve-kTt.segmentTitles[0] = \"Built-in\"; ObjectID = \"lVF-ve-kTt\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4612,7 +4444,7 @@
     },
     "lVF-ve-kTt.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; lVF-ve-kTt.segmentTitles[1] = \"Controller\"; ObjectID = \"lVF-ve-kTt\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4642,7 +4474,7 @@
     },
     "MaN-f7-I3g.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Frame Pacing\"; ObjectID = \"MaN-f7-I3g\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4672,7 +4504,7 @@
     },
     "Mm0-xf-9eh.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; Mm0-xf-9eh.segmentTitles[0] = \"Slide From Left Edge\"; ObjectID = \"Mm0-xf-9eh\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4702,7 +4534,7 @@
     },
     "Mm0-xf-9eh.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; Mm0-xf-9eh.segmentTitles[1] = \"Slide From Right Edge\"; ObjectID = \"Mm0-xf-9eh\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4732,7 +4564,7 @@
     },
     "MM5-O0-vK3.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; MM5-O0-vK3.segmentTitles[0] = \"No\"; ObjectID = \"MM5-O0-vK3\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4762,7 +4594,7 @@
     },
     "MM5-O0-vK3.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; MM5-O0-vK3.segmentTitles[1] = \"Yes\"; ObjectID = \"MM5-O0-vK3\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4786,18 +4618,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "啟用"
-          }
-        }
-      }
-    },
-    "MNm-86-RGl.text" : {
-      "comment" : "Class = \"UILabel\"; text = \"YUV 4:4:4\"; ObjectID = \"MNm-86-RGl\";",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "YUV 4:4:4"
           }
         }
       }
@@ -4834,7 +4654,7 @@
     },
     "mTM-NL-CcF.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; mTM-NL-CcF.segmentTitles[0] = \"Align with System\"; ObjectID = \"mTM-NL-CcF\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4864,7 +4684,7 @@
     },
     "mTM-NL-CcF.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; mTM-NL-CcF.segmentTitles[1] = \"Reversed\"; ObjectID = \"mTM-NL-CcF\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4894,7 +4714,7 @@
     },
     "MUY-2Y-bHi.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Touch Mode\"; ObjectID = \"MUY-2Y-bHi\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4924,7 +4744,7 @@
     },
     "MXH-vb-Zyb.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Swap Yaw & Roll\"; ObjectID = \"MXH-vb-Zyb\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4984,7 +4804,7 @@
     },
     "MzN-ZR-qyM.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; MzN-ZR-qyM.segmentTitles[0] = \"Auto\"; ObjectID = \"MzN-ZR-qyM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5014,7 +4834,7 @@
     },
     "MzN-ZR-qyM.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; MzN-ZR-qyM.segmentTitles[1] = \"Built-in\"; ObjectID = \"MzN-ZR-qyM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5044,7 +4864,7 @@
     },
     "MzN-ZR-qyM.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; MzN-ZR-qyM.segmentTitles[2] = \"L/R Swapped\"; ObjectID = \"MzN-ZR-qyM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5074,7 +4894,7 @@
     },
     "MzN-ZR-qyM.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; MzN-ZR-qyM.segmentTitles[3] = \"Disabled\"; ObjectID = \"MzN-ZR-qyM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5104,7 +4924,7 @@
     },
     "nh6-cn-z23.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Toggle Local Soft Keyboard\"; ObjectID = \"nh6-cn-z23\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5134,7 +4954,7 @@
     },
     "NLH-qN-qCo.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; NLH-qN-qCo.segmentTitles[0] = \"Off\"; ObjectID = \"NLH-qN-qCo\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5164,7 +4984,7 @@
     },
     "NLH-qN-qCo.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; NLH-qN-qCo.segmentTitles[1] = \"Simplified\"; ObjectID = \"NLH-qN-qCo\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5194,7 +5014,7 @@
     },
     "NLH-qN-qCo.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; NLH-qN-qCo.segmentTitles[2] = \"Detailed\"; ObjectID = \"NLH-qN-qCo\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5248,7 +5068,7 @@
     },
     "oPM-G6-u5O.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Mouse Pointer Velocity\"; ObjectID = \"oPM-G6-u5O\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5278,7 +5098,7 @@
     },
     "OWG-zd-e3I.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; OWG-zd-e3I.segmentTitles[0] = \"Disabled\"; ObjectID = \"OWG-zd-e3I\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5308,7 +5128,7 @@
     },
     "OWG-zd-e3I.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; OWG-zd-e3I.segmentTitles[1] = \"Press-toggle\"; ObjectID = \"OWG-zd-e3I\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5338,7 +5158,7 @@
     },
     "OWG-zd-e3I.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; OWG-zd-e3I.segmentTitles[2] = \"Hold down\"; ObjectID = \"OWG-zd-e3I\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5368,7 +5188,7 @@
     },
     "OXy-y4-yO4.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Swap A/B X/Y Buttons\"; ObjectID = \"OXy-y4-yO4\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5398,7 +5218,7 @@
     },
     "P1g-rW-Mgp.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Controller Navigation\"; ObjectID = \"P1g-rW-Mgp\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5470,7 +5290,7 @@
     },
     "pjK-jB-97s.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Gyro Source\"; ObjectID = \"pjK-jB-97s\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5500,7 +5320,7 @@
     },
     "pMN-6T-aYE.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Gesture Sliding Distance\"; ObjectID = \"pMN-6T-aYE\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5530,7 +5350,7 @@
     },
     "pP6-Pl-0In.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Mic Volume\"; ObjectID = \"pP6-Pl-0In\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5620,7 +5440,7 @@
     },
     "pTO-ff-lbl.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pencil Tip Offset\"; ObjectID = \"pTO-ff-lbl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5662,7 +5482,7 @@
     },
     "pYZ-GR-EwO.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Resolution   \"; ObjectID = \"pYZ-GR-EwO\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5754,7 +5574,7 @@
     },
     "Qat-gL-qiL.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Stroke Type\"; ObjectID = \"Qat-gL-qiL\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5784,7 +5604,7 @@
     },
     "QdG-9a-5AZ.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Soft Keyboard Toolbar\"; ObjectID = \"QdG-9a-5AZ\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5826,7 +5646,7 @@
     },
     "qL1-75-ubM.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Globe Key as Escape\"; ObjectID = \"qL1-75-ubM\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5946,7 +5766,7 @@
     },
     "Qs9-iS-YoW.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Divider Position\"; ObjectID = \"Qs9-iS-YoW\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -5976,7 +5796,7 @@
     },
     "qSU-wh-tqA.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; qSU-wh-tqA.segmentTitles[0] = \"Off\"; ObjectID = \"qSU-wh-tqA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6006,7 +5826,7 @@
     },
     "qSU-wh-tqA.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; qSU-wh-tqA.segmentTitles[1] = \"Custom\"; ObjectID = \"qSU-wh-tqA\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6048,7 +5868,7 @@
     },
     "QYJ-84-bvc.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Lift Stream View for Local Keyboard                                          \"; ObjectID = \"QYJ-84-bvc\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6090,7 +5910,7 @@
     },
     "s2i-ZL-Gz4.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Statistics Overlay\"; ObjectID = \"s2i-ZL-Gz4\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6132,7 +5952,7 @@
     },
     "SAQ-04-n4h.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Multi-Controller Mode\"; ObjectID = \"SAQ-04-n4h\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6246,7 +6066,7 @@
     },
     "shy-hG-9wY.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Remember Menu Fold/Expand\"; ObjectID = \"shy-hG-9wY\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6276,7 +6096,7 @@
     },
     "SuN-S2-8hj.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Single Tap Sensitivity\"; ObjectID = \"SuN-S2-8hj\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6336,7 +6156,7 @@
     },
     "t7a-18-5wz.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Performance Graphs  \"; ObjectID = \"t7a-18-5wz\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6366,7 +6186,7 @@
     },
     "t12-bo-icS.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[0] = \"Hovering Disabled\"; ObjectID = \"t12-bo-icS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6396,7 +6216,7 @@
     },
     "t12-bo-icS.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[1] = \"Stylus\"; ObjectID = \"t12-bo-icS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6426,7 +6246,7 @@
     },
     "t12-bo-icS.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[2] = \"Mouse\"; ObjectID = \"t12-bo-icS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6456,7 +6276,7 @@
     },
     "t12-bo-icS.segmentTitles[3]" : {
       "comment" : "Class = \"UISegmentedControl\"; t12-bo-icS.segmentTitles[3] = \"Touch\"; ObjectID = \"t12-bo-icS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6486,7 +6306,7 @@
     },
     "tAd-bm-2IO.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Local Mouse Cursor\"; ObjectID = \"tAd-bm-2IO\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6540,7 +6360,7 @@
     },
     "u9Q-wm-UBm.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Roll Sensitivity\"; ObjectID = \"u9Q-wm-UBm\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6570,7 +6390,7 @@
     },
     "uFg-dv-6nT.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Blend Physical Stick Input\"; ObjectID = \"uFg-dv-6nT\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6600,7 +6420,7 @@
     },
     "UpM-yi-yc9.text" : {
       "comment" : "Class = \"UILabel\"; text = \"DualSense Haptic Intensity\"; ObjectID = \"UpM-yi-yc9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6654,7 +6474,7 @@
     },
     "v5f-j3-pEc.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Custom Double Tap Keyboard Shortcut\"; ObjectID = \"v5f-j3-pEc\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6684,7 +6504,7 @@
     },
     "v8l-hf-kiR.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Rendering Mode\"; ObjectID = \"v8l-hf-kiR\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6726,7 +6546,7 @@
     },
     "VWB-YB-Ptj.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; VWB-YB-Ptj.segmentTitles[0] = \"Duplicate\"; ObjectID = \"VWB-YB-Ptj\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6756,7 +6576,7 @@
     },
     "VWB-YB-Ptj.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; VWB-YB-Ptj.segmentTitles[1] = \"External Display Only\"; ObjectID = \"VWB-YB-Ptj\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6786,7 +6606,7 @@
     },
     "w3d-5s-dH3.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Disable Slide Gesture for Pencil\"; ObjectID = \"w3d-5s-dH3\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6816,7 +6636,7 @@
     },
     "wi6-L4-KwS.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; wi6-L4-KwS.segmentTitles[0] = \"System\"; ObjectID = \"wi6-L4-KwS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6846,7 +6666,7 @@
     },
     "wi6-L4-KwS.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; wi6-L4-KwS.segmentTitles[1] = \"Light\"; ObjectID = \"wi6-L4-KwS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6876,7 +6696,7 @@
     },
     "wi6-L4-KwS.segmentTitles[2]" : {
       "comment" : "Class = \"UISegmentedControl\"; wi6-L4-KwS.segmentTitles[2] = \"Dark\"; ObjectID = \"wi6-L4-KwS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6960,7 +6780,7 @@
     },
     "WWl-77-twB.text" : {
       "comment" : "Class = \"UILabel\"; text = \"SDR Performance Workaround\"; ObjectID = \"WWl-77-twB\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6990,7 +6810,7 @@
     },
     "X0u-7f-F86.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Async Frame Dequeue\"; ObjectID = \"X0u-7f-F86\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7032,7 +6852,7 @@
     },
     "xE0-v2-n9r.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Tick Interval\"; ObjectID = \"xE0-v2-n9r\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7104,7 +6924,7 @@
     },
     "Xnd-C4-8N9.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Controller Mouse Velocity\"; ObjectID = \"Xnd-C4-8N9\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7134,7 +6954,7 @@
     },
     "XU0-qu-2p4.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Yaw&Pitch → Right Stick\"; ObjectID = \"XU0-qu-2p4\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7176,7 +6996,7 @@
     },
     "YM8-us-6sh.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Haptic Engine\"; ObjectID = \"YM8-us-6sh\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7206,7 +7026,7 @@
     },
     "YPA-7E-Cdl.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Duck Other Apps\"; ObjectID = \"YPA-7E-Cdl\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7236,7 +7056,7 @@
     },
     "yY7-Sf-Zes.segmentTitles[0]" : {
       "comment" : "Class = \"UISegmentedControl\"; yY7-Sf-Zes.segmentTitles[0] = \"Slide From Left Edge\"; ObjectID = \"yY7-Sf-Zes\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7266,7 +7086,7 @@
     },
     "yY7-Sf-Zes.segmentTitles[1]" : {
       "comment" : "Class = \"UISegmentedControl\"; yY7-Sf-Zes.segmentTitles[1] = \"Slide From Right Edge\"; ObjectID = \"yY7-Sf-Zes\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7296,7 +7116,7 @@
     },
     "Zp4-fA-IeL.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Open Toolbox in Streaming\"; ObjectID = \"Zp4-fA-IeL\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7326,7 +7146,7 @@
     },
     "Zsj-Fa-IgS.text" : {
       "comment" : "Class = \"UILabel\"; text = \"Pinch Sensitivity\"; ObjectID = \"Zsj-Fa-IgS\";",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

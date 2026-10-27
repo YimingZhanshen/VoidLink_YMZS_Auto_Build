@@ -15,7 +15,10 @@
 #import "LocalizationHelper.h"
 #import "VoidLink-Swift.h"
 // #import "ThemeManager.h"
-#import "DataManager.h"
+#import "AppDelegate.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
+#import "TemporarySettings.h"
 
 @interface LayoutOnScreenControlsViewController () <WidgetPickerViewControllerDelegate>
 
@@ -73,8 +76,8 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
 @synthesize chevronImageView;
 
 - (UIInterfaceOrientationMask)getCurrentOrientation{
-    CGFloat screenHeightInPoints = CGRectGetHeight([[UIScreen mainScreen] bounds]);
-    CGFloat screenWidthInPoints = CGRectGetWidth([[UIScreen mainScreen] bounds]);
+    CGFloat screenHeightInPoints = CGRectGetHeight([[PublicUtils screenForView:self.viewIfLoaded] bounds]);
+    CGFloat screenWidthInPoints = CGRectGetWidth([[PublicUtils screenForView:self.viewIfLoaded] bounds]);
     //lock the orientation accordingly after streaming is started
     if(screenWidthInPoints > screenHeightInPoints) return UIInterfaceOrientationMaskLandscape;
     else return UIInterfaceOrientationMaskPortrait|UIInterfaceOrientationMaskPortraitUpsideDown;
@@ -1073,7 +1076,7 @@ typedef NS_ENUM(NSUInteger, DecelerationRateSliderMode) {
 /*
 - (CGFloat)denormalizeSizeFactor:(CGFloat)sizeFactor{
     bool isNormalizedSizeFactor = sizeFactor > 6;
-    return isNormalizedSizeFactor ? sizeFactor/10000*[UIScreen mainScreen].bounds.size.width
+    return isNormalizedSizeFactor ? sizeFactor/10000*[PublicUtils screenForView:self.viewIfLoaded].bounds.size.width
 }
  */
 

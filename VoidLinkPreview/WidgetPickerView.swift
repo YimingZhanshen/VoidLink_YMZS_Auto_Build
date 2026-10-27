@@ -25,6 +25,7 @@ private extension View {
 @available(iOS 13.0, *)
 final class WidgetPickerPresentationState: ObservableObject {
     @Published var hasHostAppeared = false
+    @Published var isVerticalBarLeading = false
 }
 
 @available(iOS 13.0, *)
@@ -376,7 +377,7 @@ private struct InteractiveTextField: UIViewRepresentable {
 
 @available(iOS 13.0, *)
 private struct WidgetPickerMetrics {
-    let isPhone: Bool
+    let usePhoneLayout: Bool
     let outerPadding: CGFloat
     let panelSpacing: CGFloat
     let blurPadding: CGFloat
@@ -396,6 +397,7 @@ private struct WidgetPickerMetrics {
     let tabFontSize: CGFloat
     let tabHorizontalPadding: CGFloat
     let tabHeight: CGFloat
+    let closeButtonTrailingInset: CGFloat
     let pickerInsetKeyboard: CGFloat
     let pickerInsetGamepadHorizontal: CGFloat
     let pickerInsetGamepadVertical: CGFloat
@@ -411,42 +413,47 @@ private struct WidgetPickerMetrics {
     let rightPanelMinWidth: CGFloat
     let leftWidthRatio: CGFloat
 
-    static func make(for isPhone: Bool) -> WidgetPickerMetrics {
+    @MainActor
+    static func make(for usePhoneLayout: Bool, isVerticalBarLeading: Bool) -> WidgetPickerMetrics {
         WidgetPickerMetrics(
-            isPhone: isPhone,
-            outerPadding: isPhone ? 4 : 24,
-            panelSpacing: isPhone ? 6 : 22,
-            blurPadding: isPhone ? 4 : 18,
-            blurCornerRadius: isPhone ? 20 : 34,
-            panelPadding: isPhone ? 7 : 22,
-            panelCornerRadius: isPhone ? 18 : 30,
-            panelShadowRadius: isPhone ? 8 : 22,
-            panelShadowYOffset: isPhone ? 4 : 12,
-            sectionSpacing: isPhone ? 2.5 : 18,
-            pickerSectionSpacing: isPhone ? 3 : 13,
-            poolSectionSpacing: isPhone ? 9 : 24,
-            headerSpacing: isPhone ? 0.5 : 6,
-            titleFontSize: isPhone ? 11.5 : 28,
-            poolTitleFontSize: isPhone ? 11 : 20,
-            subtitleFontSize: isPhone ? 7 : 13,
-            tabSpacing: isPhone ? 4 : 10,
-            tabFontSize: isPhone ? 7.2 : 13,
-            tabHorizontalPadding: isPhone ? 5 : 16,
-            tabHeight: isPhone ? 16 : 38,
-            pickerInsetKeyboard: isPhone ? 1 : 16,
-            pickerInsetGamepadHorizontal: isPhone ? 10 : 24,
-            pickerInsetGamepadVertical: isPhone ? 10 : 24,
-            pickerInsetFunctional: isPhone ? 2 : 24,
-            pickerSurfaceCornerRadius: isPhone ? 14 : 28,
-            tipHeight: isPhone ? 36 : 68,
-            tipFontSize: isPhone ? 9.5 : 13,
-            chipHeight: isPhone ? 24 : 46,
-            chipFontSize: isPhone ? 9.5 : 14,
-            chipCornerRadius: isPhone ? 9 : 16,
-            poolGridSpacing: isPhone ? 3 : 10,
-            poolGridInset: isPhone ? 5 : 14,
-            rightPanelMinWidth: isPhone ? 180 : 280,
-            leftWidthRatio: isPhone ? 0.68 : 0.64
+            usePhoneLayout: usePhoneLayout,
+            outerPadding: usePhoneLayout ? 4 : 24,
+            panelSpacing: usePhoneLayout ? 6 : 22,
+            blurPadding: usePhoneLayout ? 4 : 18,
+            blurCornerRadius: usePhoneLayout ? 20 : 34,
+            panelPadding: usePhoneLayout ? 7 : 22,
+            panelCornerRadius: usePhoneLayout ? 18 : 30,
+            panelShadowRadius: usePhoneLayout ? 8 : 22,
+            panelShadowYOffset: usePhoneLayout ? 4 : 12,
+            sectionSpacing: usePhoneLayout ? 2.5 : 18,
+            pickerSectionSpacing: usePhoneLayout ? 3 : 13,
+            poolSectionSpacing: usePhoneLayout ? 9 : 24,
+            headerSpacing: usePhoneLayout ? 0.5 : 6,
+            titleFontSize: usePhoneLayout ? 11.5 : 28,
+            poolTitleFontSize: usePhoneLayout ? 11 : 20,
+            subtitleFontSize: usePhoneLayout ? 7 : 13,
+            tabSpacing: usePhoneLayout ? 4 : 10,
+            tabFontSize: usePhoneLayout ? 7.2 : 13,
+            tabHorizontalPadding: usePhoneLayout ? 5 : 16,
+            tabHeight: usePhoneLayout ? 16 : 38,
+            closeButtonTrailingInset: usePhoneLayout
+                && PublicUtils.isFoldableIPhone
+                && PublicUtils.hingeStatus == .closed
+                && isVerticalBarLeading ? 30 : 0,
+            pickerInsetKeyboard: usePhoneLayout ? 1 : 16,
+            pickerInsetGamepadHorizontal: usePhoneLayout ? 10 : 24,
+            pickerInsetGamepadVertical: usePhoneLayout ? (PublicUtils.isFoldableIPhone ? 52 : 10 ): 24,
+            pickerInsetFunctional: usePhoneLayout ? 2 : 24,
+            pickerSurfaceCornerRadius: usePhoneLayout ? 14 : 28,
+            tipHeight: usePhoneLayout ? 36 : 68,
+            tipFontSize: usePhoneLayout ? 9.5 : 13,
+            chipHeight: usePhoneLayout ? 24 : 46,
+            chipFontSize: usePhoneLayout ? 9.5 : 14,
+            chipCornerRadius: usePhoneLayout ? 9 : 16,
+            poolGridSpacing: usePhoneLayout ? 3 : 10,
+            poolGridInset: usePhoneLayout ? 5 : 14,
+            rightPanelMinWidth: usePhoneLayout ? 180 : 280,
+            leftWidthRatio: usePhoneLayout ? 0.68 : 0.64
         )
     }
 }
@@ -940,9 +947,17 @@ struct WidgetPickerView: View {
             resetTipMessage()
         }
     }
+    
+    static var useTabletLayout: Bool {
+        if !PublicUtils.isIPhone {return true}
+        return PublicUtils.isFoldableIPhone && (PublicUtils.hingeStatus != .closed && PublicUtils.isLandscape())
+    }
 
     private var pickerMetrics: WidgetPickerMetrics {
-        WidgetPickerMetrics.make(for: UIDevice.current.userInterfaceIdiom == .phone)
+        WidgetPickerMetrics.make(
+            for: !WidgetPickerView.useTabletLayout,
+            isVerticalBarLeading: presentationState.isVerticalBarLeading
+        )
     }
 
     var body: some View {
@@ -1020,13 +1035,13 @@ struct WidgetPickerView: View {
 
             GeometryReader { contentProxy in
                 let usesVerticalLayout = contentProxy.size.height > contentProxy.size.width
-                let isPadPortrait = !pickerMetrics.isPhone && usesVerticalLayout
-                let isPhonePortrait = pickerMetrics.isPhone && usesVerticalLayout
+                let isPadPortrait = !pickerMetrics.usePhoneLayout && usesVerticalLayout
+                let isPhonePortrait = pickerMetrics.usePhoneLayout && usesVerticalLayout
                 let verticalOuterPadding = isPhonePortrait ? pickerMetrics.outerPadding * 0.5 : pickerMetrics.outerPadding
                 let reclaimedBottomSafeArea = isPhonePortrait ? contentProxy.safeAreaInsets.bottom : 0
-                let centeredContentTopInset = pickerMetrics.isPhone ? 0 : contentProxy.safeAreaInsets.top
-                let centeredContentBottomInset = pickerMetrics.isPhone ? 0 : contentProxy.safeAreaInsets.bottom
-                let leftWidth = max(pickerMetrics.isPhone ? 0 : 420, contentProxy.size.width * pickerMetrics.leftWidthRatio)
+                let centeredContentTopInset = pickerMetrics.usePhoneLayout ? 0 : contentProxy.safeAreaInsets.top
+                let centeredContentBottomInset = pickerMetrics.usePhoneLayout ? 0 : (PublicUtils.isFoldableIPhone ? 0 : contentProxy.safeAreaInsets.bottom)
+                let leftWidth = max(pickerMetrics.usePhoneLayout ? 0 : 420, contentProxy.size.width * pickerMetrics.leftWidthRatio)
                 let rightWidth = max(
                     pickerMetrics.rightPanelMinWidth,
                     contentProxy.size.width - leftWidth - pickerMetrics.panelSpacing - pickerMetrics.outerPadding * 2
@@ -1040,7 +1055,8 @@ struct WidgetPickerView: View {
                 let sharedVerticalHeight = max(220, sharedVerticalAvailableHeight * 0.5)
                 let verticalPoolHeight = max(220, sharedVerticalHeight + poolVerticalBonusHeight)
                 let verticalPickerHeight = max(220, sharedVerticalAvailableHeight - verticalPoolHeight)
-                let bottomStackPadding = isPhonePortrait ? (verticalOuterPadding - reclaimedBottomSafeArea) : verticalOuterPadding
+                let bottomStackPadding = (isPhonePortrait ? (verticalOuterPadding - reclaimedBottomSafeArea) :
+                                            (PublicUtils.isFoldableIPhone && PublicUtils.hingeStatus != .closed) ? -6 : verticalOuterPadding)
 
                 VStack {
                     Group {
@@ -1231,6 +1247,7 @@ struct WidgetPickerView: View {
                         .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
                 }
                 .buttonStyle(PlainButtonStyle())
+                .padding(.trailing, metrics.closeButtonTrailingInset)
             }
         }
         .padding(pickerPanelPadding)
@@ -1257,7 +1274,7 @@ struct WidgetPickerView: View {
         let tabFontSize = isPadPortrait ? 12.0 : metrics.tabFontSize
         let tabHorizontalPadding = isPadPortrait ? 10.0 : metrics.tabHorizontalPadding
         let tabHeight = isPadPortrait ? 30.0 : metrics.tabHeight
-        let tabMinWidth = isPadPortrait ? 88.0 : (metrics.isPhone ? 43 : 50)
+        let tabMinWidth = isPadPortrait ? 88.0 : (metrics.usePhoneLayout ? 43 : 50)
 
         return HStack(spacing: tabSpacing) {
             ForEach(availableTabs) { tab in
@@ -1305,12 +1322,12 @@ struct WidgetPickerView: View {
     private func widgetPoolPanel(metrics: WidgetPickerMetrics, isPadPortrait: Bool) -> some View {
         let poolTitleFontSize = isPadPortrait ? 20.0 : metrics.poolTitleFontSize
         let poolSubtitleFontSize = isPadPortrait ? 11.0 : metrics.subtitleFontSize
-        let poolHeaderSpacing = metrics.headerSpacing + (metrics.isPhone ? 0 : (isPadPortrait ? 2 : 19))
+        let poolHeaderSpacing = metrics.headerSpacing + (metrics.usePhoneLayout ? 0 : (isPadPortrait ? 2 : 19))
         let poolTipHeight = isPadPortrait ? 54.0 : metrics.tipHeight
         let poolTipFontSize = isPadPortrait ? 11.0 : metrics.tipFontSize
         let poolChipHeight = isPadPortrait ? 36.0 : metrics.chipHeight
         let poolChipFontSize = isPadPortrait ? 12.0 : metrics.chipFontSize
-        let poolGridWidth: CGFloat? = isPadPortrait ? min(240, UIScreen.main.bounds.width * 0.34) : nil
+        let poolGridWidth: CGFloat? = isPadPortrait ? min(240, PublicUtils.currentScreen.bounds.width * 0.34) : nil
 
         return VStack(alignment: .leading, spacing: metrics.poolSectionSpacing) {
             VStack(alignment: .leading, spacing: poolHeaderSpacing) {
@@ -1324,7 +1341,7 @@ struct WidgetPickerView: View {
                 Text(LocalizationHelper.localizedString(forKey: "Selected widgets are queued here in tap order."))
                     .font(.system(size: poolSubtitleFontSize, weight: .medium, design: .rounded))
                     .foregroundColor(Color.black.opacity(0.48))
-                    .lineLimit(metrics.isPhone ? 1 : 2)
+                    .lineLimit(metrics.usePhoneLayout ? 1 : 2)
                     .minimumScaleFactor(0.85)
             }
 
@@ -1344,7 +1361,7 @@ struct WidgetPickerView: View {
                 .frame(maxWidth: .infinity, alignment: .center)
 
             if keyboardPickerMode != .shortcutPicker {
-                HStack(spacing: metrics.isPhone ? 8 : 12) {
+                HStack(spacing: metrics.usePhoneLayout ? 8 : 12) {
                     PoolActionChip(
                         title: LocalizationHelper.localizedString(forKey: "Gyro button"),
                         isPrimary: false,
@@ -1389,7 +1406,7 @@ struct WidgetPickerView: View {
                 }
             }
 
-            HStack(spacing: metrics.isPhone ? 8 : 12) {
+            HStack(spacing: metrics.usePhoneLayout ? 8 : 12) {
                 PoolActionChip(
                     title: isShortcutPickerMode
                         ? LocalizationHelper.localizedString(forKey: "Create shortcut")
@@ -1458,7 +1475,7 @@ struct WidgetPickerView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                 }
-                .padding(.horizontal, metrics.isPhone ? 10 : 14)
+                .padding(.horizontal, metrics.usePhoneLayout ? 10 : 14)
             )
     }
 
@@ -2395,18 +2412,18 @@ struct WidgetPickerView: View {
     }
 
     private var createWidgetSheet: some View {
-        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
-        let contentSpacing: CGFloat = isPhone ? 10 : 16
-        let sectionSpacing: CGFloat = isPhone ? 7 : 10
-        let fieldHeight: CGFloat = isPhone ? 30 : 38
-        let segmentedControlHeight: CGFloat = isPhone ? 36 : 38
-        let actionSpacing: CGFloat = isPhone ? 8 : 12
-        let actionHeight: CGFloat = isPhone ? 34 : 44
-        let actionFontSize: CGFloat = isPhone ? 13 : 15
-        let cardPadding: CGFloat = isPhone ? 12 : 18
-        let cardMaxWidth: CGFloat = isPhone ? 320 : 420
-        let cardCornerRadius: CGFloat = isPhone ? 22 : 28
-        let horizontalInset: CGFloat = isPhone ? 14 : 24
+        let usePhoneLayout = pickerMetrics.usePhoneLayout
+        let contentSpacing: CGFloat = usePhoneLayout ? 10 : 16
+        let sectionSpacing: CGFloat = usePhoneLayout ? 7 : 10
+        let fieldHeight: CGFloat = usePhoneLayout ? 30 : 38
+        let segmentedControlHeight: CGFloat = usePhoneLayout ? 36 : 38
+        let actionSpacing: CGFloat = usePhoneLayout ? 8 : 12
+        let actionHeight: CGFloat = usePhoneLayout ? 34 : 44
+        let actionFontSize: CGFloat = usePhoneLayout ? 13 : 15
+        let cardPadding: CGFloat = usePhoneLayout ? 12 : 18
+        let cardMaxWidth: CGFloat = usePhoneLayout ? 320 : 420
+        let cardCornerRadius: CGFloat = usePhoneLayout ? 22 : 28
+        let horizontalInset: CGFloat = usePhoneLayout ? 14 : 24
         return ZStack {
             Color.black.opacity(0.28)
                 .edgesIgnoringSafeArea(.all)
@@ -2512,7 +2529,7 @@ struct WidgetPickerView: View {
                         submitWidgetPayload()
                     }
                 }
-                .padding(.top, isPhone ? 2 : 0)
+                .padding(.top, usePhoneLayout ? 2 : 0)
                 .zIndex(0)
             }
             .padding(cardPadding)
@@ -2532,18 +2549,18 @@ struct WidgetPickerView: View {
     }
 
     private var buttonMacroSheet: some View {
-        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
-        let contentSpacing: CGFloat = isPhone ? 10 : 16
-        let sectionSpacing: CGFloat = isPhone ? 7 : 10
-        let fieldHeight: CGFloat = isPhone ? 30 : 38
-        let segmentedControlHeight: CGFloat = isPhone ? 36 : 38
-        let actionSpacing: CGFloat = isPhone ? 8 : 12
-        let actionHeight: CGFloat = isPhone ? 34 : 44
-        let actionFontSize: CGFloat = isPhone ? 13 : 15
-        let cardPadding: CGFloat = isPhone ? 12 : 18
-        let cardMaxWidth: CGFloat = isPhone ? 320 : 420
-        let cardCornerRadius: CGFloat = isPhone ? 22 : 28
-        let horizontalInset: CGFloat = isPhone ? 14 : 24
+        let usePhoneLayout = !WidgetPickerView.useTabletLayout
+        let contentSpacing: CGFloat = usePhoneLayout ? 10 : 16
+        let sectionSpacing: CGFloat = usePhoneLayout ? 7 : 10
+        let fieldHeight: CGFloat = usePhoneLayout ? 30 : 38
+        let segmentedControlHeight: CGFloat = usePhoneLayout ? 36 : 38
+        let actionSpacing: CGFloat = usePhoneLayout ? 8 : 12
+        let actionHeight: CGFloat = usePhoneLayout ? 34 : 44
+        let actionFontSize: CGFloat = usePhoneLayout ? 13 : 15
+        let cardPadding: CGFloat = usePhoneLayout ? 12 : 18
+        let cardMaxWidth: CGFloat = usePhoneLayout ? 320 : 420
+        let cardCornerRadius: CGFloat = usePhoneLayout ? 22 : 28
+        let horizontalInset: CGFloat = usePhoneLayout ? 14 : 24
         return ZStack {
             Color.black.opacity(0.28)
                 .edgesIgnoringSafeArea(.all)
@@ -2628,7 +2645,7 @@ struct WidgetPickerView: View {
                         applyButtonMacroChanges()
                     }
                 }
-                .padding(.top, isPhone ? 2 : 0)
+                .padding(.top, usePhoneLayout ? 2 : 0)
                 .zIndex(0)
             }
             .padding(cardPadding)
@@ -2648,18 +2665,18 @@ struct WidgetPickerView: View {
     }
     
     private var triggerIntervalSheet: some View {
-        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
-        let contentSpacing: CGFloat = isPhone ? 10 : 16
-        let sectionSpacing: CGFloat = isPhone ? 7 : 10
-        let fieldHeight: CGFloat = isPhone ? 30 : 38
-        let segmentedControlHeight: CGFloat = isPhone ? 36 : 38
-        let actionSpacing: CGFloat = isPhone ? 8 : 12
-        let actionHeight: CGFloat = isPhone ? 34 : 44
-        let actionFontSize: CGFloat = isPhone ? 13 : 15
-        let cardPadding: CGFloat = isPhone ? 12 : 18
-        let cardMaxWidth: CGFloat = isPhone ? 320 : 420
-        let cardCornerRadius: CGFloat = isPhone ? 22 : 28
-        let horizontalInset: CGFloat = isPhone ? 14 : 24
+        let usePhoneLayout = pickerMetrics.usePhoneLayout
+        let contentSpacing: CGFloat = usePhoneLayout ? 10 : 16
+        let sectionSpacing: CGFloat = usePhoneLayout ? 7 : 10
+        let fieldHeight: CGFloat = usePhoneLayout ? 30 : 38
+        let segmentedControlHeight: CGFloat = usePhoneLayout ? 36 : 38
+        let actionSpacing: CGFloat = usePhoneLayout ? 8 : 12
+        let actionHeight: CGFloat = usePhoneLayout ? 34 : 44
+        let actionFontSize: CGFloat = usePhoneLayout ? 13 : 15
+        let cardPadding: CGFloat = usePhoneLayout ? 12 : 18
+        let cardMaxWidth: CGFloat = usePhoneLayout ? 320 : 420
+        let cardCornerRadius: CGFloat = usePhoneLayout ? 22 : 28
+        let horizontalInset: CGFloat = usePhoneLayout ? 14 : 24
 
         return ZStack {
             Color.black.opacity(0.28)
@@ -2727,7 +2744,7 @@ struct WidgetPickerView: View {
                         applyTriggerIntervalChanges()
                     }
                 }
-                .padding(.top, isPhone ? 2 : 0)
+                .padding(.top, usePhoneLayout ? 2 : 0)
                 .zIndex(0)
             }
             .padding(cardPadding)
@@ -2879,12 +2896,12 @@ struct WidgetPickerView: View {
         clipsContentToBounds: Bool = false,
         @ViewBuilder content: () -> Content
     ) -> some View {
-        let isPhone = UIDevice.current.userInterfaceIdiom == .phone
-        let titleFontSize: CGFloat = isPhone ? 11.5 : 13
-        let sectionSpacing: CGFloat = isPhone ? 5 : 7
-        let sectionHorizontalPadding: CGFloat = isPhone ? 9 : 12
-        let sectionVerticalPadding: CGFloat = isPhone ? 6 : 10
-        let sectionCornerRadius: CGFloat = isPhone ? 12 : 14
+        let usePhoneLayout = pickerMetrics.usePhoneLayout
+        let titleFontSize: CGFloat = usePhoneLayout ? 11.5 : 13
+        let sectionSpacing: CGFloat = usePhoneLayout ? 5 : 7
+        let sectionHorizontalPadding: CGFloat = usePhoneLayout ? 9 : 12
+        let sectionVerticalPadding: CGFloat = usePhoneLayout ? 6 : 10
+        let sectionCornerRadius: CGFloat = usePhoneLayout ? 12 : 14
 
         return VStack(alignment: .leading, spacing: sectionSpacing) {
             Text(title)
@@ -3766,7 +3783,7 @@ struct FunctionalCollectionButton: View {
     let action: () -> Void
 
     private var labelFontSize: CGFloat {
-        UIDevice.current.userInterfaceIdiom == .phone ? 8 : 12
+        !WidgetPickerView.useTabletLayout ? 8 : 12
     }
 
     private let cornerRadius: CGFloat = PublicUtils.isIPhone ? 16 : 24

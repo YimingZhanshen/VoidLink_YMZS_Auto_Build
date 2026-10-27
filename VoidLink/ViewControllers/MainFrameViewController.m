@@ -17,14 +17,15 @@
 #import "Connection.h"
 #import "StreamManager.h"
 #import "Utils.h"
-#import "DataManager.h"
+#import "AppDelegate.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
 #import "TemporarySettings.h"
 #import "WakeOnLanManager.h"
 #import "AppListResponse.h"
 #import "ServerInfoResponse.h"
 #import "StreamFrameViewController.h"
 #import "LoadingFrameViewController.h"
-#import "TemporaryApp.h"
 #import "IdManager.h"
 #import "ConnectionHelper.h"
 #import "LocalizationHelper.h"
@@ -32,12 +33,9 @@
 #if !TARGET_OS_TV
 #import "CustomEdgeSlideGestureRecognizer.h"
 #endif
-#import "DataManager.h"
 #import "VoidLink-Swift.h"
 
-#if !TARGET_OS_TV
-#import "SettingsViewController.h"
-#else
+#if TARGET_OS_TV
 #import <sys/utsname.h>
 #endif
 
@@ -74,6 +72,13 @@ static NSArray<UIBarButtonItem *> *VLBarButtonItems(UIBarButtonItem *first, UIBa
     UIBarButtonItem* _addHostButton;
     UIBarButtonItem* _helpButton;
     UIBarButtonItem* _upButton;
+    NSArray<NSLayoutConstraint *> *_appCollectionSafeAreaConstraints;
+    UIViewAutoresizing _appCollectionOriginalAutoresizingMask;
+    BOOL _appCollectionOriginalTranslatesAutoresizingMask;
+#if DEBUG
+    NSMutableDictionary<NSString *, NSString *> *_appCollectionLayoutDiagnosticStates;
+#endif
+    BOOL _profilesButtonUsesCompactSymbol;
 
     UILabel* hostViewTitleLabel;
     //CGFloat recordedScreenWidth;
@@ -434,10 +439,10 @@ static NSMutableSet* hostList;
     // [self disableNavigation];
     [self updateTitle];
     [self alreadyPaired];
+    [self refreshAppCollectionLayout];
     // self.navigationController.navigationBar.backgroundColor = [ThemeManager appBackgroundColor];
     // self.navigationController.navigationBar.translucent = NO;
     //[self applyNavBarAppearance:navBarAppearance];
-    
     
     dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
     dispatch_after(delayTime, dispatch_get_main_queue(), ^{
@@ -561,6 +566,7 @@ static NSMutableSet* hostList;
     [self.collectionView setCollectionViewLayout:self.collectionViewLayout];
     [self.collectionView reloadData]; //for new scroll host view reloading mechanism
     [self.view addSubview:self.collectionView]; //for new scroll host view reloading mechanism
+    [self constrainIPhoneAppViewToSafeArea];
     
     // 若未在线或未配对, 有以下:
     
@@ -1413,79 +1419,6 @@ static NSMutableSet* hostList;
             return;
         }
     }
-#if !TARGET_OS_TV
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.resolutionStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.fpsStack];
-    // [self.settingsViewController widget:self.settingsViewController.bitrateSlider setEnabled:!self.settingsExpandedInStreamView];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.optimizeGamesStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.audioOnPcStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.sdrPerformanceWorkaroundStack];
-    // [self.settingsViewController.touchModeSelector1 setEnabled:!_settingsExpandedInStreamView || !(self.settingsViewController.touchModeSelector1.selectedSegmentIndex == AbsoluteTouch && !self.settingsViewController.passthroughGesturesSwitch.isOn)];
-    // [self.settingsViewController.touchModeSelector2 setEnabled:self.settingsViewController.touchModeSelector1.enabled];
-    
-    [self.settingsViewController.codecSelector setEnabled:!_settingsExpandedInStreamView];
-    if(_settingsExpandedInStreamView){
-        [self.settingsViewController.yuv444Switch setEnabled:NO];
-        [self.settingsViewController.fullColorRangeSwitch setEnabled:NO];
-        [self.settingsViewController.hdrSwitch setEnabled:NO];
-    }
-    else [self.settingsViewController updateCodecDependentSwitches];
-    
-    [self.settingsViewController.gyroModeSelector setEnabled:!_settingsExpandedInStreamView || ![streamFrameViewController shallDisableGyroHotSwitch]];
-    [self.settingsViewController.emulatedControllerTypeSelector setEnabled:!_settingsExpandedInStreamView];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.citrixX1MouseStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.externalDisplayModeStack];
-    
-    if(self.settingsViewController.audioConfigSelector.numberOfSegments>2){
-        if(_settingsExpandedInStreamView){
-            if(self.settingsViewController.audioConfigSelector.selectedSegmentIndex>=2){
-                [self.settingsViewController.audioConfigSelector setEnabled:false];
-            }
-            else {
-                [self.settingsViewController.audioConfigSelector setEnabled:false forSegmentAtIndex:2];
-                [self.settingsViewController.audioConfigSelector setEnabled:false forSegmentAtIndex:3];
-            }
-        }
-        else{
-            [self.settingsViewController.audioConfigSelector setEnabled:true];
-            [self.settingsViewController.audioConfigSelector setEnabled:true forSegmentAtIndex:2];
-            [self.settingsViewController.audioConfigSelector setEnabled:true forSegmentAtIndex:3];
-        }
-    }
-    
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.duckOtherAppStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.pipStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView forStack:self.settingsViewController.appThemeStack];
-    [self.settingsViewController.renderingBackendSelector setEnabled:!_settingsExpandedInStreamView];
-    // Enable frame pacing mode selector only if not in stream view AND not in performance mode
-    BOOL shouldEnableFrameQueueSettings = !_settingsExpandedInStreamView && (self.settingsViewController.renderingBackendSelector.selectedSegmentIndex != RENDER_METAL);
-    // [self.settingsViewController.framePacingModeSelector setEnabled:shouldEnableFrameQueueSettings];
-    
-    if(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex != FramePacingModeOff
-       && self.settingsViewController.framePacingModeSelector.selectedSegmentIndex != FramePacingModeLegacy) {
-        [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeOff];
-        [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView forSegmentAtIndex:FramePacingModeLegacy];
-    }
-    else [self.settingsViewController.framePacingModeSelector setEnabled:!_settingsExpandedInStreamView];
-    
-    if(FrameInterpolator.deviceSupportsInterpolation){
-        [self.settingsViewController.framePacingModeSelector setEnabled:_settingsViewController.framerateSelector.selectedSegmentIndex != _settingsViewController.framerateSelector.numberOfSegments-1
-         || !self.isStreaming forSegmentAtIndex:FramePacingModeInterpolation];
-    }
-
-    // [self.settingsViewController.frameTimebaseSwitch setEnabled:shouldEnableFramePacing];
-    [self.settingsViewController.asyncFrameDequeueSwitch setEnabled:shouldEnableFrameQueueSettings];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView || !(shouldEnableFrameQueueSettings && self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeQueue) forStack:self.settingsViewController.frameQueueSizeStack];
-    [self.settingsViewController setHidden:!(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) forStack:self.settingsViewController.interpolationLevelStack];
-    [self.settingsViewController setHidden:_settingsExpandedInStreamView || !(self.settingsViewController.framePacingModeSelector.selectedSegmentIndex == FramePacingModeInterpolation) forStack:self.settingsViewController.streamDimensionScaleStack];
-
-    // Disable mic switch if sunshine does not support mic redirection
-    [self.settingsViewController.redirectMicSwitch setEnabled:!_settingsExpandedInStreamView||streamFrameViewController.micStreamInitialized];
-    if(_settingsExpandedInStreamView && !streamFrameViewController.micStreamInitialized) [self.settingsViewController.redirectMicSwitch setOn:false];
-    [self.settingsViewController setHidden:!self.settingsViewController.redirectMicSwitch.isOn forStack:self.settingsViewController.useBuiltinMicStack];
-    [self.settingsViewController.useBuiltinMicSwitch setEnabled:!_settingsExpandedInStreamView];
-    // [self.settingsViewController.passthroughGesturesSwitch setEnabled:!_settingsExpandedInStreamView];
-#endif
 }
 
 - (void)revealController:(SWRevealViewController *)revealController didMoveToPosition:(FrontViewPosition)position {
@@ -1534,10 +1467,160 @@ static NSMutableSet* hostList;
 
 - (void)adjustScrollViewForSafeArea:(UIScrollView*)view {
     if (@available(iOS 11.0, *)) {
-        if (self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20) {
-            view.contentInset = UIEdgeInsetsMake(0, 20, 0, 20);
+        BOOL needsHorizontalInset = self.view.safeAreaInsets.left >= 20 || self.view.safeAreaInsets.right >= 20;
+#if !TARGET_OS_TV
+        if ((PublicUtils.isIPhone && !PublicUtils.isFoldableIPhone) ||
+            UIInterfaceOrientationIsPortrait([self appViewInterfaceOrientation])) {
+            // Make the compact portrait layout explicit, including on first entry.
+            needsHorizontalInset = YES;
+        }
+#endif
+        UIEdgeInsets insets = view.contentInset;
+        insets.left = insets.right = needsHorizontalInset ? 20 : 0;
+        if (!UIEdgeInsetsEqualToEdgeInsets(view.contentInset, insets)) {
+            view.contentInset = insets;
         }
     }
+}
+
+#if !TARGET_OS_TV
+- (UIInterfaceOrientation)appViewInterfaceOrientation {
+    if (@available(iOS 26.0, *)) {
+        return self.view.window.windowScene.effectiveGeometry.interfaceOrientation;
+    } else if (@available(iOS 13.0, *)) {
+        return self.view.window.windowScene.interfaceOrientation;
+    } else {
+        return UIApplication.sharedApplication.statusBarOrientation;
+    }
+}
+#endif
+
+- (void)constrainIPhoneAppViewToSafeArea {
+    /*
+    if(!PublicUtils.isIPhone) {
+        [self logAppCollectionLayout:@"skip-not-iphone"];
+        return;
+    }
+    if (self.collectionView == self.view || self.collectionView.superview != self.view) {
+        [self logAppCollectionLayout:@"skip-hierarchy"];
+        return;
+    } */
+    CGFloat horizontalInset = 0;
+    if (!PublicUtils.isFoldableIPhone) {
+#if !TARGET_OS_TV
+        UIInterfaceOrientation orientation = [self appViewInterfaceOrientation];
+        if (PublicUtils.isIPhone && UIInterfaceOrientationIsPortrait(orientation)) {
+            horizontalInset = [self appCollectionCellSize].width / 4.6;
+        } else
+#endif
+        {
+            // Ordinary iPhones return to their original full-width layout in landscape.
+            if (_appCollectionSafeAreaConstraints.count > 0) {
+                [NSLayoutConstraint deactivateConstraints:_appCollectionSafeAreaConstraints];
+                _appCollectionSafeAreaConstraints = nil;
+                self.collectionView.translatesAutoresizingMaskIntoConstraints = _appCollectionOriginalTranslatesAutoresizingMask;
+                self.collectionView.autoresizingMask = _appCollectionOriginalAutoresizingMask;
+                self.collectionView.frame = self.view.bounds;
+            }
+            // [self logAppCollectionLayout:@"skip-nonportrait"];
+            return;
+        }
+    }
+    // Removing the collection view on re-entry also removes its parent constraints.
+    // Reuse them while attached, and recreate them after the next mounting.
+    if (_appCollectionSafeAreaConstraints.count > 0 && _appCollectionSafeAreaConstraints.firstObject.active) {
+        if (_appCollectionSafeAreaConstraints[0].constant != horizontalInset) {
+            _appCollectionSafeAreaConstraints[0].constant = horizontalInset;
+        }
+        if (_appCollectionSafeAreaConstraints[1].constant != -horizontalInset) {
+            _appCollectionSafeAreaConstraints[1].constant = -horizontalInset;
+        }
+        // [self logAppCollectionLayout:@"constraints-updated"];
+        return;
+    }
+    if (_appCollectionSafeAreaConstraints.count == 0) {
+        _appCollectionOriginalAutoresizingMask = self.collectionView.autoresizingMask;
+        _appCollectionOriginalTranslatesAutoresizingMask = self.collectionView.translatesAutoresizingMaskIntoConstraints;
+    }
+    [NSLayoutConstraint deactivateConstraints:_appCollectionSafeAreaConstraints ?: @[]];
+    self.collectionView.translatesAutoresizingMaskIntoConstraints = NO;
+    _appCollectionSafeAreaConstraints = @[
+        [self.collectionView.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:horizontalInset],
+        [self.collectionView.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:-horizontalInset],
+        [self.collectionView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+        [self.collectionView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+    ];
+    [NSLayoutConstraint activateConstraints:_appCollectionSafeAreaConstraints];
+    // [self logAppCollectionLayout:@"constraints-created"];
+}
+
+/*
+- (void)logAppCollectionLayout:(NSString *)phase {
+#if DEBUG && !TARGET_OS_TV
+    // On by default for this investigation. Disable with launch arguments:
+    // -VLAppCollectionLayoutDiagnostics NO
+    NSNumber *enabled = [NSUserDefaults.standardUserDefaults objectForKey:@"VLAppCollectionLayoutDiagnostics"];
+    if (enabled != nil && !enabled.boolValue) { return; }
+    UIWindow *window = self.viewIfLoaded.window;
+    UIInterfaceOrientation orientation = UIInterfaceOrientationUnknown;
+    UIInterfaceOrientation legacyOrientation = UIInterfaceOrientationUnknown;
+    if (@available(iOS 13.0, *)) {
+        legacyOrientation = window.windowScene.interfaceOrientation;
+        orientation = legacyOrientation;
+    }
+    if (@available(iOS 26.0, *)) {
+        orientation = window.windowScene.effectiveGeometry.interfaceOrientation;
+    }
+    NSUInteger activeConstraints = 0;
+    for (NSLayoutConstraint *constraint in _appCollectionSafeAreaConstraints) {
+        if (constraint.active) { activeConstraints++; }
+    }
+    UICollectionViewCell *visibleCell = self.collectionView.visibleCells.firstObject;
+    NSString *state = [NSString stringWithFormat:
+        @"iOS=%@ main=%d phone=%d fold=%d entered=%d hidden=%d orientation=%ld legacy=%ld "
+         "view=%@ parent=%@ sameView=%d window=%@ viewBounds=%@ safe=%@ "
+         "collectionFrame=%@ collectionBounds=%@ insets=%@ adjustedInsets=%@ "
+         "constraints=%lu/%lu left=%.3f right=%.3f translates=%d ambiguous=%d "
+         "apps=%lu expectedCardWidth=%.3f visibleCellFrame=%@",
+        UIDevice.currentDevice.systemVersion, NSThread.isMainThread, PublicUtils.isIPhone,
+        PublicUtils.isFoldableIPhone, _enteredAppView, self.collectionView.hidden,
+        (long)orientation, (long)legacyOrientation,
+        NSStringFromClass(self.view.class), NSStringFromClass(self.collectionView.superview.class),
+        self.collectionView == self.view, NSStringFromCGRect(window.bounds),
+        NSStringFromCGRect(self.view.bounds), NSStringFromCGRect(self.view.safeAreaLayoutGuide.layoutFrame),
+        NSStringFromCGRect(self.collectionView.frame), NSStringFromCGRect(self.collectionView.bounds),
+        NSStringFromUIEdgeInsets(self.collectionView.contentInset),
+        NSStringFromUIEdgeInsets(self.collectionView.adjustedContentInset),
+        (unsigned long)activeConstraints, (unsigned long)_appCollectionSafeAreaConstraints.count,
+        _appCollectionSafeAreaConstraints.firstObject.constant,
+        _appCollectionSafeAreaConstraints.count > 1 ? _appCollectionSafeAreaConstraints[1].constant : 0,
+        self.collectionView.translatesAutoresizingMaskIntoConstraints, self.collectionView.hasAmbiguousLayout,
+        (unsigned long)self.sortedAppList.count, [self appCollectionCellSize].width,
+        NSStringFromCGRect(visibleCell.frame)];
+    if ([_appCollectionLayoutDiagnosticStates[phase] isEqualToString:state]) { return; }
+    if (_appCollectionLayoutDiagnosticStates == nil) {
+        _appCollectionLayoutDiagnosticStates = [NSMutableDictionary dictionary];
+    }
+    _appCollectionLayoutDiagnosticStates[phase] = state;
+    NSLog(@"[AppCollectionLayout] %@ %@", phase, state);
+#endif
+}
+ */
+
+- (void)refreshAppCollectionLayout {
+    /*
+    if (!PublicUtils.isIPhone || self.collectionView.superview != self.view) {
+        [self logAppCollectionLayout:@"refresh-skipped"];
+        return;
+    } */
+    [self constrainIPhoneAppViewToSafeArea];
+    [self adjustScrollViewForSafeArea:self.collectionView];
+    // Resolve the collection's new bounds before preparing its cell positions.
+    [self.view setNeedsLayout];
+    [self.view layoutIfNeeded];
+    [self.collectionView.collectionViewLayout invalidateLayout];
+    [self.collectionView layoutIfNeeded];
+    // [self logAppCollectionLayout:@"refresh-completed"];
 }
 
 // Adjust the subviews for the safe area on the iPhone X.
@@ -1616,8 +1699,8 @@ static NSMutableSet* hostList;
 
 - (bool)isIPhonePortrait{
     bool isIPhone = ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone);
-    CGFloat screenHeightInPoints = CGRectGetHeight([[UIScreen mainScreen] bounds]);
-    CGFloat screenWidthInPoints = CGRectGetWidth([[UIScreen mainScreen] bounds]);
+    CGFloat screenHeightInPoints = CGRectGetHeight([[PublicUtils screenForView:self.viewIfLoaded] bounds]);
+    CGFloat screenWidthInPoints = CGRectGetWidth([[PublicUtils screenForView:self.viewIfLoaded] bounds]);
     bool isPortrait = screenHeightInPoints > screenWidthInPoints;
     return isIPhone && isPortrait;
    // return isPortrait;
@@ -1910,6 +1993,8 @@ static NSMutableSet* hostList;
             [_profilesButton setImage:image];
             _profilesButton.imageInsets = UIEdgeInsetsMake(-1.5, 0, -1.5, 0);
             _profilesButton.tintColor = ThemeManager.appPrimaryColor;
+            _profilesButtonUsesCompactSymbol = NO;
+            [self updateLegacyCompactProfilesNavigationIcon];
         }
         
     } else {
@@ -1998,6 +2083,25 @@ static NSMutableSet* hostList;
     }
 }
 
+- (void)updateLegacyCompactProfilesNavigationIcon {
+    if (PublicUtils.iOS18Available || !_profilesButton) return;
+    BOOL compact = [PublicUtils isCompactNavigationBar:self.navigationController.navigationBar];
+    if (_profilesButtonUsesCompactSymbol == compact) return;
+    _profilesButtonUsesCompactSymbol = compact;
+
+    UIImage *image;
+    if (compact) {
+        UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration
+            configurationWithPointSize:18 weight:UIImageSymbolWeightRegular];
+        image = [UIImage systemImageNamed:@"gamecontroller.fill" withConfiguration:config];
+        _profilesButton.imageInsets = UIEdgeInsetsZero;
+    } else {
+        image = [UIImage imageNamed:@"gamecontroller.circle.regular"];
+        _profilesButton.imageInsets = UIEdgeInsetsMake(-1.5, 0, -1.5, 0);
+    }
+    _profilesButton.image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+}
+
 // Called when the system's theme (light/dark mode) changes
 // will not be active if the app is streaming
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
@@ -2030,15 +2134,15 @@ static NSMutableSet* hostList;
         default:
             settings.sdrPerformanceWorkaround = true;
             settings.framePacingMode = @(FramePacingModeQueue);
-            if([UIScreen mainScreen].maximumFramesPerSecond > 110) settings.asyncFrameDequeue = false;
-            if([UIScreen mainScreen].maximumFramesPerSecond < 65) settings.asyncFrameDequeue = false;
+            if([PublicUtils screenForView:self.viewIfLoaded].maximumFramesPerSecond > 110) settings.asyncFrameDequeue = false;
+            if([PublicUtils screenForView:self.viewIfLoaded].maximumFramesPerSecond < 65) settings.asyncFrameDequeue = false;
             break;
     }
     
-    if([UIScreen mainScreen].maximumFramesPerSecond > 110) settings.framerate = @(120);
-    if([UIScreen mainScreen].maximumFramesPerSecond < 65) settings.framerate = @(60);
+    if([PublicUtils screenForView:self.viewIfLoaded].maximumFramesPerSecond > 110) settings.framerate = @(120);
+    if([PublicUtils screenForView:self.viewIfLoaded].maximumFramesPerSecond < 65) settings.framerate = @(60);
 
-    // if([UIScreen mainScreen].maximumFramesPerSecond < 65) settings.touchMoveEventInterval = @(60);
+    // if([PublicUtils screenForView:self.viewIfLoaded].maximumFramesPerSecond < 65) settings.touchMoveEventInterval = @(60);
     settings.onscreenControls = @(OnScreenControlsLevelCustom);
     settings.pencilTickIntervalUs = @(1750);
     settings.pencilTipOffsetX = @(0);
@@ -2225,22 +2329,22 @@ static NSMutableSet* hostList;
 
 -(void)viewDidLayoutSubviews{
     [super viewDidLayoutSubviews];
+    [self constrainIPhoneAppViewToSafeArea];
+    // [self logAppCollectionLayout:@"parent-layout-completed"];
+    [self updateLegacyCompactProfilesNavigationIcon];
     [self updateHosts];
     // if (@available(iOS 13.0, *)) [GamepadNavigationIllustrationHud showInKeyWindow];
 }
 
-// this will also be called back when device orientation changes
-//- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-//    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-//    
-//    double delayInSeconds = 0.7;
-//    // Convert the delay into a dispatch_time_t value
-//    dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-//    // Perform some task after the delay
-//    dispatch_after(delayTime, dispatch_get_main_queue(), ^{// Code to execute after the delay
-//        [self updateResolutionAccordingly];
-//    });
-//}
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    if (!PublicUtils.isIPhone || PublicUtils.isFoldableIPhone) { return; }
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self refreshAppCollectionLayout];
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self refreshAppCollectionLayout];
+    }];
+}
 
 -(void) fillResolutionTable:(CMVideoDimensions *)resolutionTable externalDisplayMode:(NSInteger)externalDisplayMode{
     UIWindow *window = self.view.window;
@@ -2405,6 +2509,7 @@ static NSMutableSet* hostList;
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:NO];
+    [self refreshAppCollectionLayout];
 
     _viewJustAppeared = true;
 
@@ -2420,7 +2525,7 @@ static NSMutableSet* hostList;
     [[self revealViewController] setPrimaryViewController:self];
     self.revealViewController.isStreaming = false; // tell the revealViewController streaming is finished
     //[self.settingsButton setEnabled:![self isIPhonePortrait]]; //make sure settings button is disabled in iphone portrait mode.
-    //recordedScreenWidth = CGRectGetWidth([[UIScreen mainScreen] bounds]); // Get the screen's bounds (in points), update recorded screen width
+    //recordedScreenWidth = CGRectGetWidth([[PublicUtils screenForView:self.viewIfLoaded] bounds]); // Get the screen's bounds (in points), update recorded screen width
 // #endif
     
     [self.navigationController setNavigationBarHidden:NO animated:NO];
@@ -2490,11 +2595,9 @@ static NSMutableSet* hostList;
 {
     [super viewWillAppear:NO];
 
-#if TARGET_OS_TV
     // StreamFrameViewController hides the navigation bar. Restore it before
     // rebuilding the collection views so their first layout uses final safe-area geometry.
     [self.navigationController setNavigationBarHidden:NO animated:NO];
-#endif
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateTheme)
@@ -2522,6 +2625,7 @@ static NSMutableSet* hostList;
     // for that which would normally fire beginForegroundRefresh.
     
     [self.view addSubview:self.collectionView];
+    [self constrainIPhoneAppViewToSafeArea];
     [self initHostCollection];
     if(!_enteredAppView) [self switchToHostView];
     else if (@available(iOS 13.0, *)) [ControllerNavigator setUINavigationDelegate:self];
@@ -2705,6 +2809,7 @@ static NSMutableSet* hostList;
     }
 
     [self.collectionView reloadData];
+    [self refreshAppCollectionLayout];
 }
 
 - (bool)isInAppView{
@@ -2748,21 +2853,21 @@ static NSMutableSet* hostList;
     return cell;
 }
 
+- (CGSize)appCollectionCellSize {
+    CGSize cellSize;
+    UIScreen* referenceScreen = PublicUtils.isFoldableRAMCached ? UIScreen.screens.firstObject : [PublicUtils screenForView:self.viewIfLoaded];
+    CGRect referenceBounds = [referenceScreen bounds];
+    if(PublicUtils.isFoldableRAMCached || PublicUtils.isIPhone) cellSize.height = 0.365*MIN(referenceBounds.size.height,referenceBounds.size.width);
+    else cellSize.height = 0.272*MIN(referenceBounds.size.height,referenceBounds.size.width);
+    CGSize defaultSize = UIAppView.defaultSize;
+    cellSize.width = cellSize.height * defaultSize.width / defaultSize.height;
+    return cellSize;
+}
+
 - (CGSize)collectionView:(UICollectionView *)collectionView
                   layout:(UICollectionViewLayout *)collectionViewLayout
   sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    CGSize cellSize;
-    if(PublicUtils.isIPhone) cellSize.height = 0.365*MIN(CGRectGetHeight([[UIScreen mainScreen] bounds]),CGRectGetWidth([[UIScreen mainScreen] bounds]));
-    else cellSize.height = 0.272*MIN(CGRectGetHeight([[UIScreen mainScreen] bounds]),CGRectGetWidth([[UIScreen mainScreen] bounds]));
-    TemporaryApp* app = self.sortedAppList[indexPath.row];
-    UIAppView* appView = [[UIAppView alloc] initWithApp:app cache:_boxArtCache andCallback:self];
-
-    cellSize.width = cellSize.height * (appView
-                                        .bounds.size.width/appView
-                                        .bounds.size.height);
-    // cardSize.width =
-    
-    return cellSize;
+    return [self appCollectionCellSize];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -2806,8 +2911,8 @@ static NSMutableSet* hostList;
 - (void)handleMenuResize:(UILongPressGestureRecognizer *)gesture {
     CGPoint locationInView = [gesture locationInView:self.view];
     CGPoint locationInSuperView = [gesture locationInView:self.revealViewController.view];
-    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+    CGFloat screenHeight = [PublicUtils screenForView:self.viewIfLoaded].bounds.size.height;
+    CGFloat screenWidth = [PublicUtils screenForView:self.viewIfLoaded].bounds.size.width;
 
     menuSeparator = [self findMenuSeparator];
     if(menuSeparator.hidden || menuSeparator == nil) return;
@@ -2816,7 +2921,7 @@ static NSMutableSet* hostList;
         if(locationInView.x < 30) {
             snapshot = [[UIView alloc] init];
             snapshot.backgroundColor = [UIColor systemBlueColor];
-            screenHeight = [UIScreen mainScreen].bounds.size.height;
+            screenHeight = [PublicUtils screenForView:self.viewIfLoaded].bounds.size.height;
             snapshot.frame = CGRectMake(locationInSuperView.x,0, 2, screenHeight);
             [self.revealViewController.view addSubview:snapshot];
         }
@@ -2852,17 +2957,7 @@ static NSMutableSet* hostList;
         [dataMan saveData];
 
 
-        if (@available(iOS 14.0, *)) {
-            if (self.settingsViewController.usesSwiftUISettings) return;
-        }
-        
-#if !TARGET_OS_TV
-        double delayInSeconds = 0.02;
-        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-        dispatch_after(popTime, dispatch_get_main_queue(), ^{
-            [self.settingsViewController hideDynamicLabelsWhenOverlapped:self.settingsViewController.parentStack];
-        });
-#endif
+
     }
 }
 
@@ -2942,8 +3037,10 @@ static NSMutableSet* hostList;
 
 - (CGSize)getHostCardSize{
     CGSize cardSize;
-    if(PublicUtils.isIPhone) cardSize.height = 0.37*MIN(CGRectGetHeight([[UIScreen mainScreen] bounds]),CGRectGetWidth([[UIScreen mainScreen] bounds]));
-    else cardSize.height = 0.25*MIN(CGRectGetHeight([[UIScreen mainScreen] bounds]),CGRectGetWidth([[UIScreen mainScreen] bounds]));
+    UIScreen* referenceScreen = PublicUtils.isFoldableRAMCached ? UIScreen.screens.firstObject : [PublicUtils screenForView:self.viewIfLoaded];
+    CGRect referenceBounds = [referenceScreen bounds];
+    if(PublicUtils.isFoldableRAMCached || PublicUtils.isIPhone) cardSize.height = 0.37*MIN(referenceBounds.size.width, referenceBounds.size.height);
+    else cardSize.height = 0.25*MIN(referenceBounds.size.width, referenceBounds.size.height);
     TemporaryHost* dummyHost = [[TemporaryHost alloc] init];
     HostCardView* dummyCard = [[HostCardView alloc] initWithHost:dummyHost];
     cardSize.width = cardSize.height * (dummyCard.size.width/dummyCard.size.height);
@@ -2963,11 +3060,16 @@ static NSMutableSet* hostList;
     if(self.hostCollectionVC.view.superview == nil){
         [self.view addSubview:self.hostCollectionVC.view];
         CGFloat leftPadding = PublicUtils.isIPhone ? 30 : 0;
+        CGFloat rightPadding = 0;
+        if(PublicUtils.isFoldableIPhone) {
+            leftPadding = 15;
+            rightPadding = -15;
+        }
         self.hostCollectionVC.view.translatesAutoresizingMaskIntoConstraints = NO;
         [NSLayoutConstraint activateConstraints:@[
             [self.hostCollectionVC.view.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:0],
             [self.hostCollectionVC.view.leadingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.leadingAnchor constant:leftPadding],
-            [self.hostCollectionVC.view.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:0],
+            [self.hostCollectionVC.view.trailingAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.trailingAnchor constant:rightPadding],
         ]];
     }
     

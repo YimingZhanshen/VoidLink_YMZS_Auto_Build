@@ -18,6 +18,7 @@
     self = [self init];
     
     self.parent = settings;
+    self.audioBufferLimitMs = settings.audioBufferLimitMs;
     
 #if TARGET_OS_TV
     self.settingsMenuMode = settings.settingsMenuMode;
@@ -33,7 +34,6 @@
     self.enablePIP = settings.enablePIP;
     self.fullColorRange = settings.fullColorRange;
     self.frameQueueSize = settings.frameQueueSize;
-    self.enableFrameTimebase = settings.enableFrameTimebase;
     self.asyncFrameDequeue = settings.asyncFrameDequeue;
     self.playAudioOnPC = settings.playAudioOnPC;
     self.redirectMic = settings.redirectMic;
@@ -42,32 +42,20 @@
     self.optimizeGames = settings.optimizeGames;
     self.multiController = settings.multiController;
     self.buttonVisualFeedback = settings.buttonVisualFeedback;
-    self.touchPointTracking = settings.touchPointTracking;
     self.swapABXYButtons = settings.swapABXYButtons;
     self.onscreenControls = settings.onscreenControls;
     self.gyroMode = settings.gyroMode;
     self.emulatedControllerType = settings.emulatedControllerType;
     self.reverseMouseWheelDirection = settings.reverseMouseWheelDirection;
-    self.asyncNativeTouchPriority = settings.asyncNativeTouchPriority;
     self.btMouseSupport = settings.btMouseSupport;
-    self.touchMode = settings.touchMode;
     self.statsOverlayLevel = settings.statsOverlayLevel;
     self.statsOverlayEnabled = settings.statsOverlayEnabled;
     self.keyboardToggleFingers = settings.keyboardToggleFingers;
-    self.oscLayoutToolFingers = settings.oscLayoutToolFingers;
-    self.slideToSettingsScreenEdge = settings.slideToSettingsScreenEdge;
-    self.slideToSettingsDistance = settings.slideToSettingsDistance;
-    self.liftStreamViewForKeyboard = settings.liftStreamViewForKeyboard;
-    self.showKeyboardToolbar = settings.showKeyboardToolbar;
-    self.softKeyboardHeight = settings.softKeyboardHeight;
-    self.touchMoveEventInterval = settings.touchMoveEventInterval;
-    self.touchPointerVelocityFactor = settings.touchPointerVelocityFactor;
     self.mousePointerVelocityFactor = settings.mousePointerVelocityFactor;
+    self.zoomViewportPointerVelocityFactor = settings.zoomViewportPointerVelocityFactor ?: @(1);
     self.gyroSensitivity = settings.gyroSensitivity;
     self.localVolume = settings.localVolume;
     self.micVolume = settings.micVolume;
-    self.pointerVelocityModeDivider = settings.pointerVelocityModeDivider;
-    self.unlockDisplayOrientation = settings.unlockDisplayOrientation;
     self.resolutionSelected = settings.resolutionSelected;
     self.externalDisplayMode = settings.externalDisplayMode;
     self.localMousePointerMode = settings.localMousePointerMode;
@@ -86,22 +74,13 @@
     self.controllerGyroBiasX = settings.controllerGyroBiasX;
     self.controllerGyroBiasY = settings.controllerGyroBiasY;
     self.controllerGyroBiasZ = settings.controllerGyroBiasZ;
-    self.singleTapSensitivity = settings.singleTapSensitivity;
     self.backgroundSessionTimer = settings.backgroundSessionTimer;
-    self.edgeSlidingSensitivity = settings.edgeSlidingSensitivity;
     self.appTheme = settings.appTheme;
     self.hapticEngine = settings.hapticEngine;
     self.uniqueId = settings.uniqueId;
     self.audioEngine = settings.audioEngine;
-    self.delayLeftClick = settings.delayLeftClick;
     self.duckOtherApps = settings.duckOtherApps;
     self.muteInBackground = settings.muteInBackground;
-    self.relativeTouchSlideThreshold = settings.relativeTouchSlideThreshold;
-    self.enablePinch = settings.enablePinch;
-    self.scrollSensitivity = settings.scrollSensitivity;
-    self.pinchSensitivity = settings.pinchSensitivity;
-    self.leftClickDelayMs = settings.leftClickDelayMs;
-    self.ctrlDownForPinch = settings.ctrlDownForPinch;
     self.settingsMenuOffset = settings.settingsMenuOffset;
     self.passthroughGestures = settings.passthroughGestures;
     self.enableControllerNavigation = settings.enableControllerNavigation;
@@ -114,10 +93,6 @@
     self.controllerMouseExpo = settings.controllerMouseExpo;
     self.streamingRadialMenuDelay = settings.streamingRadialMenuDelay;
     self.globeAsEscape = settings.globeAsEscape;
-    self.pencilTickMode = settings.pencilTickMode;
-    self.pencilTickIntervalUs = settings.pencilTickIntervalUs;
-    self.pencilTipOffsetX = settings.pencilTipOffsetX;
-    self.pencilTipOffsetY = settings.pencilTipOffsetY;
 #else
     self.settingsMenuMode = settings.settingsMenuMode;
     self.settingsMenuWidth = settings.settingsMenuWidth;
@@ -163,6 +138,7 @@
     self.touchMoveEventInterval = settings.touchMoveEventInterval;
     self.touchPointerVelocityFactor = settings.touchPointerVelocityFactor;
     self.mousePointerVelocityFactor = settings.mousePointerVelocityFactor;
+    self.zoomViewportPointerVelocityFactor = settings.zoomViewportPointerVelocityFactor ?: @(1);
     self.gyroSensitivity = settings.gyroSensitivity;
     self.localVolume = settings.localVolume;
     self.micVolume = settings.micVolume;
@@ -197,7 +173,8 @@
     self.duckOtherApps = settings.duckOtherApps;
     self.muteInBackground = settings.muteInBackground;
     self.relativeTouchSlideThreshold = settings.relativeTouchSlideThreshold;
-    self.enablePinch = settings.enablePinch;
+    self.trackpadGestureMode = settings.trackpadGestureMode;
+    self.trackpadGestureSensitivity = settings.trackpadGestureSensitivity ?: @(1);
     self.scrollSensitivity = settings.scrollSensitivity;
     self.pinchSensitivity = settings.pinchSensitivity;
     self.leftClickDelayMs = settings.leftClickDelayMs;
@@ -222,6 +199,13 @@
     self.pencilTipOffsetY = settings.pencilTipOffsetY;
 
 #endif
+    
+    self.floatingKeyboardButton = settings.floatingKeyboardButton;
+
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    self.cursorInertia = [defaults boolForKey:CursorInertiaDefaultsKey];
+    self.cursorInertiaDeceleration = [defaults objectForKey:CursorInertiaDecelerationDefaultsKey] ?: @(CursorInertiaDecelerationDefault);
+    self.portraitStreamOffset = @([defaults floatForKey:PortraitStreamOffsetDefaultsKey]);
     
     return self;
 }

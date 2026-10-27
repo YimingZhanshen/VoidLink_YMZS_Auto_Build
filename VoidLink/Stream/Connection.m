@@ -12,7 +12,11 @@
 #import "Connection.h"
 #import "Plot.h"
 #import "Utils.h"
-#import "DataManager.h"
+#import "AppDelegate.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
+#import "TemporarySettings.h"
+#import "VoidLink-Swift.h"
 
 #import <VideoToolbox/VideoToolbox.h>
 
@@ -21,6 +25,7 @@
 
 #include "Limelight.h"
 #include "opus_multistream.h"
+#include <stdatomic.h>
 #include "VoidLink-Swift.h"
 
 @implementation Connection {
@@ -56,7 +61,11 @@ static int audioFrameSize;
 
 static bool useSystemAudioEngine;
 static bool audioSessionInterrupted;
-// Protected by playbackQueueLock; true from a rejected frame until admission resumes.
+static atomic_int audioBufferLimitMs = 80;
+// Protected by the Connection class lock; reset on foreground/background events.
+static BOOL hasTriggeredPlaybackRecovery;
+static CFTimeInterval lastPlaybackRecoveryTime;
+// Protected by playbackQueueLock; preserves muting until admission resumes.
 static bool audioPlaybackBackpressure;
 static AVAudioEngine *audioEngine;
 static AVAudioPlayerNode *audioPlayerNode;
@@ -67,6 +76,7 @@ static uint64_t playbackGeneration;
 static AVAudioFramePosition playbackQueuedFrames;
 static uint64_t playbackDroppedBuffers;
 static CFTimeInterval playbackBackpressureLastLogTime;
+static CFTimeInterval playbackQueueLastLogTime;
 static uint64_t playbackReportedDroppedBuffers;
 
 static bool muteInBackground;
@@ -328,6 +338,7 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
     // System audio engine initialization
     DataManager* dataMan = [[DataManager alloc] init];
     TemporarySettings* tempSettings = [dataMan getSettings];
+    [Connection setAudioBufferLimitMs:tempSettings.audioBufferLimitMs.intValue];
 #if TARGET_OS_TV
     AVAudioSession *session = [AVAudioSession sharedInstance];
     // NSLog(@"[TVAudio] before playback setup: category=%@, mode=%@, options=%lu, outputVolume=%.3f, inputAvailable=%d, inputs=%@, outputs=%@",
@@ -387,6 +398,7 @@ int ArInit(int audioConfiguration, POPUS_MULTISTREAM_CONFIGURATION opusConfig, v
 void ArCleanup(void)
 {
     @synchronized (playbackQueueLock) {
+        playbackGeneration++;
         audioPlaybackBackpressure = false;
     }
     if (opusDecoder != NULL) {
@@ -414,6 +426,10 @@ void ArCleanup(void)
     volume = powf(linearVolume, exponent);
 }
 
++ (void)setAudioBufferLimitMs:(int)milliseconds {
+    atomic_store_explicit(&audioBufferLimitMs, MIN(300, MAX(35, milliseconds)), memory_order_relaxed);
+}
+
 + (void)setMuteInBackground:(bool)mute {
     muteInBackground = mute;
 }
@@ -439,6 +455,7 @@ static void ResetPlaybackQueue(void) {
         playbackQueuedFrames = 0;
         playbackDroppedBuffers = 0;
         playbackBackpressureLastLogTime = 0;
+        playbackQueueLastLogTime = 0;
         playbackReportedDroppedBuffers = 0;
     }
 }
@@ -505,10 +522,10 @@ void AudioEngineInit(int sampleRate, int channelCount) {
         queuedMs = audioConfig.sampleRate > 0 ? 1000.0 * playbackQueuedFrames / audioConfig.sampleRate : 0;
         dropped = playbackDroppedBuffers;
     }
-    NSLog(@"[AudioPlayback] latency: actualIO=%.4f, sessionOutput=%.4f, player=%.4f, outputNode=%.4f, outputRate=%.0f, queuedMs=%.1f, dropped=%llu",
+    /* NSLog(@"[AudioPlayback] latency: actualIO=%.4f, sessionOutput=%.4f, player=%.4f, outputNode=%.4f, outputRate=%.0f, queuedMs=%.1f, dropped=%llu",
           session.IOBufferDuration, session.outputLatency, audioPlayerNode.outputPresentationLatency,
           audioEngine.outputNode.presentationLatency, [audioEngine.outputNode inputFormatForBus:0].sampleRate,
-          queuedMs, (unsigned long long)dropped);
+          queuedMs, (unsigned long long)dropped); */
 // #if TARGET_OS_TV
     // NSLog(@"[TVAudio] playback state: category=%@, mode=%@, options=%lu, outputVolume=%.3f, softwareVolume=%.3f, playerVolume=%.3f, mixerVolume=%.3f, running=%d, playing=%d, inputs=%@, outputs=%@",
           // session.category, session.mode, (unsigned long)session.categoryOptions, session.outputVolume,
@@ -540,7 +557,27 @@ void AudioEngineInit(int sampleRate, int channelCount) {
 }
 #endif
 
++ (void)resetSysAudioPlaybackCooldown {
+    @synchronized ([Connection class]) {
+        hasTriggeredPlaybackRecovery = NO;
+        lastPlaybackRecoveryTime = 0;
+    }
+}
+
+// Shared by explicit engine resets and the start of a backpressure episode.
+// Do not reset this timestamp when the engine or playback queue is rebuilt.
+static BOOL TryBeginPlaybackRecovery(void) {
+    @synchronized ([Connection class]) {
+        CFTimeInterval now = CACurrentMediaTime();
+        if (hasTriggeredPlaybackRecovery && now - lastPlaybackRecoveryTime <= 20.0) return NO;
+        hasTriggeredPlaybackRecovery = YES;
+        lastPlaybackRecoveryTime = now;
+        return YES;
+    }
+}
+
 + (void)resetSysAudioPlayback {
+    if (!TryBeginPlaybackRecovery()) return;
     audioSessionInterrupted = true;
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0),
                    dispatch_get_main_queue(), ^{
@@ -624,19 +661,27 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
                 // AVAudioPlayerNode. Bound them during stalls and route changes.
                 AVAudioPlayerNode *player = audioPlayerNode;
                 uint64_t generation;
+                double queuedMsToLog = -1;
                 @synchronized (playbackQueueLock) {
-                    AVAudioFramePosition limit = MAX(frameCount, audioConfig.sampleRate * 0.06);
-                    if (playbackQueuedFrames + frameCount > limit) {
+                    double foregroundLimitSeconds = atomic_load_explicit(&audioBufferLimitMs, memory_order_relaxed) / 1000.0;
+                    AVAudioFramePosition triggerLimit = MAX(frameCount, audioConfig.sampleRate * (PublicUtils.appDidEnterBackground ? 100.0 : foregroundLimitSeconds));
+                    // Drain an active episode to 25 ms including the next buffer.
+                    // Permit one oversized buffer so playback cannot remain blocked.
+                    AVAudioFramePosition resumeLimit = MIN(triggerLimit, MAX(frameCount, audioConfig.sampleRate * 0.025));
+                    AVAudioFramePosition limit = audioPlaybackBackpressure ? resumeLimit : triggerLimit;
+                    // Only the start of a new episode consumes the cooldown interval.
+                    if (playbackQueuedFrames + frameCount > limit &&
+                        (audioPlaybackBackpressure || TryBeginPlaybackRecovery())) {
                         audioPlaybackBackpressure = true;
                         playbackDroppedBuffers++;
                         CFTimeInterval now = CACurrentMediaTime();
                         // Log the first rejection immediately, then at most once per second.
                         if (playbackReportedDroppedBuffers == 0 || now - playbackBackpressureLastLogTime >= 1.0) {
-                            double msPerFrame = 1000.0 / audioConfig.sampleRate;
-                            NSLog(@"[AudioPlayback] backpressure: queuedMs=%.1f, incomingMs=%.1f, limitMs=%.1f, droppedSinceLastLog=%llu, droppedTotal=%llu",
+                            // double msPerFrame = 1000.0 / audioConfig.sampleRate;
+                            /* NSLog(@"[AudioPlayback] backpressure: queuedMs=%.1f, incomingMs=%.1f, limitMs=%.1f, droppedSinceLastLog=%llu, droppedTotal=%llu",
                                   playbackQueuedFrames * msPerFrame, frameCount * msPerFrame, limit * msPerFrame,
                                   (unsigned long long)(playbackDroppedBuffers - playbackReportedDroppedBuffers),
-                                  (unsigned long long)playbackDroppedBuffers);
+                                  (unsigned long long)playbackDroppedBuffers); */
                             playbackBackpressureLastLogTime = now;
                             playbackReportedDroppedBuffers = playbackDroppedBuffers;
                         }
@@ -645,6 +690,12 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
                     audioPlaybackBackpressure = false;
                     generation = playbackGeneration;
                     playbackQueuedFrames += frameCount;
+                    /* CFTimeInterval now = CACurrentMediaTime();
+                    if (now - playbackQueueLastLogTime >= 1.0) {
+                        // Snapshot includes the buffer being submitted below.
+                        queuedMsToLog = 1000.0 * playbackQueuedFrames / audioConfig.sampleRate;
+                        playbackQueueLastLogTime = now;
+                    } */
                 }
                 [player scheduleBuffer:buffer completionCallbackType:AVAudioPlayerNodeCompletionDataRendered completionHandler:^(AVAudioPlayerNodeCompletionCallbackType callbackType) {
                     @synchronized (playbackQueueLock) {
@@ -653,6 +704,9 @@ void ArDecodeAndPlaySample(char* sampleData, int sampleLength)
                         }
                     }
                 }];
+                if (queuedMsToLog >= 0) {
+                    // NSLog(@"[AudioPlayback] queue: queuedMs=%.1f", queuedMsToLog);
+                }
             }
         }
         
@@ -804,6 +858,10 @@ void ClDs5HapticsIrV2(const LI_DS5_HAPTICS_IR_FRAME_V2* frame)
     // won't be able to acquire it if LiStartConnection is in
     // progress.
     LiInterruptConnection();
+    @synchronized (playbackQueueLock) {
+        // Invalidate completions belonging to the terminated connection.
+        playbackGeneration++;
+    }
     [audioPlayerNode stop];
     [audioEngine stop];
     [ControllerUtil stopAllDualSenseHaptics];
@@ -993,7 +1051,7 @@ void ClDs5HapticsIrV2(const LI_DS5_HAPTICS_IR_FRAME_V2* frame)
     _clCallbacks.setControllerLED = ClSetControllerLED;
     _clCallbacks.setAdaptiveTriggers = ClSetAdaptiveTriggers;
     useDualSenseAuthoredPCM = (config.emulatedControllerType == ControllerEmulationPsEnhancedHaptic
-                               && ControllerUtil.hasDualSenseController) || config.hapticEngine == RumbleDevice;
+                               && ControllerUtil.hasDualSenseController) || config.hapticEngine == HapticEnginePreferenceRumbleDevice;
     if (useDualSenseAuthoredPCM) {
         _clCallbacks.ds5HapticsPcm = ClDs5HapticsPcm;
         // _clCallbacks.ds5HapticsIrV2 = ClDs5HapticsIrV2;

@@ -221,7 +221,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
     }
 
     private func getCurrentOrientation() -> UIInterfaceOrientationMask {
-        let bounds = UIScreen.main.bounds
+        let bounds = PublicUtils.screen(for: viewIfLoaded).bounds
         return bounds.width > bounds.height ? .landscape : [.portrait, .portraitUpsideDown]
     }
 
@@ -408,6 +408,8 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
         
         var hasLegacyWidget = false
         for case let encoded as Data in oscProfile.buttonStatesEncoded {
+            if PublicUtils.isSimulator {continue}
+
             guard let buttonState = self.profilesManager?.unarchiveButtonStateEncoded(encoded) else { continue }
             
             if folder != nil {
@@ -420,6 +422,7 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
             
             if buttonState.widgetType == 1 {
                 let widgetView = OnScreenWidgetView.widget(cmdString: buttonState.name, buttonLabel: buttonState.alias, shape: buttonState.widgetShape, profile: oscProfile)
+                guard let widgetView = widgetView else {continue}
                 widgetView.sequence = (buttonState.sequence == -1 || folder != nil) ? {
                     sequence += 1
                     return sequence
@@ -526,8 +529,8 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
             self.layoutOSC.oscButtonLayerPool.removeAllObjects()
         }
         
-        OnScreenWidgetView.deepestButton = nil;
-        _ = OnScreenWidgetView.getDeepestButton()
+        // OnScreenWidgetView.deepestButton = nil;
+        // _ = OnScreenWidgetView.getDeepestButton()
         var motionControlButtons = Set<OnScreenWidgetView>()
         if let deepestButton = OnScreenWidgetView.deepestButton {
             for widget in OnScreenWidgetView.mapping.values {
@@ -682,23 +685,16 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
         if self.profileSelectorLoadingMode == .selectProfileFromLayoutTool {
             
             let oldSize = view.bounds.size
+            guard oldSize.width > 0, oldSize.height > 0, size.width > 0, size.height > 0 else { return }
             let scaleX = size.width / oldSize.width
             let scaleY = size.height / oldSize.height
-            
-            for widget in OnScreenWidgetView.mapping.values {
-                let oldCenter = widget.center
-                let oldStoredCenter = widget.storedCenter
-                
-                coordinator.animate(alongsideTransition: { _ in
-                    widget.center = CGPoint(
-                        x: oldCenter.x * scaleX,
-                        y: oldCenter.y * scaleY
-                    )
-                    widget.storedCenter = CGPoint(
-                        x: oldStoredCenter.x * scaleX,
-                        y: oldStoredCenter.y * scaleY
-                    )
-                }, completion: nil)
+
+            OnScreenWidgetView.transitionWidgets(in: view, to: size, coordinator: coordinator)
+
+            let legacyHistory = layoutOSC.layoutChanges.compactMap { $0 as? OnScreenButtonState }
+                .map { ($0, $0.position) }
+            for (state, position) in legacyHistory {
+                state.position = CGPoint(x: position.x * scaleX, y: position.y * scaleY)
             }
             
             for buttonLayer in self.layoutOSC.oscButtonLayerPool {
@@ -711,9 +707,20 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
                             x: oldPosition.x * scaleX,
                             y: oldPosition.y * scaleY
                         )
-                    }, completion: nil)
+                    }, completion: { context in
+                        if context.isCancelled { layer.position = oldPosition }
+                    })
                 }
             }
+
+            coordinator.animate(alongsideTransition: nil, completion: { [weak self] context in
+                guard let self else { return }
+                if context.isCancelled {
+                    for (state, position) in legacyHistory { state.position = position }
+                }
+                self.setupWidgetPanel()
+                self.updateViewBounds()
+            })
         }
     }
 
@@ -1296,6 +1303,8 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
             shape: params["shape"] as? String ?? "",
             profile: profile
         )
+        
+        guard let newWidget = newWidget else {return}
 
         newWidget.sequence = widget.sequence
         newWidget.autoDockIdleDuration = widget.autoDockIdleDuration
@@ -1374,6 +1383,9 @@ final class LayoutOnScreenControlsViewController: UIViewController, OnScreenWidg
             shape: params["shape"] as? String ?? "",
             profile: profile
         )
+        
+        guard let widgetView = widgetView else {return}
+        
         view.insertSubview(widgetView, belowSubview: widgetPanelStack)
         widgetView.isHidden = true
         widgetView.sequence = widgetView.getAvailableSequence()

@@ -27,6 +27,14 @@ private let refreshCycle: TimeInterval = 1.0
 
 @objcMembers
 final class UIAppView: UIButton {
+    static var defaultSize: CGSize {
+        #if os(tvOS)
+        return CGSize(width: 200, height: 265)
+        #else
+        return CGSize(width: 150, height: 200)
+        #endif
+    }
+
     weak var updateLoopDelegate: AppViewUpdateLoopDelegate?
 
     private static var noImage: UIImage?
@@ -49,11 +57,7 @@ final class UIAppView: UIButton {
             UIAppView.noImage = UIImage(named: "NoAppImage")
         }
 
-        #if os(tvOS)
-        let initialFrame = CGRect(x: 0, y: 0, width: 200, height: 265)
-        #else
-        let initialFrame = CGRect(x: 0, y: 0, width: 150, height: 200)
-        #endif
+        let initialFrame = CGRect(origin: .zero, size: Self.defaultSize)
 
         self.appImage = UIImageView(frame: initialFrame)
 

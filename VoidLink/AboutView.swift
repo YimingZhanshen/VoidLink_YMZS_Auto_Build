@@ -112,83 +112,92 @@ public struct AboutView: View {
                     }
                     
                     HStack(spacing: 15) {
-                        if #available(iOS 15.0, *) {
-                            if PublicUtils.isIPad, PublicUtils.isIAPAddonAvailable {
-                                Button(LocalizationHelper.localizedString(forKey: "I'm an artist")) {
-                                    IAPManager.checkPurchaseInfo(.PencilProPack) { info in
-                                        if !info.valid {
-                                            IAPManager.inAppPurchaseAction(viewController: self.aboutVC, product: .PencilProPack)
-                                        }
-                                        else {
-                                            AlertControllerUtil.showAlert(
-                                                in: self.aboutVC,
-                                                title: "",
-                                                message: LocalizationHelper.localizedString(forKey:"Drawing Toolkit already purchased"),
-                                                withCancel: false,
-                                                buttonTitle: LocalizationHelper.localizedString(forKey: "OK"),
-                                                countdown: 0)
-                                        }
-                                    }
-                                }
-                                .padding()
-                                .background(Color.blue.opacity(1))
-                                .foregroundColor(.white)
-                                .frame(height: 46)
-                                .cornerRadius(12)
-                                .padding(.top, 10)
-                            }
-                        }
-                        
-                        // OK 按钮
-                        Button(LocalizationHelper.localizedString(forKey: "OK")) {
-                            aboutVC.dismiss(animated:true)
-                        }
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .frame(height: 46)
-                        .cornerRadius(12)
-                        .padding(.top, 10)
+                        // Xcode 27 can infer TupleContent here, which is unavailable on
+                        // older systems. Keep the stack's content explicitly TupleView.
+                        TupleView((artistPurchaseButton, dismissButton))
                     }
                     
                     
                 } else {
                     HStack(spacing: 20) {
-                        Button(LocalizationHelper.localizedString(forKey: "Join us")) {
-                            // 打开链接
-                            if let url = URL(string: LocalizationHelper.localizedString(forKey: "supportLink")) {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .frame(height: 33)
-                        .frame(minWidth: 100)
-                        /*
-                         Button(LocalizationHelper.localizedString(forKey: "OK")) {
-                         presentationMode.wrappedValue.dismiss()
-                         }
-                         .padding()
-                         .background(Color.blue)
-                         .foregroundColor(.white)
-                         .cornerRadius(12)
-                         .frame(height: 33)
-                         .frame(minWidth: 100)*/
-                        Button(LocalizationHelper.localizedString(forKey: "OK")) {
-                            aboutVC.dismiss(animated:true)
-                        }
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                        .frame(height: 33)
+                        // Xcode 27 may select TupleContent in this fallback branch.
+                        // Its type is resolved on iOS 15 even though the branch is unused.
+                        TupleView((legacyJoinButton, legacyDismissButton))
                     }
                     .padding(.top, 10)
                 }
             }
         }
         .padding()
+    }
+
+    @available(iOS 14.0, *)
+    @ViewBuilder
+    private var artistPurchaseButton: some View {
+        if #available(iOS 15.0, *) {
+            if PublicUtils.isIPad, PublicUtils.isIAPAddonAvailable {
+                Button(LocalizationHelper.localizedString(forKey: "I'm an artist")) {
+                    IAPManager.checkPurchaseInfo(.PencilProPack) { info in
+                        if !info.valid {
+                            IAPManager.inAppPurchaseAction(viewController: self.aboutVC, product: .PencilProPack)
+                        }
+                        else {
+                            AlertControllerUtil.showAlert(
+                                in: self.aboutVC,
+                                title: "",
+                                message: LocalizationHelper.localizedString(forKey:"Drawing Toolkit already purchased"),
+                                withCancel: false,
+                                buttonTitle: LocalizationHelper.localizedString(forKey: "OK"),
+                                countdown: 0)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.blue.opacity(1))
+                .foregroundColor(.white)
+                .frame(height: 46)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.top, 10)
+            }
+        }
+    }
+
+    @available(iOS 14.0, *)
+    private var dismissButton: some View {
+        Button(LocalizationHelper.localizedString(forKey: "OK")) {
+            aboutVC.dismiss(animated:true)
+        }
+        .padding()
+        .background(Color.blue)
+        .foregroundColor(.white)
+        .frame(height: 46)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(.top, 10)
+    }
+
+    private var legacyJoinButton: some View {
+        Button(LocalizationHelper.localizedString(forKey: "Join us")) {
+            // 打开链接
+            if let url = URL(string: LocalizationHelper.localizedString(forKey: "supportLink")) {
+                UIApplication.shared.open(url)
+            }
+        }
+        .padding()
+        .background(Color.blue)
+        .foregroundColor(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .frame(height: 33)
+        .frame(minWidth: 100)
+    }
+
+    private var legacyDismissButton: some View {
+        Button(LocalizationHelper.localizedString(forKey: "OK")) {
+            aboutVC.dismiss(animated:true)
+        }
+        .padding()
+        .background(Color.blue)
+        .foregroundColor(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .frame(height: 33)
     }
 }

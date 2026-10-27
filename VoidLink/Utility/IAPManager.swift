@@ -289,7 +289,7 @@ import UIKit
             let dataMan = DataManager()
             let settings = dataMan.retrieveSettings()
             settings?.onscreenControls = 1
-            settings?.pencilTickMode = NSNumber(value: PencilTickMode.ManualTick.rawValue)
+            settings?.pencilTickMode = NSNumber(value: PencilTickMode.manualTick.rawValue)
             dataMan.saveData()
             let profileMan = OSCProfilesManager.sharedManager(.zero)
             var toolkitProfileIndex = profileMan.getIndex(byName: "Pencil Pro")

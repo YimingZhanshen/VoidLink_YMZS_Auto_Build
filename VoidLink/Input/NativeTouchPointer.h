@@ -28,6 +28,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)updatePointerCoords:(UITouch *)touch;
 
 
+// Explicit view and gain let trackpad input reuse the mapping without global context.
+- (instancetype)initWithTouch:(UITouch *)touch view:(StreamView *)view NS_SWIFT_NAME(init(touch:view:));
+- (void)updatePointerCoords:(UITouch *)touch inView:(StreamView *)view velocityFactor:(CGFloat)velocityFactor NS_SWIFT_NAME(update(touch:in:velocityFactor:));
+
 - (instancetype)initWithTouch:(UITouch *)touch;
 @end
 

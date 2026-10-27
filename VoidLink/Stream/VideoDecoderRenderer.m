@@ -13,7 +13,9 @@
 @import AVFoundation;
 @import VideoToolbox;
 
-#import "DataManager.h"
+#import "AppDelegate.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
 #import "TemporarySettings.h"
 #import "VideoDecoderRenderer.h"
 #import "FrameQueue.h"
@@ -55,7 +57,8 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     dispatch_queue_t _sq, _vtq;
     StreamView* _view;
     __weak id<ConnectionCallbacks> _callbacks;
-    float _streamAspectRatio;
+    float _streamAspectRatio; // Main-thread layout state; never read by VideoRecv.
+    float _decodedAspectRatio; // VideoRecv-owned last announced stream ratio.
 
     AVSampleBufferDisplayLayer* _displayLayer;
     int _videoFormat;
@@ -66,8 +69,8 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     NSMutableArray *_parameterSetBuffers;
     NSData *_masteringDisplayColorVolume;
     NSData *_contentLightLevelInfo;
-    CMVideoFormatDescriptionRef _formatDesc;
-    CMVideoFormatDescriptionRef _formatDescImageBuffer;
+    CMVideoFormatDescriptionRef _formatDesc; // Owned exclusively by VideoRecv until dealloc.
+    CMVideoFormatDescriptionRef _formatDescImageBuffer; // Confined to _vtq until dealloc.
     VTDecompressionSessionRef _decompressionSession;
     FrameInterpolator *_frameInterpolator;
     BOOL _frameInterpolationPaused;
@@ -117,32 +120,23 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     [renderer stopFrameInterpolation];
 }
 
-- (void)reinitializeDisplayLayer
+- (void)updateDisplayLayerLayout
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{ [self updateDisplayLayerLayout]; });
+        return;
+    }
     if (_displayLayer == nil) {
         _displayLayer = [[AVSampleBufferDisplayLayer alloc] init];
         _displayLayer.backgroundColor = [UIColor blackColor].CGColor;
         _displayLayer.videoGravity = AVLayerVideoGravityResize;
+        // Only the initial layer waits for its first IDR. Resizing a live stream
+        // must not hide the picture or reset decoder resources.
+        _displayLayer.hidden = YES;
         [_view.layer addSublayer:_displayLayer];
     }
 
-    // Update aspect ratio from the actual stream dimensions if we have a format description
     float aspectRatioToUse = _streamAspectRatio;
-    if (_formatDesc != NULL) {
-        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(_formatDesc);
-        if (dimensions.width > 0 && dimensions.height > 0) {
-            aspectRatioToUse = (float)dimensions.width / (float)dimensions.height;
-            if (fabsf(aspectRatioToUse - _streamAspectRatio) > 0.001f) {
-                Log(LOG_I, @"Stream resolution changed: updating aspect ratio from %.4f to %.4f (%dx%d)",
-                    _streamAspectRatio, aspectRatioToUse, dimensions.width, dimensions.height);
-                _streamAspectRatio = aspectRatioToUse;
-                // Also update StreamView's aspect ratio for correct touch input mapping (if it's a StreamView)
-                if ([_view respondsToSelector:@selector(setStreamAspectRatio:)]) {
-                    [(StreamView*)_view setStreamAspectRatio:aspectRatioToUse];
-                }
-            }
-        }
-    }
 
     // Ensure the AVSampleBufferDisplayLayer is sized to preserve the aspect ratio
     // of the video stream. We used to use AVLayerVideoGravityResizeAspect, but that
@@ -161,30 +155,6 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _displayLayer.position = CGPointMake(CGRectGetMidX(_view.bounds), CGRectGetMidY(_view.bounds));
     _displayLayer.bounds = CGRectMake(0, 0, videoSize.width, videoSize.height);
     [CATransaction commit];
-
-    // Hide the layer until we get an IDR frame. This ensures we
-    // can see the loading progress label as the stream is starting.
-    _displayLayer.hidden = YES;
-
-    if (_formatDesc != nil) {
-        CFRelease(_formatDesc);
-        _formatDesc = nil;
-    }
-
-    if (_formatDescImageBuffer != nil) {
-        CFRelease(_formatDescImageBuffer);
-        _formatDescImageBuffer = nil;
-    }
-
-    @synchronized(self) {
-        if (_decompressionSession != nil){
-            VTDecompressionSessionWaitForAsynchronousFrames(_decompressionSession);
-
-            VTDecompressionSessionInvalidate(_decompressionSession);
-            CFRelease(_decompressionSession);
-            _decompressionSession = nil;
-        }
-    }
 }
 
 - (id)initWithView:(UIView* )view callbacks:(id<ConnectionCallbacks>)callbacks streamAspectRatio:(float)aspectRatio
@@ -193,6 +163,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     self = [super init];
     
     appDidEnterBackgroundWithoutPip = false;
+    PublicUtils.appDidEnterBackground = false;
     
     _sq = dispatch_queue_create("com.moonlight.VideoDecoderRenderer",
                                 dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
@@ -204,7 +175,8 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     _view = (StreamView*) view;
     _callbacks = callbacks;
     _streamAspectRatio = aspectRatio;
-    _maxRefreshRate = [[UIScreen mainScreen] maximumFramesPerSecond];
+    _decodedAspectRatio = aspectRatio;
+    _maxRefreshRate = [[PublicUtils screenForView:view] maximumFramesPerSecond];
     _parameterSetBuffers = [[NSMutableArray alloc] init];
     atomic_init(&_renderedInterpolatedFrameCount, 0);
 
@@ -222,11 +194,11 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     [_frameQueue startForOwner:self];
     [_frameQueue setHighWaterMark:MAX(1, _queueSize)];
 
-    [self reinitializeDisplayLayer];
+    [self updateDisplayLayerLayout];
     // NSTimeInterval interval = 1.0/tempSettings.framerate.intValue;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(reinitializeDisplayLayer)
+                                             selector:@selector(updateDisplayLayerLayout)
                                                  name:@"ScreenChanged"
                                                object:nil];
 
@@ -414,7 +386,8 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 }
 
 
-- (OSStatus)setupDecompressionSessionWithAttributes:(NSDictionary *)destinationPixelBufferAttributes {
+- (OSStatus)setupDecompressionSessionWithAttributes:(NSDictionary *)destinationPixelBufferAttributes
+                                formatDescription:(CMVideoFormatDescriptionRef)formatDescription {
     // This method is called from within synchronized block, so no additional sync needed here
     if (_decompressionSession != NULL) {
         VTDecompressionSessionInvalidate(_decompressionSession);
@@ -423,7 +396,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     }
 
     OSStatus status = VTDecompressionSessionCreate(kCFAllocatorDefault,
-                                                   _formatDesc,
+                                                   formatDescription,
                                                    nil,
                                                    (__bridge CFDictionaryRef)destinationPixelBufferAttributes,
                                                    nil,
@@ -434,7 +407,7 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     return status;
 }
 
-- (void)setupDecompressionSession {
+- (void)setupDecompressionSessionForFormatDescription:(CMVideoFormatDescriptionRef)formatDescription {
 #if TARGET_OS_SIMULATOR
     NSNumber *pixelFormat = @(kCVPixelFormatType_32BGRA);
     NSMutableDictionary *destinationPixelBufferAttributes = [@{
@@ -485,11 +458,11 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
 
 #if !TARGET_OS_SIMULATOR
     if (!interpolationRequested) {
-        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes formatDescription:formatDescription];
         return;
     }
 
-    OSStatus status = [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+    OSStatus status = [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes formatDescription:formatDescription];
     if (status != noErr) {
         Log(LOG_W, @"Falling back from frame-interpolation decode output %@ to native pixel format %@", pixelFormat, nativePixelFormat);
         [self->_frameInterpolator reset];
@@ -501,12 +474,12 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
             destinationPixelBufferAttributes[(id)kVTVideoDecoderSpecification_RequireHardwareAcceleratedVideoDecoder] = @YES;
             destinationPixelBufferAttributes[(id)kVTDecompressionPropertyKey_GeneratePerFrameHDRDisplayMetadata] = @YES;
         }
-        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+        [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes formatDescription:formatDescription];
 
         [self restartDisplayLinkForInterpolationEnabled:NO];
     }
 #else
-    [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes];
+    [self setupDecompressionSessionWithAttributes:destinationPixelBufferAttributes formatDescription:formatDescription];
 #endif
     return;
 }
@@ -517,10 +490,10 @@ extern int ff_isom_write_av1c(AVIOContext *pb, const uint8_t *buf, int size,
     if (self->_displayLayer.status == AVQueuedSampleBufferRenderingStatusFailed) {
         // Log(LOG_E, @"Display layer rendering failed: %@", _displayLayer.error);
 
-        // Recreate the display layer. We are already on the main thread,
-        // so this is safe to do right here.
+        // Recover the display layer on the main thread without touching the
+        // compressed format or the active decompression session.
         [self->_displayLayer flushAndRemoveImage];
-        [self reinitializeDisplayLayer];
+        [self updateDisplayLayerLayout];
 
         // Request an IDR frame to initialize the new decoder
         LiRequestIdrFrame();
@@ -780,6 +753,16 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 - (void)stop{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_displayLink invalidate];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (_formatDesc != NULL) {
+        CFRelease(_formatDesc);
+    }
+    if (_formatDescImageBuffer != NULL) {
+        CFRelease(_formatDescImageBuffer);
+    }
 }
 
 - (void)cleanup{
@@ -1185,22 +1168,27 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
             abort();
         }
 
-        // Check if the resolution changed and reinitialize the display layer if needed
+        // Only VideoRecv reads the compressed format. Send scalar layout state
+        // to the main thread instead of letting layout retain/release this object.
         if (_formatDesc != NULL) {
             CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(_formatDesc);
-            float newAspectRatio = (float)dimensions.width / (float)dimensions.height;
-
-            // If aspect ratio changed significantly, reinitialize the display layer on the main thread
-            if (fabsf(newAspectRatio - _streamAspectRatio) > 0.001f) {
-                Log(LOG_I, @"Resolution change detected in IDR frame: %dx%d (aspect ratio %.4f -> %.4f)",
-                    dimensions.width, dimensions.height, _streamAspectRatio, newAspectRatio);
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self reinitializeDisplayLayer];
-                    // Post notification so StreamFrameViewController can update the StreamView's aspect ratio
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"StreamAspectRatioChanged"
-                                                                        object:self
-                                                                      userInfo:@{@"aspectRatio": @(newAspectRatio)}];
-                });
+            if (dimensions.width > 0 && dimensions.height > 0) {
+                float newAspectRatio = (float)dimensions.width / (float)dimensions.height;
+                if (fabsf(newAspectRatio - _decodedAspectRatio) > 0.001f) {
+                    Log(LOG_I, @"Resolution change detected in IDR frame: %dx%d (aspect ratio %.4f -> %.4f)",
+                        dimensions.width, dimensions.height, _decodedAspectRatio, newAspectRatio);
+                    _decodedAspectRatio = newAspectRatio;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self->_streamAspectRatio = newAspectRatio;
+                        if ([self->_view respondsToSelector:@selector(setStreamAspectRatio:)]) {
+                            self->_view.streamAspectRatio = newAspectRatio;
+                        }
+                        [self updateDisplayLayerLayout];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:@"StreamAspectRatioChanged"
+                                                                            object:self
+                                                                          userInfo:@{@"aspectRatio": @(newAspectRatio)}];
+                    });
+                }
             }
         }
     }
@@ -1319,6 +1307,10 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                             frameNumber:(int)frameNumber
                               frameType:(int)frameType
                         decodeStartTime:(CFTimeInterval)decodeStartTime {
+    CMVideoFormatDescriptionRef frameFormat = CMSampleBufferGetFormatDescription(sampleBuffer);
+    // ARC captures a strong owner in the output handler and its queued work.
+    // A later IDR may replace _formatDesc before this frame reaches _vtq.
+    id frameFormatOwner = (__bridge id)frameFormat;
     // Synchronize access to decompression session to prevent race conditions during background/foreground transitions
     @synchronized(self) {
         // Check if we need to create/recreate the decompression session
@@ -1326,7 +1318,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
 
         // Also check if the session might have been invalidated by iOS during background
         if (!needsNewSession && _decompressionSession != nil) {
-            Boolean isValid = VTDecompressionSessionCanAcceptFormatDescription(_decompressionSession, _formatDesc);
+            Boolean isValid = VTDecompressionSessionCanAcceptFormatDescription(_decompressionSession, frameFormat);
             if (!isValid) {
                 Log(LOG_W, @"Decompression session is invalid, needs recreation");
                 needsNewSession = YES;
@@ -1334,7 +1326,7 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
         }
 
         if (needsNewSession) {
-            [self setupDecompressionSession];
+            [self setupDecompressionSessionForFormatDescription:frameFormat];
         }
 
         if (_decompressionSession == nil) {
@@ -1366,40 +1358,40 @@ int DrSubmitDecodeUnit(PDECODE_UNIT decodeUnit);
                     return;
                 }
 
-                CMSampleBufferRef sampleBufferOut = nil;
-                CVPixelBufferRef pixelBuffer = nil;
-
-                // AVSampleBuffer path: package into a SampleBuffer
-                if (self->_renderingBackend == RENDER_AVSB) {
-                    if (self->_formatDescImageBuffer == NULL || !CMVideoFormatDescriptionMatchesImageBuffer(self->_formatDescImageBuffer, imageBuffer)) {
-                        OSStatus res = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, imageBuffer, &(self->_formatDescImageBuffer));
-                        if (res != noErr) {
-                            Log(LOG_E, @"Failed to create video format description from imageBuffer");
-                            return;
-                        }
-                    }
-
-                    CMSampleTimingInfo sampleTiming = {kCMTimeInvalid, presentationTimestamp, presentationDuration};
-
-                    OSStatus err =
-                        CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, imageBuffer, self->_formatDescImageBuffer, &sampleTiming, &sampleBufferOut);
-                    if (err != noErr) {
-                        Log(LOG_E, @"Error creating sample buffer for decompressed image buffer %d", (int)err);
-                        return;
-                    }
-                } else if (self->_renderingBackend == RENDER_METAL) {
-                    // Metal path: retain the pixelBuffer here so it survives the dispatch
-                    pixelBuffer = CVPixelBufferRetain((CVPixelBufferRef)imageBuffer);
-                }
-
-                // Dispatch onto our higher priority queue
+                // Retain the output buffer, without copying pixels. The existing
+                // serial processing queue also owns the AVSB format cache now.
+                CVPixelBufferRef pixelBuffer = CVPixelBufferRetain((CVPixelBufferRef)imageBuffer);
                 dispatch_async(self->_vtq, ^{
                     Frame *frame = nil;
                     if (self->_renderingBackend == RENDER_AVSB) {
+                        if (self->_formatDescImageBuffer == NULL || !CMVideoFormatDescriptionMatchesImageBuffer(self->_formatDescImageBuffer, pixelBuffer)) {
+                            CMVideoFormatDescriptionRef imageFormat = NULL;
+                            OSStatus res = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer, &imageFormat);
+                            if (res != noErr) {
+                                Log(LOG_E, @"Failed to create video format description from imageBuffer: %d", (int)res);
+                                CVPixelBufferRelease(pixelBuffer);
+                                return;
+                            }
+                            if (self->_formatDescImageBuffer != NULL) {
+                                CFRelease(self->_formatDescImageBuffer);
+                            }
+                            self->_formatDescImageBuffer = imageFormat;
+                        }
+
+                        CMSampleBufferRef sampleBufferOut = NULL;
+                        CMSampleTimingInfo timing = {kCMTimeInvalid, presentationTimestamp, presentationDuration};
+                        OSStatus err = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixelBuffer, self->_formatDescImageBuffer, &timing, &sampleBufferOut);
+                        CVPixelBufferRelease(pixelBuffer); // The sample buffer retains its image.
+                        if (err != noErr) {
+                            Log(LOG_E, @"Error creating sample buffer for decompressed image buffer %d", (int)err);
+                            return;
+                        }
+                        // Frame adopts the create reference to sampleBufferOut.
                         frame = [[Frame alloc] initWithSampleBuffer:sampleBufferOut frameNumber:frameNumber frameType:frameType];
                     } else {
+                        // Frame adopts the retained pixelBuffer.
                         frame = [[Frame alloc] initWithPixelBufffer:pixelBuffer frameNumber:frameNumber frameType:frameType pts:presentationTimestamp];
-                        [frame setFormatDesc:self->_formatDesc];
+                        [frame setFormatDesc:(__bridge CMVideoFormatDescriptionRef)frameFormatOwner];
                     }
 
                     FrameInterpolator *interpolator = self->_frameInterpolator;

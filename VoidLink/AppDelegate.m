@@ -13,7 +13,9 @@
 #import "MainFrameViewController.h"
 #import "SceneDelegate.h"
 #import "VoidLink-Swift.h"
-#import "DataManager.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
+#import "TemporarySettings.h"
 
 #if TARGET_OS_TV
 @interface AppDelegate ()
@@ -72,7 +74,7 @@ static NSString* DB_NAME = @"Limelight_iOS.sqlite";
     if (@available(iOS 13.0, *)) {
         // Scene delegate will handle window creation
     } else {
-        self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        self.window = [[UIWindow alloc] initWithFrame:[[PublicUtils currentScreen] bounds]];
         
         NSString *storyboardName;
         if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad) {

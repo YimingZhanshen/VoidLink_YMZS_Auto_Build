@@ -120,13 +120,13 @@
         self.gyroToStickMinOffset = [decoder containsValueForKey:@"gyroToStickMinOffset"] ? [decoder decodeDoubleForKey:@"gyroToStickMinOffset"] : 0;
         self.physicalLeftStickMinOffset = [decoder containsValueForKey:@"physicalLeftStickMinOffset"] ? [decoder decodeDoubleForKey:@"physicalLeftStickMinOffset"] : 0;
         self.physicalRightStickMinOffset = [decoder containsValueForKey:@"physicalRightStickMinOffset"] ? [decoder decodeDoubleForKey:@"physicalRightStickMinOffset"] : 0;
-        self.controllerGyroSwitchMode = [decoder containsValueForKey:@"controllerGyroSwitchMode"] ? [decoder decodeIntForKey:@"controllerGyroSwitchMode"] : ControllerGyroSwitchDisabled;
+        self.controllerGyroSwitchMode = [decoder containsValueForKey:@"controllerGyroSwitchMode"] ? [decoder decodeIntForKey:@"controllerGyroSwitchMode"] : ControllerGyroSwitchModeDisabled;
         self.reverseGyroHoldButton = [decoder containsValueForKey:@"reverseGyroHoldButton"] ? [decoder decodeBoolForKey:@"reverseGyroHoldButton"] : false;
         self.controllerGyroSwitchHold = [decoder containsValueForKey:@"controllerGyroSwitchHold"] ? [decoder decodeIntForKey:@"controllerGyroSwitchHold"] : ControllerElementNull;
         self.controllerGyroSwitchToggle = [decoder containsValueForKey:@"controllerGyroSwitchToggle"] ? [decoder decodeIntForKey:@"controllerGyroSwitchToggle"] : ControllerElementNull;
         
-        self.touchMode = [decoder containsValueForKey:@"touchMode"] ? [decoder decodeIntForKey:@"touchMode"] : NativeTouch;
-        if(self.touchMode == NativeTouchOnly) self.touchMode = NativeTouch;
+        self.touchMode = [decoder containsValueForKey:@"touchMode"] ? [decoder decodeIntForKey:@"touchMode"] : TouchModeNative;
+        if(self.touchMode == TouchModeNativeOnly) self.touchMode = TouchModeNative;
         
         self.pointerVelocityModeDivider = [decoder containsValueForKey:@"pointerVelocityModeDivider"] ? [decoder decodeFloatForKey:@"pointerVelocityModeDivider"] : 0.5;
         self.touchPointerVelocityFactor = [decoder containsValueForKey:@"touchPointerVelocityFactor"] ? [decoder decodeFloatForKey:@"touchPointerVelocityFactor"] : 1.0;

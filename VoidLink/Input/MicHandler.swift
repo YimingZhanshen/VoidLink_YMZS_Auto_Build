@@ -139,6 +139,10 @@ public class MicHandler: NSObject {
 
         self.useBuiltinMic = useBuiltinMic
         self.voiceProcessing = voiceProcessing
+        if !deferCapture && redirectMicEnabledBySettings {
+            // Allow the first backpressure episode during initial mic startup.
+            Connection.resetSysAudioPlaybackCooldown()
+        }
         let session = AVAudioSession.sharedInstance()
         if deferCapture {
             playbackSessionBeforeCapture = (session.category, session.mode, session.categoryOptions)
@@ -493,6 +497,8 @@ public class MicHandler: NSObject {
 #else
         guard !iosDisposed else { return }
 #endif
+        // Clear the cooldown before either mute path changes the audio pipeline.
+        Connection.resetSysAudioPlaybackCooldown()
         // Use the redirect setting captured at initialization to select the mute behavior.
         // Redirect enabled: pause capture without changing the shared session or VPIO.
         if redirectMicEnabledBySettings {

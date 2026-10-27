@@ -36,7 +36,7 @@ private enum PencilProInterruptedPurchaseReset {
     ) { _ in
         let dataManager = DataManager()
         if let settings = dataManager.retrieveSettings() {
-            settings.pencilTickMode = NSNumber(value: PencilTickMode.PencilTickDisabled.rawValue)
+            settings.pencilTickMode = NSNumber(value: PencilTickMode.disabled.rawValue)
             settings.pencilTipOffsetX = 0
             settings.pencilTipOffsetY = 0
             dataManager.saveData()
@@ -323,17 +323,22 @@ enum SettingsItemID: String, Hashable, Identifiable {
 
     case touchMode = "touchModeStack"
     case mousePointerVelocity = "mousePointerVelocityStack"
+    case zoomViewportPointerVelocity = "zoomViewportPointerVelocityStack"
+    case trackpadGestureSensitivity = "trackpadGestureSensitivityStack"
+    case cursorInertia = "cursorInertiaStack"
+    case cursorInertiaDeceleration = "cursorInertiaDecelerationStack"
     case pointerVelocityDivider = "pointerVelocityDividerStack"
     case pointerVelocityFactor = "pointerVelocityFactorStack"
     case delayLeftClick = "delayLeftClickStack"
     case passthroughGestures = "passthroughGesturesStack"
-    case pinchGesture = "pinchGestureStack"
+    case trackpadGestures = "pinchGestureStack"
     case ctrlDownForPinch = "ctrlDownForPinchStack"
     case scrollSensitivity = "scrollSensitivityStack"
     case pinchSensitivity = "pinchSensitivityStack"
     case onScreenWidget = "onScreenWidgetStack"
     case buttonVisualFeedback = "buttonVisualFeedbackStack"
     case trackTouchPoint = "trackTouchPointStack"
+    case floatingKeyboardButton = "floatingKeyboardButtonStack"
 
     // MARK: Controller
 
@@ -403,11 +408,13 @@ enum SettingsItemID: String, Hashable, Identifiable {
     case duckOtherApps = "duckOtherAppStack"
     case muteInBackground = "muteInBackgroundStack"
     case audioConfig = "audioConfigStack"
+    case audioBufferLimit = "audioBufferLimitStack"
 
     // MARK: Others
 
     case statsOverlay = "statsOverlayStack"
     case unlockDisplayOrientation = "unlockDisplayOrientationStack"
+    case portraitStreamOffset = "portraitStreamOffsetStack"
     case backgroundSessionTimer = "backgroundSessionTimerStack"
     case appTheme = "appThemeStack"
     case optimizeGames = "optimizeGamesStack"
@@ -448,15 +455,20 @@ enum SettingsItemID: String, Hashable, Identifiable {
         case .asyncFrameDequeue: return "Async Frame Dequeue"
         case .pictureInPicture: return "Enable PiP"
         case .touchMode: return "Touch Mode"
-        case .mousePointerVelocity: return "Mouse Pointer Velocity"
+        case .mousePointerVelocity: return "Cursor Velocity"
+        case .zoomViewportPointerVelocity: return "Cursor Velocity (View Zoom)"
+        case .trackpadGestureSensitivity: return "Gesture Sensitivity"
+        case .cursorInertia: return "Cursor Inertia"
+        case .cursorInertiaDeceleration: return "Deceleration"
         case .pointerVelocityDivider: return "Divider Position"
         case .pointerVelocityFactor: return "Touch Pointer Velocity"
         case .delayLeftClick: return "Delay Left Click"
         case .passthroughGestures: return "Passthrough Gestures"
-        case .pinchGesture: return "Pinch Gesture"
+        case .trackpadGestures: return "Touchpad Gestures"
         case .ctrlDownForPinch: return "Ctrl Down for Pinch"
         case .scrollSensitivity: return "Scroll Sensitivity"
         case .pinchSensitivity: return "Pinch Sensitivity"
+        case .floatingKeyboardButton: return "Floating Keyboard Button"
         case .onScreenWidget: return "On-Screen Widgets"
         case .buttonVisualFeedback: return "Button Visual Feedback"
         case .trackTouchPoint: return "Touch Point Tracking"
@@ -511,8 +523,10 @@ enum SettingsItemID: String, Hashable, Identifiable {
         case .duckOtherApps: return "Duck Other Apps"
         case .muteInBackground: return "Mute in Background"
         case .audioConfig: return "Audio Configuration"
+        case .audioBufferLimit: return "Audio Buffer Limit"
         case .statsOverlay: return "Statistics Overlay"
         case .unlockDisplayOrientation: return "90° Display Rotation"
+        case .portraitStreamOffset: return "Portrait Stream Position"
         case .backgroundSessionTimer: return "Background Session"
         case .appTheme: return "Theme"
         case .optimizeGames: return "Optimize Game Settings"
@@ -1215,14 +1229,19 @@ final class SettingsItemRegistry: ObservableObject {
 
     let touchMode = SettingsItemModel<Int>(id: .touchMode, value: 1)
     let mousePointerVelocity = SettingsItemModel<Double>(id: .mousePointerVelocity, value: 100)
+    let zoomViewportPointerVelocity = SettingsItemModel<Double>(id: .zoomViewportPointerVelocity, value: 100)
+    let trackpadGestureSensitivity = SettingsItemModel<Double>(id: .trackpadGestureSensitivity, value: 1)
     let pointerVelocityDivider = SettingsItemModel<Double>(id: .pointerVelocityDivider, value: 100)
     let pointerVelocityFactor = SettingsItemModel<Double>(id: .pointerVelocityFactor, value: 100)
     let delayLeftClick = SettingsItemModel<Bool>(id: .delayLeftClick, value: true)
     let passthroughGestures = SettingsItemModel<Bool>(id: .passthroughGestures, value: true)
-    let pinchGesture = SettingsItemModel<Bool>(id: .pinchGesture, value: true)
+    let cursorInertia = SettingsItemModel<Bool>(id: .cursorInertia, value: false)
+    let cursorInertiaDeceleration = SettingsItemModel<Double>(id: .cursorInertiaDeceleration, value: Double(CursorInertiaDecelerationDefault))
+    let trackpadGestures = SettingsItemModel<Int>(id: .trackpadGestures, value: TrackpadGestureMode.ctrlAndScroll.rawValue)
     let ctrlDownForPinch = SettingsItemModel<Bool>(id: .ctrlDownForPinch, value: true)
     let scrollSensitivity = SettingsItemModel<Double>(id: .scrollSensitivity, value: 1)
     let pinchSensitivity = SettingsItemModel<Double>(id: .pinchSensitivity, value: 1)
+    let floatingKeyboardButton = SettingsItemModel<Bool>(id: .floatingKeyboardButton, value: false)
     let onScreenWidget = SettingsItemModel<Int>(id: .onScreenWidget, value: 0)
     let buttonVisualFeedback = SettingsItemModel<Bool>(id: .buttonVisualFeedback, value: true)
     let trackTouchPoint = SettingsItemModel<Bool>(id: .trackTouchPoint, value: false)
@@ -1262,7 +1281,7 @@ final class SettingsItemRegistry: ObservableObject {
     
     // MARK: Drawing Toolkit
 
-    let pencilTick = SettingsItemModel<Int>(id: .pencilTick, value: PencilTickMode.PencilTickDisabled.rawValue)
+    let pencilTick = SettingsItemModel<Int>(id: .pencilTick, value: PencilTickMode.disabled.rawValue)
     let pencilTickInterval = SettingsItemModel<Double>(id: .pencilTickInterval, value: 1500)
     let pencilTipOffset = SettingsItemModel<Bool>(id: .pencilTipOffset, value: false)
     let pressureCurve = SettingsItemModel<Bool>(id: .pressureCurve, value: false)
@@ -1298,11 +1317,13 @@ final class SettingsItemRegistry: ObservableObject {
     let duckOtherApps = SettingsItemModel<Bool>(id: .duckOtherApps, value: false)
     let muteInBackground = SettingsItemModel<Bool>(id: .muteInBackground, value: false)
     let audioConfig = SettingsItemModel<Int>(id: .audioConfig, value: AudioConfig.stereo.rawValue)
+    let audioBufferLimit = SettingsItemModel<Double>(id: .audioBufferLimit, value: 80)
 
     // MARK: Others
 
     let statsOverlay = SettingsItemModel<Int>(id: .statsOverlay, value: StatsOverlayLevel.off.rawValue)
     let unlockDisplayOrientation = SettingsItemModel<Int>(id: .unlockDisplayOrientation, value: 1)
+    let portraitStreamOffset = SettingsItemModel<Double>(id: .portraitStreamOffset, value: 0)
     let backgroundSessionTimer = SettingsItemModel<Double>(id: .backgroundSessionTimer, value: 0)
     let appTheme = SettingsItemModel<Int>(id: .appTheme, value: UIUserInterfaceStyle.light.rawValue)
     let optimizeGames = SettingsItemModel<Bool>(id: .optimizeGames, value:true)
@@ -1345,14 +1366,19 @@ final class SettingsItemRegistry: ObservableObject {
             // Touch Control
             touchMode.objectWillChange,
             mousePointerVelocity.objectWillChange,
+            zoomViewportPointerVelocity.objectWillChange,
+            trackpadGestureSensitivity.objectWillChange,
             pointerVelocityDivider.objectWillChange,
             pointerVelocityFactor.objectWillChange,
             delayLeftClick.objectWillChange,
             passthroughGestures.objectWillChange,
-            pinchGesture.objectWillChange,
+            cursorInertia.objectWillChange,
+            cursorInertiaDeceleration.objectWillChange,
+            trackpadGestures.objectWillChange,
             ctrlDownForPinch.objectWillChange,
             scrollSensitivity.objectWillChange,
             pinchSensitivity.objectWillChange,
+            floatingKeyboardButton.objectWillChange,
             onScreenWidget.objectWillChange,
             buttonVisualFeedback.objectWillChange,
             trackTouchPoint.objectWillChange,
@@ -1419,10 +1445,12 @@ final class SettingsItemRegistry: ObservableObject {
             duckOtherApps.objectWillChange,
             muteInBackground.objectWillChange,
             audioConfig.objectWillChange,
+            audioBufferLimit.objectWillChange,
 
             // Others
             statsOverlay.objectWillChange,
             unlockDisplayOrientation.objectWillChange,
+            portraitStreamOffset.objectWillChange,
             backgroundSessionTimer.objectWillChange,
             appTheme.objectWillChange,
             optimizeGames.objectWillChange,
@@ -1745,11 +1773,24 @@ fileprivate final class SettingsBlockInteractionState: ObservableObject {
 }
 
 @available(iOS 13.0, tvOS 13.0, *)
+private struct SettingsVideoResolution {
+    let presetDimensions: CMVideoDimensions
+    let interpolation: InterpolationResolutionConfiguration
+    let streamDimensions: CMVideoDimensions
+    let selection: Int
+    let framePacingMode: Int
+    let streamDimensionScale: Double
+}
+
+@available(iOS 13.0, tvOS 13.0, *)
 final class SettingsSession: NSObject, ObservableObject {
+    private static let customResolutionBasisKey = "SettingsCustomResolutionBasis.v1"
     @Published var isStreaming = false
     @Published private(set) var isGameProfileModified = false
+    @Published private(set) var isTouchMouseZoomViewportEnabled = false
     fileprivate let itemRegistry = SettingsItemRegistry()
     private var itemRegistryCancellable: AnyCancellable?
+    private var touchMouseZoomViewportCancellable: AnyCancellable?
 
     fileprivate let navigationState = SettingsNavigationState()
     var highlightedID: String? {
@@ -1806,7 +1847,9 @@ final class SettingsSession: NSObject, ObservableObject {
     fileprivate weak var presentingController: UIViewController?
     private var cachedDisplaySizes: [Int: CGSize] = [:]
     private var cachedSafeAreaSizes: [Int: CGSize] = [:]
+    private weak var lastResolutionWindow: UIWindow?
     private var isPersistingSettings = false
+    private var portraitStreamOffsetChangedInMenu = false
     private var screenConnectionNotificationTokens: [NSObjectProtocol] = []
     private var controllerNavigationSetupCoordinator: ControllerNavigationSetupCoordinator?
     private weak var capturedGyroSwitchController: GCController?
@@ -1821,6 +1864,7 @@ final class SettingsSession: NSObject, ObservableObject {
     private var pendingHighlightMoveOffset: Int?
     private var pendingHighlightMoveUsesSectionHeadersOnly: Bool?
     private var pendingHighlightMoveScheduled = false
+    private var highlightMoveCancellationGeneration: UInt64 = 0
 
     init(presentingController: UIViewController) {
 #if os(tvOS)
@@ -1853,6 +1897,15 @@ final class SettingsSession: NSObject, ObservableObject {
         lastPresetResolution = persistedResolution == 5 ? 1 : min(max(persistedResolution, 0), 4)
         customWidth = snapshot.width.intValue
         customHeight = snapshot.height.intValue
+        if persistedResolution == 5,
+           let basis = UserDefaults.standard.dictionary(forKey: Self.customResolutionBasisKey),
+           basis["submittedWidth"] as? Int == snapshot.width.intValue,
+           basis["submittedHeight"] as? Int == snapshot.height.intValue,
+           let width = basis["width"] as? Int, width >= 256,
+           let height = basis["height"] as? Int, height >= 256 {
+            customWidth = width
+            customHeight = height
+        }
         itemRegistry.frameRate.value = [30, 60, 120].contains(snapshot.framerate.intValue) ? snapshot.framerate.intValue : 60
         let bitrateIndex = settingsBitrateIndex(for: Double(snapshot.bitrate.intValue))
         itemRegistry.bitrate.value = settingsBitrateTable[bitrateIndex]
@@ -1872,16 +1925,23 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.mousePointerVelocity.value = settingsVelocitySliderPosition(
             for: CGFloat(snapshot.mousePointerVelocityFactor.doubleValue)
         )
+        itemRegistry.zoomViewportPointerVelocity.value = settingsVelocitySliderPosition(
+            for: CGFloat(snapshot.zoomViewportPointerVelocityFactor.doubleValue)
+        )
+        itemRegistry.trackpadGestureSensitivity.value = min(3, max(0.05, snapshot.trackpadGestureSensitivity.doubleValue))
         itemRegistry.pointerVelocityDivider.value = snapshot.pointerVelocityModeDivider.doubleValue * 100
         itemRegistry.pointerVelocityFactor.value = settingsVelocitySliderPosition(
             for: CGFloat(snapshot.touchPointerVelocityFactor.doubleValue)
         )
         itemRegistry.delayLeftClick.value = snapshot.delayLeftClick
         itemRegistry.passthroughGestures.value = snapshot.passthroughGestures
-        itemRegistry.pinchGesture.value = snapshot.enablePinch
+        itemRegistry.trackpadGestures.value = snapshot.trackpadGestureMode.intValue
+        itemRegistry.cursorInertia.value = snapshot.cursorInertia
+        itemRegistry.cursorInertiaDeceleration.value = min(10, max(1, snapshot.cursorInertiaDeceleration.doubleValue))
         itemRegistry.ctrlDownForPinch.value = snapshot.ctrlDownForPinch
         itemRegistry.scrollSensitivity.value = snapshot.scrollSensitivity.doubleValue
         itemRegistry.pinchSensitivity.value = snapshot.pinchSensitivity.doubleValue
+        itemRegistry.floatingKeyboardButton.value = snapshot.floatingKeyboardButton
         itemRegistry.onScreenWidget.value = snapshot.onscreenControls.intValue
         itemRegistry.buttonVisualFeedback.value = snapshot.buttonVisualFeedback
         itemRegistry.trackTouchPoint.value = snapshot.touchPointTracking
@@ -1935,11 +1995,13 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.duckOtherApps.value = snapshot.duckOtherApps
         itemRegistry.muteInBackground.value = snapshot.muteInBackground
         itemRegistry.audioConfig.value = settingsSanitizedAudioConfig(snapshot.audioConfig.intValue)
+        itemRegistry.audioBufferLimit.value = min(200, max(20, snapshot.audioBufferLimitMs.doubleValue))
 
         // MARK: Others
 
         itemRegistry.statsOverlay.value = snapshot.statsOverlayLevel.intValue
         itemRegistry.unlockDisplayOrientation.value = snapshot.unlockDisplayOrientation ? 1 : 0
+        itemRegistry.portraitStreamOffset.value = min(100, max(-100, snapshot.portraitStreamOffset.doubleValue))
         itemRegistry.backgroundSessionTimer.value = Double(snapshot.backgroundSessionTimer.intValue)
         itemRegistry.appTheme.value = snapshot.appTheme.intValue
         itemRegistry.optimizeGames.value = snapshot.optimizeGames
@@ -1959,8 +2021,8 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.enableGraphs.value = snapshot.enableGraphs
         itemRegistry.sendDummyEvent.value = snapshot.sendDummyEvent
 
-        let persistedMenuMode = SettingsMenuMode(rawValue: snapshot.settingsMenuMode.intValue) ?? .AllSettings
-        menuMode = persistedMenuMode == .RemoveSettingItem ? .FavoriteSettings : persistedMenuMode
+        let persistedMenuMode = SettingsMenuMode(rawValue: snapshot.settingsMenuMode.intValue) ?? .all
+        menuMode = persistedMenuMode == .removeSettingItem ? .favorite : persistedMenuMode
         let savedFavoriteIdentifiers = (UserDefaults.standard.array(forKey: settingsFavoriteIdentifiersKey) as? [String])
             ?? defaultFavoriteSettingIdentifiers
         favoriteSettingIdentifiers = migratedFavoriteSettingIdentifiers(savedFavoriteIdentifiers)
@@ -2008,6 +2070,20 @@ final class SettingsSession: NSObject, ObservableObject {
                 queue: .main
             ) { [weak self] _ in
                 self?.refreshResolutionGeometry()
+            },
+            NotificationCenter.default.addObserver(
+                forName: PublicUtils.hingeStatusDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                self?.refreshResolutionGeometryAfterWindowChange(notification)
+            },
+            NotificationCenter.default.addObserver(
+                forName: PublicUtils.windowGeometryDidChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                self?.refreshResolutionGeometryAfterWindowChange(notification)
             }
         ]
         
@@ -2026,7 +2102,7 @@ final class SettingsSession: NSObject, ObservableObject {
             ) { [weak self] _ in
                 guard let self else { return }
                 self.itemRegistry.onScreenWidget.value = OnScreenControlsLevel.custom.rawValue
-                self.itemRegistry.pencilTick.value = PencilTickMode.ManualTick.rawValue
+                self.itemRegistry.pencilTick.value = PencilTickMode.manualTick.rawValue
             }
         ]
         
@@ -2045,6 +2121,30 @@ final class SettingsSession: NSObject, ObservableObject {
         // Match UIKit's settingsViewJustLoaded behavior: establish the initial
         // hidden-state baseline without flashing rows restored from persistence.
         knownVisibleSettingIDs = conditionallyVisibleSettingIDs
+
+        isTouchMouseZoomViewportEnabled = itemRegistry.touchMode.value == TouchMode.relative.rawValue
+            && itemRegistry.trackpadGestures.value == TrackpadGestureMode.zoomViewport.rawValue
+        touchMouseZoomViewportCancellable = Publishers.CombineLatest(
+            itemRegistry.touchMode.$value,
+            itemRegistry.trackpadGestures.$value
+        )
+        .map { touchMode, pinchMode -> Bool in
+            return touchMode == TouchMode.relative.rawValue
+                && pinchMode == TrackpadGestureMode.zoomViewport.rawValue
+        }
+        .removeDuplicates()
+        .dropFirst() // Establish the initial state without resetting the stream viewport.
+        .sink { [weak self] enabled in
+            guard let self else { return }
+            self.isTouchMouseZoomViewportEnabled = enabled
+            if !enabled {
+                if let streamFrameVC = StreamFrameViewController.sharedInstance(),
+                   RelativeTouchGestureHandler.hasUsedZoomViewport(in: streamFrameVC.streamView) {
+                    streamFrameVC.resetMagnifierStreamViewWith(animated: true)
+                    streamFrameVC.streamView.saveStreamingGameProfileChanges()
+                }
+            }
+        }
     }
 
     deinit {
@@ -2055,8 +2155,8 @@ final class SettingsSession: NSObject, ObservableObject {
 
     var isActive: Bool { presentingController != nil }
     var usesMetal: Bool { itemRegistry.renderingBackend.value == SettingsRenderingBackend.metal.rawValue }
-    var isAllSettings: Bool { menuMode == .AllSettings }
-    var isRemovingFavorites: Bool { menuMode == .RemoveSettingItem }
+    var isAllSettings: Bool { menuMode == .all }
+    var isRemovingFavorites: Bool { menuMode == .removeSettingItem }
 
     /// Settings may remain mounted beneath ProfileSelector or an alert. Those
     /// controllers own ControllerNavigator at that time, so a SwiftUI rerender
@@ -2288,7 +2388,7 @@ final class SettingsSession: NSObject, ObservableObject {
             SettingsPickerOption(value: 30, title: "30 FPS".localized),
             SettingsPickerOption(value: 60, title: "60 FPS".localized)
         ]
-        if UIScreen.main.maximumFramesPerSecond > 62 {
+        if PublicUtils.currentScreen.maximumFramesPerSecond > 62 {
             options.append(.init(value: 120, title: "120 FPS".localized))
         }
         guard itemRegistry.framePacing.value == FramePacingMode.interpolation.rawValue,
@@ -2318,7 +2418,8 @@ final class SettingsSession: NSObject, ObservableObject {
 
     var resolutionText: String {
         _ = resolutionGeometryRevision
-        return "\(chosenWidth) × \(chosenHeight)"
+        let dimensions = resolveVideoResolution().presetDimensions
+        return "\(dimensions.width) × \(dimensions.height)"
     }
 
     var bitrateText: String {
@@ -2326,16 +2427,12 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     var interpolationText: String {
-        let dimensions = interpolationConfiguration.dimensions
+        let dimensions = resolveVideoResolution().interpolation.dimensions
         return "   \(dimensions.width) × \(dimensions.height)"
     }
 
     var streamDimensionText: String {
-        let dimensions = FrameInterpolator.scaledStreamDimensions(
-            presetDimensions: chosenDimensions,
-            interpolationDimensions: interpolationConfiguration.dimensions,
-            scale: Float(itemRegistry.streamDimensionScale.value)
-        )
+        let dimensions = resolveVideoResolution().streamDimensions
         return "   \(dimensions.width) × \(dimensions.height)"
     }
 
@@ -2507,10 +2604,19 @@ final class SettingsSession: NSObject, ObservableObject {
 
     var touchModeOptions: [SettingsPickerOption<Int>] {
         [
-            .init(value: TouchMode.RelativeTouch.rawValue, title: "Touchpad".localized),
-            .init(value: TouchMode.NativeTouch.rawValue, title: "Native Touch".localized),
-            .init(value: TouchMode.AbsoluteTouch.rawValue, title: "Single Point".localized),
-            .init(value: TouchMode.TouchDisabled.rawValue, title: "Disabled".localized)
+            .init(value: TouchMode.relative.rawValue, title: "Touchpad".localized),
+            .init(value: TouchMode.native.rawValue, title: "Native Touch".localized),
+            .init(value: TouchMode.absolute.rawValue, title: "Single Point".localized),
+            .init(value: TouchMode.disabled.rawValue, title: "Disabled".localized)
+        ]
+    }
+
+    var trackpadGestureOptions: [SettingsPickerOption<Int>] {
+        [
+            .init(value: TrackpadGestureMode.pinchDisabled.rawValue, title: "No Pinch".localized),
+            .init(value: TrackpadGestureMode.zoomViewport.rawValue, title: "View Zoom".localized),
+            .init(value: TrackpadGestureMode.nativeTrackpad.rawValue, title: "Native Mode".localized),
+            .init(value: TrackpadGestureMode.ctrlAndScroll.rawValue, title: "Ctrl+Scroll".localized)
         ]
     }
 
@@ -2533,6 +2639,18 @@ final class SettingsSession: NSObject, ObservableObject {
                     GenericUtils.handleTouchModeChangingTip(in: session.presentingController)
                 }
             ),
+            pickerItem(
+                \.trackpadGestures,
+                 setValue: { session, model, newValue in
+                     model.value = newValue
+                     if newValue == TrackpadGestureMode.nativeTrackpad.rawValue {
+                         GenericUtils.handleFirstSettingNativeTrackpad(in: session.presentingController)
+                     }
+                 },
+                options: { $0.trackpadGestureOptions },
+                distribution: .proportionalToContent,
+                isVisible: {$0.itemRegistry.touchMode.value == TouchMode.relative.rawValue},
+            ),
             sliderItem(
                 \.mousePointerVelocity,
                 range: 0...300,
@@ -2541,7 +2659,38 @@ final class SettingsSession: NSObject, ObservableObject {
                     let display = settingsVelocityDisplayPercent(for: model.value)
                     return "\(Int(display))%"
                 },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue }
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue
+                    && $0.itemRegistry.trackpadGestures.value != TrackpadGestureMode.zoomViewport.rawValue }
+            ),
+            sliderItem(
+                \.zoomViewportPointerVelocity,
+                range: 0...300,
+                clampedTo: 0...300,
+                valueText: { _, model in
+                    let display = settingsVelocityDisplayPercent(for: model.value)
+                    return "\(Int(display))%"
+                },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue
+                    && $0.itemRegistry.trackpadGestures.value == TrackpadGestureMode.zoomViewport.rawValue }
+            ),
+            sliderItem(
+                \.trackpadGestureSensitivity,
+                range: 0.05...3,
+                clampedTo: 0.05...3,
+                valueText: { _, model in "\(Int((model.value * 100).rounded()))%" },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue && $0.itemRegistry.trackpadGestures.value == TrackpadGestureMode.nativeTrackpad.rawValue }
+            ),
+            toggleItem(
+                \.passthroughGestures,
+                isVisible: {$0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue}
+            ),
+            sliderItem(
+                \.scrollSensitivity,
+                range: 0...3,
+                clampedTo: 0...3,
+                valueText: { _, model in "\(Int((model.value * 100).rounded()))%" },
+                 isVisible: { ($0.itemRegistry.touchMode.value == TouchMode.relative.rawValue && $0.itemRegistry.trackpadGestures.value != TrackpadGestureMode.nativeTrackpad.rawValue)
+                    || ($0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue && $0.itemRegistry.passthroughGestures.value)}
             ),
             sliderItem(
                 \.pointerVelocityDivider,
@@ -2551,7 +2700,7 @@ final class SettingsSession: NSObject, ObservableObject {
                     let divider = Int(model.value.rounded())
                     return "| \(divider)% | \(100 - divider)% |"
                 },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.NativeTouch.rawValue },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.native.rawValue },
                 hasInfo: true,
                 isGameProfileSetting: true,
                 continuousInteraction: SettingsContinuousInteractionDescriptor(
@@ -2571,7 +2720,7 @@ final class SettingsSession: NSObject, ObservableObject {
                     let display = settingsVelocityDisplayPercent(for: model.value)
                     return "\(Int(display))%"
                 },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.NativeTouch.rawValue },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.native.rawValue },
                 hasInfo: true,
                 isGameProfileSetting: true,
                 continuousInteraction: SettingsContinuousInteractionDescriptor(
@@ -2584,48 +2733,23 @@ final class SettingsSession: NSObject, ObservableObject {
                 )
             ),
             toggleItem(
-                \.delayLeftClick,
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue },
-                hasInfo: true
-            ),
-            toggleItem(
-                \.passthroughGestures,
-                isVisible: {$0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue}
-            ),
-            toggleItem(
-                \.pinchGesture,
-                // UIKit reveals this row with passthroughGesturesSwitchFlipped:
-                // derive the same relationship directly from the source item.
-                isVisible: {$0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue || ($0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue
-                    && $0.itemRegistry.passthroughGestures.value)}
-            ),
-            toggleItem(
                 \.ctrlDownForPinch,
-                isVisible: {($0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue
-                             && $0.itemRegistry.pinchGesture.value)
-                            || ($0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue
-                            && $0.itemRegistry.passthroughGestures.value
-                            && $0.itemRegistry.pinchGesture.value)},
+                isVisible: {($0.itemRegistry.touchMode.value == TouchMode.relative.rawValue
+                             && $0.itemRegistry.trackpadGestures.value == TrackpadGestureMode.ctrlAndScroll.rawValue)
+                            || ($0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue
+                            && $0.itemRegistry.passthroughGestures.value)},
                 hasInfo: true
-            ),
-            sliderItem(
-                \.scrollSensitivity,
-                range: 0...3,
-                clampedTo: 0...3,
-                valueText: { _, model in "\(Int((model.value * 100).rounded()))%" },
-                isVisible: {$0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue || ($0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue
-                    && $0.itemRegistry.passthroughGestures.value)}
             ),
             sliderItem(
                 \.pinchSensitivity,
                 range: 0...3,
                 clampedTo: 0...3,
                 valueText: { _, model in "\(Int((model.value * 100).rounded()))%" },
-                isVisible: {($0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue
-                             && $0.itemRegistry.pinchGesture.value)
-                            || ($0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue
-                            && $0.itemRegistry.passthroughGestures.value
-                            && $0.itemRegistry.pinchGesture.value)},
+                isVisible: {($0.itemRegistry.touchMode.value == TouchMode.relative.rawValue
+                             && ($0.itemRegistry.trackpadGestures.value == TrackpadGestureMode.zoomViewport.rawValue
+                                || $0.itemRegistry.trackpadGestures.value == TrackpadGestureMode.ctrlAndScroll.rawValue))
+                            || ($0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue
+                            && $0.itemRegistry.passthroughGestures.value)},
             ),
             pickerItem(
                 \.onScreenWidget,
@@ -2707,12 +2831,12 @@ final class SettingsSession: NSObject, ObservableObject {
 
     private var hapticEngineOptions: [SettingsPickerOption<Int>] {
         var options: [SettingsPickerOption<Int>] = [
-            .init(value: HapticEnginePreference.HapticEngineAuto.rawValue, title: "Auto".localized),
-            .init(value: HapticEnginePreference.LeftRightSwapped.rawValue, title: "L/R Swapped".localized),
-            .init(value: HapticEnginePreference.RumbleOff.rawValue, title: "Disabled".localized)
+            .init(value: HapticEnginePreference.auto.rawValue, title: "Auto".localized),
+            .init(value: HapticEnginePreference.leftRightSwapped.rawValue, title: "L/R Swapped".localized),
+            .init(value: HapticEnginePreference.rumbleOff.rawValue, title: "Disabled".localized)
         ]
         if PublicUtils.isIPhone {
-            options.insert(.init(value: HapticEnginePreference.RumbleDevice.rawValue, title: "Built-in".localized), at: 1)
+            options.insert(.init(value: HapticEnginePreference.rumbleDevice.rawValue, title: "Built-in".localized), at: 1)
         }
         return options
     }
@@ -2734,14 +2858,14 @@ final class SettingsSession: NSObject, ObservableObject {
             supportsControllerGyro = false
         }
         var options:[SettingsPickerOption<Int>] = [
-            .init(value: GyroMode.GyroModeOff.rawValue, title: "Off".localized),
-            .init(value: GyroMode.GyroModeAuto.rawValue, title: "Auto".localized, isEnabled: supportsControllerGyro),
-            .init(value: GyroMode.AlwaysController.rawValue, title: "Controller".localized, isEnabled: supportsControllerGyro)
+            .init(value: GyroMode.off.rawValue, title: "Off".localized),
+            .init(value: GyroMode.auto.rawValue, title: "Auto".localized, isEnabled: supportsControllerGyro),
+            .init(value: GyroMode.alwaysController.rawValue, title: "Controller".localized, isEnabled: supportsControllerGyro)
         ]
         
 #if !os(tvOS)
         if !PublicUtils.isTVOS && !PublicUtils.isRunningOnMacAsiPadApp {
-            options.insert(.init(value: GyroMode.AlwaysDevice.rawValue, title: "Built-in".localized, isEnabled: CMMotionManager().isGyroAvailable), at: 2)
+            options.insert(.init(value: GyroMode.alwaysDevice.rawValue, title: "Built-in".localized, isEnabled: CMMotionManager().isGyroAvailable), at: 2)
         }
 #endif
         
@@ -2857,7 +2981,7 @@ final class SettingsSession: NSObject, ObservableObject {
                 clampedTo: 0...300,
                 valueText: { _, model in "\(Int(model.value.rounded()))%" },
                 isVisible: { $0.itemRegistry.emulatedControllerType.value != Int(ControllerEmulation.xbox.rawValue)
-                    && $0.itemRegistry.gyroMode.value != GyroMode.GyroModeOff.rawValue }
+                    && $0.itemRegistry.gyroMode.value != GyroMode.off.rawValue }
             ),
             sliderItem(
                 \.leftStickMinOffset,
@@ -3031,8 +3155,8 @@ final class SettingsSession: NSObject, ObservableObject {
 
     private var pencilTickOptions: [SettingsPickerOption<Int>] {
         [
-            .init(value: PencilTickMode.PencilTickDisabled.rawValue, title: "Regular".localized),
-            .init(value: PencilTickMode.ManualTick.rawValue, title: "HD".localized)
+            .init(value: PencilTickMode.disabled.rawValue, title: "Regular".localized),
+            .init(value: PencilTickMode.manualTick.rawValue, title: "HD".localized)
         ]
     }
 
@@ -3059,7 +3183,7 @@ final class SettingsSession: NSObject, ObservableObject {
                 range: 1500...4000,
                 clampedTo: 1500...4000,
                 valueText: { _, model in "\(Int(model.value.rounded())) μs" },
-                isVisible: { $0.itemRegistry.pencilTick.value == PencilTickMode.ManualTick.rawValue }
+                isVisible: { $0.itemRegistry.pencilTick.value == PencilTickMode.manualTick.rawValue }
             ),
             toggleItem(
                 \.pencilTipOffset,
@@ -3279,7 +3403,7 @@ final class SettingsSession: NSObject, ObservableObject {
         [
             toggleItem(
                 \.audioOnPC,
-                isEnabled: { _ in !self.isStreaming },
+                isVisible: { _ in !self.isStreaming }
             ),
             sliderItem(
                 \.localVolume,
@@ -3355,6 +3479,21 @@ final class SettingsSession: NSObject, ObservableObject {
                 options: { $0.audioConfigOptions },
                 distribution: .proportionalToContent,
                 hasInfo: true
+            ),
+            sliderItem(
+                \.audioBufferLimit,
+                setValue: { session, model, newValue in
+                    let value = min(300, max(50, newValue))
+                    model.value = value
+                    guard session.settingsExpandedInStreamView else { return }
+                    Connection.setAudioBufferLimitMs(Int32(value))
+                },
+                range: 50...300,
+                clampedTo: 50...300,
+                valueText: { _, model in "\(Int(model.value)) ms" },
+                isVisible: { session in
+                    session.itemRegistry.audioConfig.value == AudioConfig.stereo.rawValue
+                }
             )
         ]
     }
@@ -3422,8 +3561,30 @@ final class SettingsSession: NSObject, ObservableObject {
                 \.unlockDisplayOrientation,
                 options: { $0.unlockDisplayOrientationOptions },
                 distribution: .equal,
-                isAvailable: !PublicUtils.isTVOS,
+                isAvailable: !PublicUtils.isTVOS && PublicUtils.isIPhone,
                 isEnabled: { $0.unlockDisplayOrientationSelectorEnabled }
+            ),
+            sliderItem(
+                \.portraitStreamOffset,
+                // % of the room between the stream's edge and the camera island (+) / home indicator (-)
+                range: -100...100,
+                clampedTo: -100...100,
+                valueText: { _, model in
+                    let percent = Int(model.value.rounded())
+                    if percent == 0 { return "Centered".localized }
+                    return percent > 0 ? "+\(percent)%" : "\(percent)%"
+                },
+                isAvailable: !PublicUtils.isTVOS && !PublicUtils.isRunningOnMacAsiPadApp,
+                isVisible: {
+                    $0.itemRegistry.unlockDisplayOrientation.value == 1 || PublicUtils.isIPad
+                },
+                onValueChanged: { session in
+                    guard session.isStreaming else { return }
+                    session.portraitStreamOffsetChangedInMenu = true
+                    StreamFrameViewController.sharedInstance()?.updatePortraitStreamOffset(
+                        percent: CGFloat(session.itemRegistry.portraitStreamOffset.value.rounded())
+                    )
+                }
             ),
             sliderItem(
                 \.backgroundSessionTimer,
@@ -3456,6 +3617,10 @@ final class SettingsSession: NSObject, ObservableObject {
                  isVisible: { _ in
                      !self.isStreaming
                  },
+            ),
+            toggleItem(
+                \.floatingKeyboardButton,
+                isAvailable: !PublicUtils.isTVOS
             ),
             toggleItem(
                 \.softKeyboardToolbar,
@@ -3547,12 +3712,24 @@ final class SettingsSession: NSObject, ObservableObject {
                     GenericUtils.handleTouchModeChangingTip(in: session.presentingController)
                 }
             ),
+            toggleItem(
+                \.cursorInertia,
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue }
+            ),
+            sliderItem(
+                \.cursorInertiaDeceleration,
+                range: 1...10,
+                clampedTo: 1...10,
+                valueText: { _, model in "\(Int(model.value.rounded()))" },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue
+                             && $0.itemRegistry.cursorInertia.value }
+            ),
             sliderItem(
                 \.relativeTouchSlideThreshold,
                 range: 0...20,
                 clampedTo: 0...20,
                 valueText: { _, model in String(format: " %.1f ", model.value) },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue },
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue },
                 hasInfo: true
             ),
             sliderItem(
@@ -3560,14 +3737,19 @@ final class SettingsSession: NSObject, ObservableObject {
                 range: 0...5,
                 clampedTo: 0...5,
                 valueText: { _, model in String(format: "  %.1f  ", model.value) },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.RelativeTouch.rawValue }
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.relative.rawValue }
+            ),
+            toggleItem(
+                \.delayLeftClick,
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue },
+                hasInfo: true
             ),
             sliderItem(
                 \.leftClickDelay,
                 range: 0...1000,
                 clampedTo: 0...1000,
                 valueText: { _, model in "  \(Int(model.value.rounded())) ms  " },
-                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.AbsoluteTouch.rawValue }
+                isVisible: { $0.itemRegistry.touchMode.value == TouchMode.absolute.rawValue }
             ),
             pickerItem(
                 \.renderingBackend,
@@ -3904,16 +4086,11 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     private var externalDisplayScreen: UIScreen? {
-#if !os(tvOS)
-        if #available(iOS 16.0, *) {
-            if let externalScene = UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .first(where: { $0.session.role == .windowExternalDisplayNonInteractive }) {
-                return externalScene.screen
-            }
-        }
-#endif
-        return UIScreen.screens.first(where: { $0 !== UIScreen.main })
+        PublicUtils.externalScreen
+    }
+
+    private var resolutionWindow: UIWindow? {
+        presentingController?.viewIfLoaded?.window ?? lastResolutionWindow
     }
 
     private var targetScreen: UIScreen {
@@ -3921,32 +4098,33 @@ final class SettingsSession: NSObject, ObservableObject {
            let externalDisplayScreen {
             return externalDisplayScreen
         }
-        return presentingController?.view.window?.screen ?? UIScreen.main
+        return resolutionWindow?.screen ?? PublicUtils.currentScreen
     }
 
     /// Mirrors UIKit's resolution-table inputs while Settings is attached to
     /// a window. Persistence happens after dismissal, when that window may no
     /// longer exist, so retain the last measured pixel sizes per display mode.
-    private func refreshDynamicResolutionSizeCache() {
+    private func refreshDynamicResolutionSizeCache(for sourceWindow: UIWindow? = nil) {
         guard !isPersistingSettings else { return }
-        guard let window = presentingController?.viewIfLoaded?.window else { return }
+        guard let window = sourceWindow ?? resolutionWindow else { return }
+        lastResolutionWindow = window
 
         let displayMode = itemRegistry.externalDisplayMode.value
         let externalScreen = externalDisplayScreen
         let usesExternalDisplay = displayMode == ExternalDisplayMode.extended.rawValue && externalScreen != nil
         let displayScreen = usesExternalDisplay
-            ? (externalScreen ?? UIScreen.main)
+            ? (externalScreen ?? PublicUtils.currentScreen)
             : window.screen
         let displayBounds = usesExternalDisplay ? displayScreen.bounds : window.bounds
         cachedDisplaySizes[displayMode] = CGSize(
-            width: displayBounds.width * displayScreen.scale,
-            height: displayBounds.height * displayScreen.scale
+            width: displayBounds.width * displayScreen.nativeScale,
+            height: displayBounds.height * displayScreen.nativeScale
         )
 
         let insets = window.safeAreaInsets
         cachedSafeAreaSizes[displayMode] = CGSize(
-            width: (window.bounds.width - insets.left - insets.right) * window.screen.scale,
-            height: window.bounds.height * window.screen.scale
+            width: (window.bounds.width - insets.left - insets.right) * window.screen.nativeScale,
+            height: window.bounds.height * window.screen.nativeScale
         )
     }
 
@@ -3959,8 +4137,8 @@ final class SettingsSession: NSObject, ObservableObject {
         let screen = targetScreen
         let bounds = displayMode == ExternalDisplayMode.extended.rawValue
             ? screen.bounds
-            : (presentingController?.view.window?.bounds ?? screen.bounds)
-        return CGSize(width: bounds.width * screen.scale, height: bounds.height * screen.scale)
+            : (resolutionWindow?.bounds ?? screen.bounds)
+        return CGSize(width: bounds.width * screen.nativeScale, height: bounds.height * screen.nativeScale)
     }
 
     private var availableSafeAreaSize: CGSize {
@@ -3969,13 +4147,13 @@ final class SettingsSession: NSObject, ObservableObject {
         if let cachedSize = cachedSafeAreaSizes[displayMode] {
             return cachedSize
         }
-        guard let window = presentingController?.view.window else {
+        guard let window = resolutionWindow else {
             return availableDisplaySize
         }
         let insets = window.safeAreaInsets
         return CGSize(
-            width: (window.bounds.width - insets.left - insets.right) * window.screen.scale,
-            height: window.bounds.height * window.screen.scale
+            width: (window.bounds.width - insets.left - insets.right) * window.screen.nativeScale,
+            height: window.bounds.height * window.screen.nativeScale
         )
     }
 
@@ -3983,8 +4161,33 @@ final class SettingsSession: NSObject, ObservableObject {
         CMVideoDimensions(width: Int32(chosenWidth), height: Int32(chosenHeight))
     }
 
-    private var interpolationConfiguration: InterpolationResolutionConfiguration {
-        FrameInterpolator.resolutionConfiguration(for: chosenDimensions, level: Float(itemRegistry.interpolationLevel.value))
+    /// The single source for display, bitrate estimation and persisted launch dimensions.
+    /// Measure once and derive interpolation/scaling from that same preset snapshot.
+    private func resolveVideoResolution(for window: UIWindow? = nil) -> SettingsVideoResolution {
+        refreshDynamicResolutionSizeCache(for: window)
+        let wasPersisting = isPersistingSettings
+        isPersistingSettings = true
+        defer { isPersistingSettings = wasPersisting }
+
+        let preset = chosenDimensions
+        let interpolation = FrameInterpolator.resolutionConfiguration(
+            for: preset, level: Float(itemRegistry.interpolationLevel.value)
+        )
+        let pacing = itemRegistry.framePacing.value
+        let scale = itemRegistry.streamDimensionScale.value
+        let submitted = pacing == FramePacingMode.interpolation.rawValue
+            ? FrameInterpolator.scaledStreamDimensions(
+                presetDimensions: preset,
+                interpolationDimensions: interpolation.dimensions,
+                scale: Float(scale)
+            )
+            : preset
+        return SettingsVideoResolution(
+            presetDimensions: preset, interpolation: interpolation,
+            streamDimensions: submitted,
+            selection: itemRegistry.usesCustomResolution.value ? 5 : itemRegistry.resolution.value,
+            framePacingMode: pacing, streamDimensionScale: scale
+        )
     }
 
     func setCustomResolution(_ enabled: Bool) {
@@ -3995,6 +4198,7 @@ final class SettingsSession: NSObject, ObservableObject {
             return
         }
 
+        let suggestedDimensions = resolveVideoResolution().presetDimensions
         let alert = UIAlertController(
             title: "Enter Custom Resolution".localized,
             message: nil,
@@ -4003,12 +4207,12 @@ final class SettingsSession: NSObject, ObservableObject {
         alert.addTextField {
             $0.placeholder = "Video Width".localized
             $0.keyboardType = .numberPad
-            $0.text = self.customWidth > 0 ? "\(self.customWidth)" : nil
+            $0.text = suggestedDimensions.width > 0 ? "\(suggestedDimensions.width)" : nil
         }
         alert.addTextField {
             $0.placeholder = "Video Height".localized
             $0.keyboardType = .numberPad
-            $0.text = self.customHeight > 0 ? "\(self.customHeight)" : nil
+            $0.text = suggestedDimensions.height > 0 ? "\(suggestedDimensions.height)" : nil
         }
         alert.addAction(UIAlertAction(title: "Cancel".localized, style: .cancel) { _ in
             self.itemRegistry.usesCustomResolution.value = false
@@ -4095,7 +4299,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     func updateBitrateForCurrentResolutionAndFrameRate() {
-        let dimensions = chosenStreamDimensionsForBitrate
+        let dimensions = resolveVideoResolution().streamDimensions
         let fps = Double(itemRegistry.frameRate.value)
         let frameRateFactor = (fps <= 60 ? fps : sqrt(fps / 60) * 60) / 30
         let resolutionFactor = defaultBitrateResolutionFactor(
@@ -4104,18 +4308,6 @@ final class SettingsSession: NSObject, ObservableObject {
         let defaultBitrate = (resolutionFactor * frameRateFactor).rounded() * 1000
         let bitrate = min(defaultBitrate, 100_000)
         setBitrateSliderPosition(Double(settingsBitrateIndex(for: bitrate)))
-    }
-
-    private var chosenStreamDimensionsForBitrate: CMVideoDimensions {
-        let presetDimensions = chosenDimensions
-        guard itemRegistry.framePacing.value == FramePacingMode.interpolation.rawValue else {
-            return presetDimensions
-        }
-        return FrameInterpolator.scaledStreamDimensions(
-            presetDimensions: presetDimensions,
-            interpolationDimensions: interpolationConfiguration.dimensions,
-            scale: Float(itemRegistry.streamDimensionScale.value)
-        )
     }
 
     private func defaultBitrateResolutionFactor(pixels: Int) -> Double {
@@ -4157,7 +4349,9 @@ final class SettingsSession: NSObject, ObservableObject {
         setSectionHitTestingEnabled(true, for: identifier)
         UserDefaults.standard.set(nextValue, forKey: identifier)
         normalizeHighlight()
-        refreshSectionHitTesting()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.refreshSectionHitTesting()
+        }
     }
 
     func isSectionExpanded(_ identifier: String) -> Bool {
@@ -4202,7 +4396,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
     
     fileprivate func updateSectionHitTesting(for scrollView: UIScrollView, refresh: Bool = false) {
-        if menuMode == .FavoriteSettings {
+        if menuMode == .favorite {
             guard enablesSectionHitTestCulling, scrollView.window != nil else { return }
             let viewport = scrollView.convert(scrollView.bounds, to: nil)
             for id in favoriteSettingIDs {
@@ -4389,6 +4583,23 @@ final class SettingsSession: NSObject, ObservableObject {
         return nil
     }
 
+    /// Only the slider thumb owns the touch; the rest of its row can still
+    /// offer favorite actions. Use UISlider's geometry rather than UIKit subviews.
+    fileprivate func isFavoriteSliderThumb(at point: CGPoint, in coordinateView: UIView) -> Bool {
+#if !os(tvOS)
+        var current = coordinateView.hitTest(point, with: nil)
+        while let candidate = current {
+            if let slider = candidate as? UISlider {
+                let track = slider.trackRect(forBounds: slider.bounds)
+                let thumb = slider.thumbRect(forBounds: slider.bounds, trackRect: track, value: slider.value)
+                return thumb.contains(coordinateView.convert(point, to: slider))
+            }
+            current = candidate.superview
+        }
+#endif
+        return false
+    }
+
     fileprivate func isExcludedFavoriteControlTouch(_ view: UIView?) -> Bool {
         var current = view
         while let candidate = current {
@@ -4418,6 +4629,7 @@ final class SettingsSession: NSObject, ObservableObject {
             // session. The previous session was already persisted when the
             // menu was dismissed.
             isGameProfileModified = false
+            portraitStreamOffsetChangedInMenu = false
         }
         updateConditionalVisibility(suppressEmerging: menuIsOpening) {
             isStreaming = streaming
@@ -4449,11 +4661,71 @@ final class SettingsSession: NSObject, ObservableObject {
         themeRevision &+= 1
     }
 
-    func refreshResolutionGeometry() {
-        // if itemRegistry.externalDisplayMode.value == ExternalDisplayMode.duplicated.rawValue || UIScreen.screens.count == 1 {
-            refreshDynamicResolutionSizeCache()
-            resolutionGeometryRevision &+= 1
-        // }
+    private func refreshResolutionGeometryAfterWindowChange(_ notification: Notification) {
+        // All hinge poses and ordinary window geometry changes use the reporting
+        // window, including when the settings menu has no attached view.
+        guard let window = notification.object as? UIWindow else { return }
+        refreshResolutionGeometry(for: window)
+        DispatchQueue.main.async { [weak self, weak window] in
+            guard let window else { return }
+            self?.refreshResolutionGeometry(for: window)
+        }
+    }
+
+    func refreshResolutionGeometry(for window: UIWindow? = nil) {
+        guard !isPersistingSettings else { return }
+        let resolution = resolveVideoResolution(for: window)
+        resolutionGeometryRevision &+= 1
+
+        // A detached settings session may have an old isStreaming value. Prefer
+        // the owner's live state and never change launch dimensions mid-stream.
+        let streaming = (presentingController as? SettingsViewController)?
+            .mainFrameViewController?.isStreaming() ?? isStreaming
+        guard !streaming,
+              let size = cachedDisplaySizes[itemRegistry.externalDisplayMode.value],
+              size.width > 0, size.height > 0 else { return }
+
+        let dataManager = DataManager()
+        guard let settings = dataManager.retrieveSettings() else { return }
+        if writeVideoResolution(to: settings, resolution: resolution) {
+            dataManager.saveData()
+        }
+    }
+
+    /// Shared by geometry refresh and menu persistence; scale the base exactly once.
+    @discardableResult
+    private func writeVideoResolution(
+        to settings: Settings,
+        resolution: SettingsVideoResolution
+    ) -> Bool {
+        let preset = resolution.presetDimensions
+        guard preset.width > 0, preset.height > 0 else { return false }
+        let submitted = resolution.streamDimensions
+        guard submitted.width > 0, submitted.height > 0 else { return false }
+        let selected = resolution.selection
+        let scale = resolution.streamDimensionScale
+        let interpolation = resolution.interpolation
+        let changed = settings.width?.intValue != Int(submitted.width)
+            || settings.height?.intValue != Int(submitted.height)
+            || settings.resolutionSelected?.intValue != selected
+            || settings.interpolationMaximumDimension?.intValue != interpolation.maximumDimension
+            || settings.interpolationMaximumPixelCount?.intValue != interpolation.maximumPixelCount
+            || settings.streamDimensionScale?.doubleValue != scale
+            || settings.framePacingMode?.intValue != resolution.framePacingMode
+        settings.width = NSNumber(value: submitted.width)
+        settings.height = NSNumber(value: submitted.height)
+        settings.resolutionSelected = NSNumber(value: selected)
+        settings.interpolationMaximumDimension = NSNumber(value: interpolation.maximumDimension)
+        settings.interpolationMaximumPixelCount = NSNumber(value: interpolation.maximumPixelCount)
+        settings.streamDimensionScale = NSNumber(value: scale)
+        settings.framePacingMode = NSNumber(value: resolution.framePacingMode)
+        if selected == 5 {
+            UserDefaults.standard.set([
+                "width": Int(preset.width), "height": Int(preset.height),
+                "submittedWidth": Int(submitted.width), "submittedHeight": Int(submitted.height)
+            ], forKey: Self.customResolutionBasisKey)
+        }
+        return changed
     }
     
     func refreshSectionHitTesting() {
@@ -4547,8 +4819,8 @@ final class SettingsSession: NSObject, ObservableObject {
     private func reloadGameProfileSettings() {
         let profile = OSCProfilesManager.sharedManager(CGRect.zero).getSelectedProfile()
         let storedTouchMode = Int(profile.touchMode)
-        let displayedTouchMode = storedTouchMode == TouchMode.NativeTouchOnly.rawValue
-            ? TouchMode.NativeTouch.rawValue
+        let displayedTouchMode = storedTouchMode == TouchMode.nativeOnly.rawValue
+            ? TouchMode.native.rawValue
             : storedTouchMode
 
         // MARK: Touch Control
@@ -4603,6 +4875,7 @@ final class SettingsSession: NSObject, ObservableObject {
     /// remains only as an integration bridge; persistence itself is not
     /// section-specific.
     func persistSettings() {
+        let resolution = resolveVideoResolution()
         isPersistingSettings = true
         defer { isPersistingSettings = false }
 
@@ -4615,8 +4888,18 @@ final class SettingsSession: NSObject, ObservableObject {
         let dataManager = DataManager()
 
         persistGameProfileSettingsIfNeeded()
+        if isStreaming && portraitStreamOffsetChangedInMenu {
+            let profileManager = OSCProfilesManager.sharedManager(CGRect.zero)
+            let profile = profileManager.getSelectedProfile()
+            if profile.normalizedStreamViewOffset != .zero || profile.streamViewScale != 1 {
+                profile.normalizedStreamViewOffset = .zero
+                profile.streamViewScale = 1
+                profileManager.replaceSelectedProfile(with: profile, overwriteDefault: true)
+            }
+            portraitStreamOffsetChangedInMenu = false
+        }
         guard let settings = dataManager.retrieveSettings() else { return }
-        let interpolationConfiguration = self.interpolationConfiguration
+        let interpolationConfiguration = resolution.interpolation
         let backgroundSessionTimerValue = itemRegistry.backgroundSessionTimer.value >= 61
             ? Int(INT16_MAX)
             : Int(itemRegistry.backgroundSessionTimer.value)
@@ -4627,9 +4910,7 @@ final class SettingsSession: NSObject, ObservableObject {
         // MARK: Video
 
         if !isStreaming {
-            settings.width = NSNumber(value: chosenWidth)
-            settings.height = NSNumber(value: chosenHeight)
-            settings.resolutionSelected = NSNumber(value: itemRegistry.usesCustomResolution.value ? 5 : itemRegistry.resolution.value)
+            writeVideoResolution(to: settings, resolution: resolution)
         }
         
         settings.framerate = NSNumber(value: itemRegistry.frameRate.value)
@@ -4637,10 +4918,10 @@ final class SettingsSession: NSObject, ObservableObject {
         settings.preferredCodec = Int32(itemRegistry.codec.value)
         settings.enableHdr = itemRegistry.hdr.value
         settings.enableYUV444 = itemRegistry.yuv444.value
-        settings.framePacingMode = NSNumber(value: itemRegistry.framePacing.value)
+        settings.framePacingMode = NSNumber(value: resolution.framePacingMode)
         settings.interpolationMaximumDimension = NSNumber(value: interpolationConfiguration.maximumDimension)
         settings.interpolationMaximumPixelCount = NSNumber(value: interpolationConfiguration.maximumPixelCount)
-        settings.streamDimensionScale = NSNumber(value: itemRegistry.streamDimensionScale.value)
+        settings.streamDimensionScale = NSNumber(value: resolution.streamDimensionScale)
         settings.frameQueueSize = NSNumber(value: Int(itemRegistry.frameQueueSize.value))
         settings.asyncFrameDequeue = itemRegistry.asyncFrameDequeue.value
         settings.enablePIP = itemRegistry.pictureInPicture.value
@@ -4649,17 +4930,23 @@ final class SettingsSession: NSObject, ObservableObject {
 
         settings.touchMode = NSNumber(value: itemRegistry.touchMode.value)
         settings.mousePointerVelocityFactor = NSNumber(value: settingsVelocityFactor(for: itemRegistry.mousePointerVelocity.value))
+        settings.zoomViewportPointerVelocityFactor = NSNumber(value: settingsVelocityFactor(for: itemRegistry.zoomViewportPointerVelocity.value))
+        settings.trackpadGestureSensitivity = NSNumber(value: itemRegistry.trackpadGestureSensitivity.value)
         settings.pointerVelocityModeDivider = NSNumber(value: itemRegistry.pointerVelocityDivider.value / 100)
         settings.touchPointerVelocityFactor = NSNumber(value: settingsVelocityFactor(for: itemRegistry.pointerVelocityFactor.value))
         settings.delayLeftClick = itemRegistry.delayLeftClick.value
         settings.passthroughGestures = itemRegistry.passthroughGestures.value
-        settings.enablePinch = itemRegistry.pinchGesture.value
+        settings.trackpadGestureMode = NSNumber(value: itemRegistry.trackpadGestures.value)
         settings.ctrlDownForPinch = itemRegistry.ctrlDownForPinch.value
         settings.scrollSensitivity = NSNumber(value: itemRegistry.scrollSensitivity.value)
         settings.pinchSensitivity = NSNumber(value: itemRegistry.pinchSensitivity.value)
         settings.onscreenControls = NSNumber(value: itemRegistry.onScreenWidget.value)
         settings.buttonVisualFeedback = itemRegistry.buttonVisualFeedback.value
         settings.touchPointTracking = itemRegistry.trackTouchPoint.value
+        UserDefaults.standard.set(itemRegistry.cursorInertia.value, forKey: CursorInertiaDefaultsKey)
+        UserDefaults.standard.set(itemRegistry.cursorInertiaDeceleration.value.rounded(), forKey: CursorInertiaDecelerationDefaultsKey)
+        settings.floatingKeyboardButton = itemRegistry.floatingKeyboardButton.value
+        UserDefaults.standard.set(itemRegistry.portraitStreamOffset.value.rounded(), forKey: PortraitStreamOffsetDefaultsKey)
 
         // MARK: Controller
 
@@ -4708,6 +4995,7 @@ final class SettingsSession: NSObject, ObservableObject {
         settings.duckOtherApps = itemRegistry.duckOtherApps.value
         settings.muteInBackground = itemRegistry.muteInBackground.value
         settings.audioConfig = NSNumber(value: settingsSanitizedAudioConfig(itemRegistry.audioConfig.value))
+        settings.audioBufferLimitMs = NSNumber(value: Int(min(200, max(20, itemRegistry.audioBufferLimit.value.rounded()))))
 
         // MARK: Others
 
@@ -5074,6 +5362,9 @@ final class SettingsSession: NSObject, ObservableObject {
                     let calibrationProfile = (profile.mutableCopy() as? OSCProfile) ?? profile
                     calibrationProfile.useBuiltinGyro = self.itemRegistry.gyroSource.value == SettingsGyroSource.builtIn.rawValue
                     let motionHandler = MotionHandler.shared(profile: calibrationProfile)
+                    if motionHandler.motionReferenceView?.window == nil {
+                        motionHandler.motionReferenceView = presenter.view
+                    }
                     motionHandler.calibrateGyroBias(duration: 5) {
                         let dataManager = DataManager()
                         guard let settings = dataManager.retrieveSettings() else { return }
@@ -5100,9 +5391,9 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     fileprivate func pencilTickChanged() {
-        guard itemRegistry.pencilTick.value == PencilTickMode.ManualTick.rawValue else { return }
+        guard itemRegistry.pencilTick.value == PencilTickMode.manualTick.rawValue else { return }
         requirePencilPro(rollback: { [weak self] in
-            self?.itemRegistry.pencilTick.value = PencilTickMode.PencilTickDisabled.rawValue
+            self?.itemRegistry.pencilTick.value = PencilTickMode.disabled.rawValue
         })
     }
 
@@ -5182,7 +5473,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     private func resetPencilProItemsAfterInterruptedPurchase() {
-        itemRegistry.pencilTick.value = PencilTickMode.PencilTickDisabled.rawValue
+        itemRegistry.pencilTick.value = PencilTickMode.disabled.rawValue
         itemRegistry.pressureCurve.value = false
         itemRegistry.doubleTapShortcut.value = false
         itemRegistry.squeezeShortcut.value = false
@@ -5289,7 +5580,7 @@ final class SettingsSession: NSObject, ObservableObject {
         stopFavoriteAutoscroll()
         ControllerNavigator.settingsSectionNavigationHoldActive = false
         menuMode = newMode
-        if newMode != .RemoveSettingItem {
+        if newMode != .removeSettingItem {
             let dataManager = DataManager()
             if let settings = dataManager.retrieveSettings() {
                 settings.settingsMenuMode = NSNumber(value: newMode.rawValue)
@@ -5301,7 +5592,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     func requestAddFavorite(for id: SettingsItemID, anchorRect: CGRect) {
-        guard menuMode == .AllSettings,
+        guard menuMode == .all,
               let identifier = favoriteIdentifier(for: id),
               let presentingController,
               presentingController.presentedViewController == nil else { return }
@@ -5347,9 +5638,9 @@ final class SettingsSession: NSObject, ObservableObject {
               let identifier = favoriteIdentifier(for: id) else { return }
 
         switch menuMode {
-        case .AllSettings:
+        case .all:
             addFavorite(identifier: identifier, showFeedback: true)
-        case .FavoriteSettings:
+        case .favorite:
             removeFavorite(identifier: identifier)
         default:
             break
@@ -5415,7 +5706,7 @@ final class SettingsSession: NSObject, ObservableObject {
             }
             return
         }
-        guard menuMode == .FavoriteSettings,
+        guard menuMode == .favorite,
               let highlightedID,
               let id = SettingsItemID.settingItem(rawValue: highlightedID),
               let identifier = favoriteIdentifier(for: id),
@@ -5464,7 +5755,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     private func favoriteAutoscrollFrame(_ link: CADisplayLink) {
-        guard menuMode == .FavoriteSettings, draggedFavoriteID != nil,
+        guard menuMode == .favorite, draggedFavoriteID != nil,
               let scrollView = navigationScrollView else {
             stopFavoriteAutoscroll(reason: "frame: missing active drag/scrollView")
             return
@@ -5483,7 +5774,8 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     fileprivate func favoriteDragTarget(at point: CGPoint, in view: UIView) -> (SettingsItemID, UIView)? {
-        guard menuMode == .FavoriteSettings else { return nil }
+        guard menuMode == .favorite,
+              !isFavoriteSliderThumb(at: point, in: view) else { return nil }
         for id in favoriteSettingIDs where isVisible(id) {
             guard let row = favoriteLongPressTargets[id]?.view, row.window != nil,
                   row.bounds.contains(view.convert(point, to: row)) else { continue }
@@ -5493,7 +5785,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     fileprivate func updateFavoriteAutoscroll(locationInScrollView location: CGPoint) {
-        guard menuMode == .FavoriteSettings, draggedFavoriteID != nil,
+        guard menuMode == .favorite, draggedFavoriteID != nil,
               let scrollView = navigationScrollView else {
             stopFavoriteAutoscroll(reason: "missing drag/scrollView")
             return
@@ -5506,7 +5798,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     func moveDraggedFavorite(over destination: SettingsItemID) {
-        guard menuMode == .FavoriteSettings,
+        guard menuMode == .favorite,
               let source = draggedFavoriteID,
               source != destination,
               let sourceIndex = favoriteSettingIdentifiers.firstIndex(of: source.rawValue),
@@ -5708,7 +6000,7 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     private var visibleNavigationIDs: [String] {
-        guard menuMode != .AllSettings else { return allSettingsNavigationIDs }
+        guard menuMode != .all else { return allSettingsNavigationIDs }
         return favoriteSettingIDs.compactMap { id -> String? in
             guard isVisible(id), isEnabled(id) else { return nil }
             return id.rawValue
@@ -5716,14 +6008,14 @@ final class SettingsSession: NSObject, ObservableObject {
     }
 
     private var sectionHeaderNavigationIDs: [String] {
-        guard menuMode == .AllSettings else { return [] }
+        guard menuMode == .all else { return [] }
         return settingsCatalog.compactMap { descriptor in
             hasVisibleItems(descriptor) ? "sectionHeader-\(descriptor.id.rawValue)" : nil
         }
     }
 
     private var completeNavigationOrderForHighlightRestoration: [String] {
-        guard menuMode == .AllSettings else {
+        guard menuMode == .all else {
             return favoriteSettingIDs.map(\.rawValue)
         }
 
@@ -5737,34 +6029,47 @@ final class SettingsSession: NSObject, ObservableObject {
         }
     }
 
-    func moveHighlight(by offset: Int) {
+    var currentHighlightMoveGeneration: UInt64 {
+        pendingHighlightMoveLock.lock()
+        defer { pendingHighlightMoveLock.unlock() }
+        return highlightMoveCancellationGeneration
+    }
+
+    func moveHighlight(by offset: Int, cancellationGeneration: UInt64? = nil) {
+        if let cancellationGeneration, cancellationGeneration != currentHighlightMoveGeneration { return }
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self] in
-                self?.moveHighlight(by: offset)
+                self?.moveHighlight(by: offset, cancellationGeneration: cancellationGeneration)
             }
             return
         }
         showNavigationHighlightForControllerNavigation()
         schedulePendingHighlightMove(
             by: offset,
-            usingSectionHeadersOnly: ControllerNavigator.settingsSectionNavigationHoldActive && menuMode == .AllSettings
+            usingSectionHeadersOnly: ControllerNavigator.settingsSectionNavigationHoldActive && menuMode == .all,
+            cancellationGeneration: cancellationGeneration
         )
     }
 
     func setSectionNavigationHoldActive(_ isActive: Bool) {
-        ControllerNavigator.settingsSectionNavigationHoldActive = isActive && menuMode == .AllSettings
+        ControllerNavigator.settingsSectionNavigationHoldActive = isActive && menuMode == .all
     }
 
     func cancelPendingHighlightMoves() {
         pendingHighlightMoveLock.lock()
+        highlightMoveCancellationGeneration &+= 1
         pendingHighlightMoveOffset = nil
         pendingHighlightMoveUsesSectionHeadersOnly = nil
         pendingHighlightMoveScheduled = false
         pendingHighlightMoveLock.unlock()
     }
 
-    private func schedulePendingHighlightMove(by offset: Int, usingSectionHeadersOnly: Bool) {
+    private func schedulePendingHighlightMove(by offset: Int, usingSectionHeadersOnly: Bool, cancellationGeneration: UInt64?) {
         pendingHighlightMoveLock.lock()
+        if let cancellationGeneration, cancellationGeneration != highlightMoveCancellationGeneration {
+            pendingHighlightMoveLock.unlock()
+            return
+        }
         pendingHighlightMoveOffset = offset
         pendingHighlightMoveUsesSectionHeadersOnly = usingSectionHeadersOnly
         guard !pendingHighlightMoveScheduled else {
@@ -5772,15 +6077,21 @@ final class SettingsSession: NSObject, ObservableObject {
             return
         }
         pendingHighlightMoveScheduled = true
+        let generation = highlightMoveCancellationGeneration
         pendingHighlightMoveLock.unlock()
 
         DispatchQueue.main.async { [weak self] in
-            self?.performPendingHighlightMove()
+            self?.performPendingHighlightMove(generation: generation)
         }
     }
 
-    private func performPendingHighlightMove() {
+    private func performPendingHighlightMove(generation: UInt64) {
         pendingHighlightMoveLock.lock()
+        // A cancelled drain must not consume a newer gesture's pending move.
+        guard generation == highlightMoveCancellationGeneration else {
+            pendingHighlightMoveLock.unlock()
+            return
+        }
         let offset = pendingHighlightMoveOffset
         let usesSectionHeadersOnly = pendingHighlightMoveUsesSectionHeadersOnly
         pendingHighlightMoveOffset = nil
@@ -5788,7 +6099,8 @@ final class SettingsSession: NSObject, ObservableObject {
         pendingHighlightMoveScheduled = false
         pendingHighlightMoveLock.unlock()
 
-        guard let offset, let usesSectionHeadersOnly, isActive else { return }
+        guard let offset, let usesSectionHeadersOnly, isActive,
+              generation == currentHighlightMoveGeneration else { return }
         performHighlightMove(by: offset, usingSectionHeadersOnly: usesSectionHeadersOnly)
     }
 
@@ -5908,7 +6220,7 @@ final class SettingsSession: NSObject, ObservableObject {
         if isFavorite {
             favoriteItemControls[itemID] = control.map { SettingsWeakControl($0) }
             // Apply this favorite row's state, never its original section's state.
-            control?.isUserInteractionEnabled = (menuMode != .FavoriteSettings ||
+            control?.isUserInteractionEnabled = (menuMode != .favorite ||
                 favoriteItemInteractionState(for: itemID).allowsHitTesting) && isItemUserInteractionEnabled(itemID)
             return
         }
@@ -6050,7 +6362,7 @@ final class SettingsSession: NSObject, ObservableObject {
     func persistHighlight() {
         guard let highlightedID else { return }
         let persistedID: String
-        if menuMode != .AllSettings,
+        if menuMode != .all,
            let id = SettingsItemID.settingItem(rawValue: highlightedID),
            let favoriteID = favoriteIdentifier(for: id) {
             persistedID = favoriteID
@@ -6117,10 +6429,10 @@ final class SettingsSession: NSObject, ObservableObject {
         var elements = [
             ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "readTip")
         ]
-        if menuMode == .AllSettings {
+        if menuMode == .all {
             elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "doublePressToAddFavorite"))
         }
-        if menuMode == .FavoriteSettings {
+        if menuMode == .favorite {
             elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadDown : .y, action: "doublePressToDelete"))
             elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "holdToReorder"))
         }
@@ -6128,7 +6440,7 @@ final class SettingsSession: NSObject, ObservableObject {
         elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .rightStickY : .leftStickY, action: "menuNavigation"))
         elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "menuNavigation"))
         
-        if menuMode == .AllSettings {
+        if menuMode == .all {
             elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .a, action: "holdToNavSection"))
         }
         
@@ -6628,7 +6940,7 @@ private struct SettingsCatalogItemView: View {
                     Text(item.id.titleKey.localized)
                         .font(.system(size: layout.itemMainLabelFontSize))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        // .minimumScaleFactor(0.5)
                 }
                 SettingsPicker(
                     selection: Binding(get: { value(store) }, set: { newValue in
@@ -6672,7 +6984,7 @@ private struct SettingsCatalogItemView: View {
                     Text(item.id.titleKey.localized)
                         .font(.system(size: layout.itemMainLabelFontSize))
                         .lineLimit(1)
-                        .minimumScaleFactor(0.5)
+                        // .minimumScaleFactor(0.5)
                 }
                 SettingsSlider(
                     value: Binding(get: { value(store) }, set: { newValue in
@@ -6860,7 +7172,7 @@ private struct SettingsFavoriteItemsView: View {
         .modifier(SettingsFavoriteDragModifier(id: id, store: store, enabled: !store.isRemovingFavorites))
         .modifier(SettingsBlockInteractionModifier(
             state: store.favoriteItemInteractionState(for: id),
-            appliesViewportCulling: enablesSectionHitTestCulling && store.menuMode == .FavoriteSettings
+            appliesViewportCulling: enablesSectionHitTestCulling && store.menuMode == .favorite
         ))
     }
 }
@@ -7275,7 +7587,7 @@ private struct SettingsScrollViewResolver: UIViewRepresentable {
 
         func updateFavoriteDragSource() {
 #if !os(tvOS)
-            guard let scrollView = resolvedScrollView, store?.menuMode == .FavoriteSettings else {
+            guard let scrollView = resolvedScrollView, store?.menuMode == .favorite else {
                 if let source = favoriteDragSource {
                     source.interaction.view?.removeInteraction(source.interaction)
                     source.store?.stopFavoriteAutoscroll(reason: "drag source detached")
@@ -7326,7 +7638,7 @@ private struct SettingsScrollViewResolver: UIViewRepresentable {
 
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             originalScrollDelegate?.scrollViewDidScroll?(scrollView)
-            if store?.menuMode == .FavoriteSettings {
+            if store?.menuMode == .favorite {
                 // Native drag autoscroll changes offset through UIScrollView;
                 // update the newly visible drop rows immediately.
                 store?.updateSectionHitTesting(for: scrollView)
@@ -7400,7 +7712,9 @@ private struct SettingsScrollViewResolver: UIViewRepresentable {
         func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
             guard gestureRecognizer === favoriteLongPressRecognizer,
                   store?.isAllSettings == true,
-                  store?.isExcludedFavoriteControlTouch(touch.view) == false else {
+                  store?.isExcludedFavoriteControlTouch(touch.view) == false,
+                  let coordinateView = gestureRecognizer.view,
+                  store?.isFavoriteSliderThumb(at: touch.location(in: coordinateView), in: coordinateView) == false else {
                 activeFavoriteLongPressID = nil
                 return false
             }
@@ -7771,16 +8085,16 @@ extension SettingsViewController {
     @objc func setSwiftUISettingsMenuMode(_ rawValue: Int) {
         guard let mode = SettingsMenuMode(rawValue: rawValue) else { return }
         swiftUISettingsStore?.setMenuMode(mode)
-        if mode == .AllSettings {
+        if mode == .all {
             swiftUISettingsStore?.refreshSectionHitTesting()
         }
-        if mode == .FavoriteSettings {
+        if mode == .favorite {
             self.swiftUISettingsStore?.warmUpFavoriteHitTestStateForCurrentScrollPosition()
         }
     }
 
     @objc func swiftUISettingsMenuModeRawValue() -> Int {
-        swiftUISettingsStore?.menuMode.rawValue ?? SettingsMenuMode.AllSettings.rawValue
+        swiftUISettingsStore?.menuMode.rawValue ?? SettingsMenuMode.all.rawValue
     }
     
     @objc func expandSection(identifier: String) {

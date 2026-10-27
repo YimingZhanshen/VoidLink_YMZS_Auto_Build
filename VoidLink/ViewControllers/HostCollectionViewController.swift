@@ -82,7 +82,7 @@ class HostCollectionViewController: UICollectionViewController, UICollectionView
 
         switch UIDevice.current.userInterfaceIdiom {
         case .phone:
-            horizontalPadding = 5
+            horizontalPadding = PublicUtils.isFoldableIPhone ? 22 : 5
         case .pad:
             fallthrough
         default:
@@ -193,10 +193,17 @@ class HostCollectionViewController: UICollectionViewController, UICollectionView
             flowLayout.sectionInset = UIEdgeInsets(top: PublicUtils.tvOS26Aavailable ? 43 : 30, left: horizontalPadding, bottom: 0, right: horizontalPadding)
             return
         }
+        
+        if PublicUtils.isFoldableIPhone {
+            flowLayout.sectionInset = UIEdgeInsets(top: 20, left: horizontalPadding, bottom: 0, right: horizontalPadding)
+            return
+        }
 
         switch numberOfRowsInCollectionView() {
         case 1:
-            flowLayout.sectionInset = UIEdgeInsets(top: 50, left: horizontalPadding, bottom: 0, right: horizontalPadding)
+            flowLayout.sectionInset = UIEdgeInsets(
+                top: (PublicUtils.liquidGlassEnabled && PublicUtils.isIPhone) ? 35 : 50,
+            left: horizontalPadding, bottom: 0, right: horizontalPadding)
         case 2:
             flowLayout.sectionInset = UIEdgeInsets(top: 17, left: horizontalPadding, bottom: 0, right: horizontalPadding)
         default:

@@ -6,6 +6,7 @@
 //  Copyright (c) 2025 Moonlight Stream. All rights reserved.
 //
 
+#import "VoidLink-Swift.h"
 #import "MetalVideoRenderer.h"
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
@@ -243,7 +244,7 @@ static void setCurrentColorSpaceName(NSString *name) {
 #if !TARGET_OS_TV
 - (void)reportMaxEDRHeadroom {
     if (@available(iOS 16.0, *)) {
-        CGFloat maxHeadroom = [[UIScreen mainScreen] potentialEDRHeadroom];
+        CGFloat maxHeadroom = [[PublicUtils currentScreen] potentialEDRHeadroom];
         if (maxHeadroom > 1.0) {
             LogOnce(LOG_I, @"Display supports EDR with a max headroom of %.1f", maxHeadroom);
         } else {
@@ -256,7 +257,7 @@ static void setCurrentColorSpaceName(NSString *name) {
 
 - (void)pollCurrentEDRHeadroom {
     if (@available(iOS 16.0, *)) {
-        CGFloat headroom = [[UIScreen mainScreen] currentEDRHeadroom];
+        CGFloat headroom = [[PublicUtils currentScreen] currentEDRHeadroom];
         if (headroom != _currentEDRHeadroom) {
             Log(LOG_I, @"EDR headroom changed to %.1f", headroom);
             _currentEDRHeadroom = (float)headroom;

@@ -12,6 +12,12 @@
 #import "Settings+CoreDataClass.h"
 #define OSC_TOOL_FINGERS 4
 
+// Touchpad settings kept in NSUserDefaults instead of Core Data, so adding them doesn't change the database schema.
+static NSString * const CursorInertiaDefaultsKey = @"touchpadCursorInertia";
+static NSString * const CursorInertiaDecelerationDefaultsKey = @"touchpadCursorInertiaDeceleration";
+static const float CursorInertiaDecelerationDefault = 5.0f;
+static NSString * const PortraitStreamOffsetDefaultsKey = @"portraitStreamVerticalOffset";
+
 
 @interface TemporarySettings : NSObject
 
@@ -24,6 +30,7 @@
 @property (nonatomic, retain) NSNumber * height;
 @property (nonatomic, retain) NSNumber * width;
 @property (nonatomic, retain) NSNumber * audioConfig;
+@property (nonatomic, retain) NSNumber * audioBufferLimitMs;
 @property (nonatomic, retain) NSNumber * onscreenControls;
 @property (nonatomic, retain) NSNumber * gyroMode;
 @property (nonatomic, retain) NSNumber * keyboardToggleFingers;
@@ -37,6 +44,7 @@
 @property (nonatomic, retain) NSNumber * micVolume;
 @property (nonatomic, retain) NSNumber * emulatedControllerType;
 @property (nonatomic, retain) NSNumber * mousePointerVelocityFactor;
+@property (nonatomic, retain) NSNumber * zoomViewportPointerVelocityFactor;
 @property (nonatomic, retain) NSNumber * pointerVelocityModeDivider;
 @property (nonatomic, retain) NSString * uniqueId;
 @property (nonatomic, retain) NSNumber * resolutionSelected;
@@ -95,13 +103,15 @@
 @property (nonatomic) BOOL delayLeftClick;
 @property (nonatomic) BOOL duckOtherApps;
 @property (nonatomic) BOOL muteInBackground;
-@property (nonatomic) BOOL enablePinch;
+@property (nonatomic, retain) NSNumber * trackpadGestureMode;
+@property (nonatomic) BOOL floatingKeyboardButton;
 @property (nonatomic) BOOL ctrlDownForPinch;
 @property (nonatomic) BOOL passthroughGestures;
 @property (nonatomic, retain) NSNumber * framePacingMode;
 @property (nonatomic, retain) NSNumber * interpolationMaximumDimension;
 @property (nonatomic, retain) NSNumber * interpolationMaximumPixelCount;
 @property (nonatomic, retain) NSNumber * streamDimensionScale;
+@property (nonatomic, retain) NSNumber * trackpadGestureSensitivity;
 @property (nonatomic, retain) NSNumber * scrollSensitivity;
 @property (nonatomic, retain) NSNumber * pinchSensitivity;
 @property (nonatomic, retain) NSNumber * relativeTouchSlideThreshold;
@@ -123,6 +133,11 @@
 @property (nonatomic, retain) NSNumber * pencilTickIntervalUs;
 @property (nonatomic, retain) NSNumber * pencilTipOffsetX;
 @property (nonatomic, retain) NSNumber * pencilTipOffsetY;
+
+// Touchpad settings (NSUserDefaults backed):
+@property (nonatomic) BOOL cursorInertia;
+@property (nonatomic, retain) NSNumber * cursorInertiaDeceleration;
+@property (nonatomic, retain) NSNumber * portraitStreamOffset; // -100...100 %: vertical stream position in portrait, + moves it up
 
 
 - (id) initFromSettings:(Settings*)settings;

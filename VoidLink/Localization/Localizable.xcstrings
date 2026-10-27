@@ -4403,7 +4403,7 @@
         },
         "zh-Hans" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "虚拟手柄"
           }
         },
@@ -5468,6 +5468,29 @@
         }
       }
     },
+    "Audio Buffer Limit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音频缓冲上限"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音訊緩衝上限"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "音訊緩衝上限"
+          }
+        }
+      }
+    },
     "Audio Configuration" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6474,6 +6497,29 @@
         }
       }
     },
+    "Centered" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "居中"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "居中"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "居中"
+          }
+        }
+      }
+    },
     "Centered (PlayStation)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7407,6 +7453,29 @@
         }
       }
     },
+    "Ctrl+Scroll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ctrl+滚轮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ctrl+滾輪"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ctrl+滾輪"
+          }
+        }
+      }
+    },
     "ctrlDownForPinchStackTip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7459,6 +7528,29 @@
         }
       }
     },
+    "Cursor Inertia" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指针惯性"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指標慣性"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指標慣性"
+          }
+        }
+      }
+    },
     "Cursor Speed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7478,6 +7570,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "游標速度"
+          }
+        }
+      }
+    },
+    "Cursor Velocity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指针灵敏度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠靈敏度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠靈敏度"
+          }
+        }
+      }
+    },
+    "Cursor Velocity (View Zoom)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指针灵敏度（视图缩放）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠靈敏度（視圖縮放）"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "滑鼠靈敏度（視圖縮放）"
           }
         }
       }
@@ -7691,6 +7829,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "深色"
+          }
+        }
+      }
+    },
+    "Deceleration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "减速力度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "減速力度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "減速力度"
           }
         }
       }
@@ -10363,6 +10524,29 @@
         }
       }
     },
+    "Floating Keyboard Button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "软键盘悬浮按钮"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軟鍵盤懸浮按鈕"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軟鍵盤懸浮按鈕"
+          }
+        }
+      }
+    },
     "Floating keyboard not supported" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11361,6 +11545,29 @@
         }
       }
     },
+    "Gesture Sensitivity" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手势灵敏度"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手勢靈敏度"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手勢靈敏度"
+          }
+        }
+      }
+    },
     "Gesture Sliding Distance" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11455,6 +11662,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "如果外接鍵盤自帶 Esc 鍵，可以關閉此選項。"
+          }
+        }
+      }
+    },
+    "Go for Sunshine-Foundation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往 Sunshine-基地版"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往 Sunshine-基地版"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前往 Sunshine-基地版"
           }
         }
       }
@@ -14578,29 +14808,6 @@
         }
       }
     },
-    "Mouse Pointer Velocity" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鼠标指针灵敏度"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠靈敏度"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "滑鼠靈敏度"
-          }
-        }
-      }
-    },
     "Mouse Pointer Velocity: %d%%" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14814,6 +15021,29 @@
         }
       }
     },
+    "Native Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原生模式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原生模式"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原生模式"
+          }
+        }
+      }
+    },
     "Native Touch" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14833,6 +15063,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "多點觸控"
+          }
+        }
+      }
+    },
+    "nativeTrackpadTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchpad Native Mode: Passes through native Windows touchpad gestures. Requires Sunshine-Foundation."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触控板 - 原生模式：透传 Windows 原生触控板手势。仅支持 Sunshine 基地版。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "觸控板 - 原生模式：透傳 Windows 原生觸控板手勢。僅支援 Sunshine 基地版。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "觸控板 - 原生模式：透傳 Windows 原生觸控板手勢。僅支援 Sunshine 基地版。"
           }
         }
       }
@@ -15087,6 +15346,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "否"
+          }
+        }
+      }
+    },
+    "No Pinch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無縮放"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無縮放"
           }
         }
       }
@@ -16734,29 +17016,6 @@
         }
       }
     },
-    "Pinch Gesture" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "缩放手势"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "縮放手勢"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "縮放手勢"
-          }
-        }
-      }
-    },
     "Pinch Sensitivity" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17163,6 +17422,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "與電腦的連線品質不佳"
+          }
+        }
+      }
+    },
+    "Portrait Stream Position" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "竖屏画面位置"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直向畫面位置"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直向畫面位置"
           }
         }
       }
@@ -19525,7 +19807,7 @@
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "提示：手動鎖定螢幕方向以避免顯示異常"
           }
         }
@@ -21474,6 +21756,35 @@
         }
       }
     },
+    "sunshineFoundationLink" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://github.com/AlkaidLab/foundation-sunshine"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://www.alkaidlab.cn/"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://www.alkaidlab.cn/"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://www.alkaidlab.cn/"
+          }
+        }
+      }
+    },
     "supportLink" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22562,25 +22873,25 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "- Touchpad: Windows laptop style touchpad. Double tap and hold to drag, 2-finger tap to click right button, 2-finger slide to scroll mouse wheel.\nTouchpad mode is not recommended for 3D games. Use MousePad on-screen widget instead.\n\n- Native Touch: Use your PC as a Windows tablet. Not supported on macOS host.\n\n- Single Point: Provides a touchscreen-like experience on macOS."
+            "value" : "- Touchpad: Laptop-style controls. Double-tap and hold to drag, two-finger tap to right-click, two-finger swipe to scroll. Cannot be used for 3D games. Use the MousePad widget instead.\n\n- Touchpad Native Mode: Passes through native Windows touchpad gestures. Requires Sunshine-Foundation.\n\n- Native Touch: Use your PC as a Windows tablet. Not supported on macOS host.\n\n- Single Point: Provides a touchscreen-like experience on macOS."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "- 触控板: Windows笔记本电脑风格触控板，快速双击并滑动即可拖动，双指快速轻按触发鼠标右键，双指滑动滚动鼠标滚轮。\n不推荐用于3D游戏，游戏时请用 MousePad 屏显控件。\n\n- 多点触控: 以Windows 平板的方式使用PC主机。不支持 macOS 主机。\n\n- 单点鼠标: 可为macOS提供类触屏体验。"
+            "value" : "- 触控板: Windows笔记本风格触控板，快速双击并滑动 - 拖动，双指轻按 - 右键，双指滑动 - 滚轮。\n不可用于3D游戏，游戏时请用 MousePad 屏显控件。\n\n- 触控板 - 原生模式： 透传 Windows 原生触控板手势。仅支持 Sunshine 基地版。\n\n- 多点触控: 以Windows 平板的方式使用PC主机。不支持 macOS 主机。\n\n- 单点鼠标: 可为macOS提供类触屏体验。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "- 觸控板：與 Windows 筆記型電腦風格觸控板，快速雙擊並滑動即可拖曳，雙指快速輕按觸發滑鼠右鍵，雙指滑動可捲動滑鼠滾輪。\n不建議用於 3D 遊戲，遊戲時請使用 MousePad 螢幕控制項。\n\n- 多點觸控：以 Windows 平板的方式操作 PC 主機。不支援 macOS 主機。\n\n\n- 單點滑鼠：可為 macOS 提供類觸控螢幕體驗。"
+            "value" : "- 觸控板: Windows 筆電風格觸控板，快速雙擊並滑動 - 拖曳，雙指輕按 - 右鍵，雙指滑動 - 滾輪。\n不可用於3D遊戲，遊戲時請用 MousePad 螢幕控制元件。\n\n- 觸控板 - 原生模式： 透傳 Windows 原生觸控板手勢。僅支援 Sunshine 基地版。\n\n- 多點觸控: 以Windows 平板的方式使用PC主機。不支援 macOS 主機。\n\n- 單點滑鼠: 可為macOS提供類觸控螢幕體驗。"
           }
         },
         "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "- 觸控板：與 Windows 筆記型電腦風格觸控板，快速雙擊並滑動即可拖曳，雙指快速輕按觸發滑鼠右鍵，雙指滑動可捲動滑鼠滾輪。\n不建議用於 3D 遊戲，遊戲時請使用 MousePad 螢幕控制項。\n\n- 多點觸控：以 Windows 平板的方式操作 PC 主機。不支援 macOS 主機。\n\n\n- 單點滑鼠：可為 macOS 提供類觸控螢幕體驗。"
+            "value" : "- 觸控板: Windows 筆電風格觸控板，快速雙擊並滑動 - 拖曳，雙指輕按 - 右鍵，雙指滑動 - 滾輪。\n不可用於3D遊戲，遊戲時請用 MousePad 螢幕控制元件。\n\n- 觸控板 - 原生模式： 透傳 Windows 原生觸控板手勢。僅支援 Sunshine 基地版。\n\n- 多點觸控: 以Windows 平板的方式使用PC主機。不支援 macOS 主機。\n\n- 單點滑鼠: 可為macOS提供類觸控螢幕體驗。"
           }
         }
       }
@@ -22627,6 +22938,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "触摸板按键"
+          }
+        }
+      }
+    },
+    "Touchpad Gestures" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触控板手势"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "觸控板手勢"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "觸控板手勢"
           }
         }
       }
@@ -22821,7 +23155,7 @@
         },
         "zh-HK" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "按住 [LT] 完成發送Enter，或用 iPhone 輸入文本"
           }
         }
@@ -23258,6 +23592,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "檢視所有應用程式"
+          }
+        }
+      }
+    },
+    "View Zoom" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "视图缩放"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視圖縮放"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "視圖縮放"
           }
         }
       }

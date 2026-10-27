@@ -21,13 +21,9 @@
 
 @implementation CustomTapGestureRecognizer
 
-static CGFloat screenHeightInPoints;
-static CGFloat screenWidthInPoints;
 
 - (instancetype)initWithTarget:(nullable id)target action:(nullable SEL)action {
     self = [super initWithTarget:target action:action];
-    screenHeightInPoints = CGRectGetHeight([[UIScreen mainScreen] bounds]);
-    screenWidthInPoints = CGRectGetWidth([[UIScreen mainScreen] bounds]);
     lowestTouchPointYCoord = 0.0;
     _numberOfTouchesRequired = 3;
     _immediateTriggering = false;
@@ -57,10 +53,10 @@ static CGFloat screenWidthInPoints;
         // this mechanism is deprecated.
         /* if(_numberOfTouchesRequired == 2){
             NSArray *twoTouches = [[event allTouches] allObjects];
-            _areVirtualControllerTaps = fabs([twoTouches[1] locationInView:self.view].x - [twoTouches[0] locationInView:self.view].x) > screenWidthInPoints/3;
+            _areVirtualControllerTaps = fabs([twoTouches[1] locationInView:self.view].x - [twoTouches[0] locationInView:self.view].x) > CGRectGetWidth(self.view.bounds)/3;
         } */
         
-        _lowestTouchPointHeight = screenHeightInPoints - lowestTouchPointYCoord;
+        _lowestTouchPointHeight = CGRectGetHeight(self.view.bounds) - lowestTouchPointYCoord;
         // NSLog(@"gen _lowestTouchPointHeight %f markmark", _lowestTouchPointHeight);
         if(_immediateTriggering){
             // lowestTouchPointYCoord = 0.0; //reset for next recoginition

@@ -31,7 +31,9 @@
 -(NSString*) getActiveCodecName;
 
 + (void)setVolume:(float)newVolume;
++ (void)setAudioBufferLimitMs:(int)milliseconds;
 + (void)resetSysAudioPlayback;
++ (void)resetSysAudioPlaybackCooldown;
 + (void)logSysAudioPlaybackLatency;
 #if TARGET_OS_TV
 + (BOOL)resumeSysAudioPlaybackBeforeMicWithError:(NSError **)error;

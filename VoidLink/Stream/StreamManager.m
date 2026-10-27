@@ -14,7 +14,10 @@
 #import "HttpManager.h"
 #import "Plot.h"
 #import "Utils.h"
-#import "DataManager.h"
+#import "AppDelegate.h"
+#import "TemporaryHost.h"
+#import "TemporaryApp.h"
+#import "TemporarySettings.h"
 
 #import "StreamView.h"
 #import "ServerInfoResponse.h"

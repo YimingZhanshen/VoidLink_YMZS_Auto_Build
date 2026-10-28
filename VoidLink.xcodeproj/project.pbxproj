@@ -104,7 +104,7 @@
 		9897B6A1221260EF00966419 /* VoidController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9897B6A0221260EF00966419 /* VoidController.m */; };
 		98CFB82F1CAD481B0048EF74 /* libmoonlight-common.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98AB2E841CAD46840089BB98 /* libmoonlight-common.a */; };
 		98D5856D1C0EA79600F6CC00 /* TemporaryHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */; };
-		98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
+		98D585701C0ED0E800F6CC00 /* TemporarySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.swift */; };
 		A1900E012F9A100100BA853A /* InputAccessoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1900E002F9A100100BA853A /* InputAccessoryBar.swift */; };
 		A1B2C3D42F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D32F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift */; };
 		A1C0DE012FBC000100000001 /* ControllerNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE002FBC000100000001 /* ControllerNavigator.swift */; };
@@ -191,7 +191,7 @@
 		A7010000000000000000004E /* MetalView.m in Sources */ = {isa = PBXBuildFile; fileRef = 97E20DCA2E21647A000D5DCA /* MetalView.m */; };
 		A7010000000000000000004F /* MetalVideoRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 97E20DC82E21647A000D5DCA /* MetalVideoRenderer.m */; };
 		A70100000000000000000050 /* ProfileSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4A3A102F0C000100000001 /* ProfileSelectorViewController.swift */; };
-		A70100000000000000000051 /* TemporarySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */; };
+		A70100000000000000000051 /* TemporarySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98D5856F1C0ED0E800F6CC00 /* TemporarySettings.swift */; };
 		A70100000000000000000053 /* UUIDHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18729EDD2E8BD68800101194 /* UUIDHelper.swift */; };
 		A70100000000000000000054 /* CryptoManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FB89460619F646E200339C8A /* CryptoManager.m */; };
 		A70100000000000000000055 /* ConnectionHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DC1F5A06206436B20037755F /* ConnectionHelper.m */; };
@@ -473,8 +473,7 @@
 		98B9CE6C27B2144B00B473C4 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS15.2.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
 		98D5856B1C0EA79600F6CC00 /* TemporaryHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporaryHost.h; path = Database/TemporaryHost.h; sourceTree = "<group>"; };
 		98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporaryHost.m; path = Database/TemporaryHost.m; sourceTree = "<group>"; };
-		98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporarySettings.h; path = Database/TemporarySettings.h; sourceTree = "<group>"; };
-		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TemporarySettings.m; path = Database/TemporarySettings.m; sourceTree = "<group>"; };
+		98D5856F1C0ED0E800F6CC00 /* TemporarySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TemporarySettings.swift; path = Database/TemporarySettings.swift; sourceTree = "<group>"; };
 		A1900E002F9A100100BA853A /* InputAccessoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputAccessoryBar.swift; sourceTree = "<group>"; };
 		A1B2C3D32F90000100ABCDEF /* AbstractGamepadOverlayWidgetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AbstractGamepadOverlayWidgetView.swift; sourceTree = "<group>"; };
 		A1C0DE002FBC000100000001 /* ControllerNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerNavigator.swift; sourceTree = "<group>"; };
@@ -1176,8 +1175,7 @@
 				9832D1351BBCD5C50036EF48 /* TemporaryApp.m */,
 				98D5856B1C0EA79600F6CC00 /* TemporaryHost.h */,
 				98D5856C1C0EA79600F6CC00 /* TemporaryHost.m */,
-				98D5856E1C0ED0E800F6CC00 /* TemporarySettings.h */,
-				98D5856F1C0ED0E800F6CC00 /* TemporarySettings.m */,
+				98D5856F1C0ED0E800F6CC00 /* TemporarySettings.swift */,
 			);
 			name = Database;
 			sourceTree = "<group>";
@@ -1461,7 +1459,7 @@
 				A7010000000000000000004E /* MetalView.m in Sources */,
 				A7010000000000000000004F /* MetalVideoRenderer.m in Sources */,
 				A70100000000000000000050 /* ProfileSelectorViewController.swift in Sources */,
-				A70100000000000000000051 /* TemporarySettings.m in Sources */,
+				A70100000000000000000051 /* TemporarySettings.swift in Sources */,
 				A70100000000000000000053 /* UUIDHelper.swift in Sources */,
 				A70100000000000000000054 /* CryptoManager.m in Sources */,
 				A70100000000000000000055 /* ConnectionHelper.m in Sources */,
@@ -1592,7 +1590,7 @@
 				97E20DD12E21647A000D5DCA /* MetalView.m in Sources */,
 				97E20DD22E21647A000D5DCA /* MetalVideoRenderer.m in Sources */,
 				3A4A3A112F0C000100000001 /* ProfileSelectorViewController.swift in Sources */,
-				98D585701C0ED0E800F6CC00 /* TemporarySettings.m in Sources */,
+				98D585701C0ED0E800F6CC00 /* TemporarySettings.swift in Sources */,
 				1829CE3F2E2154DF0074A99A /* SceneDelegate.m in Sources */,
 				18729EDE2E8BD68800101194 /* UUIDHelper.swift in Sources */,
 				FB89462819F646E200339C8A /* CryptoManager.m in Sources */,

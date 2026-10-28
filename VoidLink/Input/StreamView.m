@@ -14,7 +14,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 #import "Plot.h"
 #import "ControllerSupport.h"
 #import "KeyboardSupport.h"

@@ -270,6 +270,8 @@ private let settingsLegacyHelpByStackIdentifier: [String: SettingsLegacyHelpCont
     // Drawing Toolkit
     "pencilTickStack": .init(messageKey: "pencilTickStackTip", learnMoreURLKey: "PencilProPackURL"),
     "pencilModeStack": .init(messageKey: "pencilModeStackTip", learnMoreURLKey: nil),
+    "doubleTapShortcutStack": .init(messageKey: "doubleTapShortcutStackTip", learnMoreURLKey: nil),
+    "squeezeShortcutStack": .init(messageKey: "squeezeShortcutStackTip", learnMoreURLKey: nil),
 
     // Gestures
     "softKeyboardGestureStack": .init(messageKey: "softKeyboardGestureStackTip", learnMoreURLKey: "softKeyboardGestureStackDoc"),
@@ -1833,7 +1835,7 @@ final class SettingsSession: NSObject, ObservableObject {
     private(set) var customHeight: Int
     private var lastPresetResolution: Int
     private var loadedRenderingBackend: Int
-    private var loadedUnlockDisplayOrientation: Bool
+    private var loadedUnlockDisplayOrientation = false
     private var resolvedThemeStyle: Int
     private var knownVisibleSettingIDs: Set<String> = []
     private var emergingHighlightGenerations: [String: UInt] = [:]
@@ -1917,6 +1919,7 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.streamDimensionScale.value = min(1, max(0, snapshot.streamDimensionScale.doubleValue))
         itemRegistry.frameQueueSize.value = Double(min(5, max(0, snapshot.frameQueueSize.intValue)))
         itemRegistry.asyncFrameDequeue.value = snapshot.asyncFrameDequeue
+#if !os(tvOS)
         itemRegistry.pictureInPicture.value = snapshot.enablePIP
 
         // MARK: Touch Control
@@ -1933,11 +1936,8 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.pointerVelocityFactor.value = settingsVelocitySliderPosition(
             for: CGFloat(snapshot.touchPointerVelocityFactor.doubleValue)
         )
-        itemRegistry.delayLeftClick.value = snapshot.delayLeftClick
         itemRegistry.passthroughGestures.value = snapshot.passthroughGestures
         itemRegistry.trackpadGestures.value = snapshot.trackpadGestureMode.intValue
-        itemRegistry.cursorInertia.value = snapshot.cursorInertia
-        itemRegistry.cursorInertiaDeceleration.value = min(10, max(1, snapshot.cursorInertiaDeceleration.doubleValue))
         itemRegistry.ctrlDownForPinch.value = snapshot.ctrlDownForPinch
         itemRegistry.scrollSensitivity.value = snapshot.scrollSensitivity.doubleValue
         itemRegistry.pinchSensitivity.value = snapshot.pinchSensitivity.doubleValue
@@ -1945,6 +1945,7 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.onScreenWidget.value = snapshot.onscreenControls.intValue
         itemRegistry.buttonVisualFeedback.value = snapshot.buttonVisualFeedback
         itemRegistry.trackTouchPoint.value = snapshot.touchPointTracking
+#endif
 
         // MARK: Controller
 
@@ -1960,6 +1961,7 @@ final class SettingsSession: NSObject, ObservableObject {
 
         // MARK: Drawing Toolkit
 
+#if !os(tvOS)
         itemRegistry.pencilTick.value = snapshot.pencilTickMode.intValue
         itemRegistry.pencilTickInterval.value = min(4000, max(1500, snapshot.pencilTickIntervalUs.doubleValue))
         itemRegistry.pencilTipOffset.value = abs(snapshot.pencilTipOffsetX.doubleValue) > 0.01
@@ -1984,38 +1986,50 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.reverseMouseWheelDirection.value = snapshot.reverseMouseWheelDirection ? 1 : 0
         itemRegistry.citrixX1Mouse.value = snapshot.btMouseSupport
         itemRegistry.globeAsEscape.value = snapshot.globeAsEscape
+#endif
 
         // MARK: Audio
 
         itemRegistry.audioOnPC.value = snapshot.playAudioOnPC
         itemRegistry.localVolume.value = min(100, max(0, snapshot.localVolume.doubleValue * 100))
         itemRegistry.redirectMic.value = snapshot.redirectMic
+#if !os(tvOS)
         itemRegistry.useBuiltinMic.value = snapshot.useBuiltinMic
+#endif
         itemRegistry.micVolume.value = min(settingsMaximumMicVolumeForCurrentDevice(), max(0, snapshot.micVolume.doubleValue * 100))
         itemRegistry.duckOtherApps.value = snapshot.duckOtherApps
         itemRegistry.muteInBackground.value = snapshot.muteInBackground
         itemRegistry.audioConfig.value = settingsSanitizedAudioConfig(snapshot.audioConfig.intValue)
-        itemRegistry.audioBufferLimit.value = min(200, max(20, snapshot.audioBufferLimitMs.doubleValue))
+        itemRegistry.audioBufferLimit.value = min(300, max(20, snapshot.audioBufferLimitMs.doubleValue))
 
         // MARK: Others
 
         itemRegistry.statsOverlay.value = snapshot.statsOverlayLevel.intValue
+#if !os(tvOS)
         itemRegistry.unlockDisplayOrientation.value = snapshot.unlockDisplayOrientation ? 1 : 0
         itemRegistry.portraitStreamOffset.value = min(100, max(-100, snapshot.portraitStreamOffset.doubleValue))
+#endif
         itemRegistry.backgroundSessionTimer.value = Double(snapshot.backgroundSessionTimer.intValue)
         itemRegistry.appTheme.value = snapshot.appTheme.intValue
         itemRegistry.optimizeGames.value = snapshot.optimizeGames
         itemRegistry.multiController.value = snapshot.multiController
+#if !os(tvOS)
         itemRegistry.softKeyboardToolbar.value = snapshot.showKeyboardToolbar
         itemRegistry.softKeyboardHeight.value = snapshot.softKeyboardHeight
+#endif
         itemRegistry.rememberFoldState.value = snapshot.rememberFoldState
         pendingInitialSettingsMenuOffsetY = snapshot.settingsMenuOffset.map { CGFloat(truncating: $0) } ?? 0
 
         // MARK: Experimental
 
+#if !os(tvOS)
+        itemRegistry.cursorInertia.value = snapshot.cursorInertia
+        itemRegistry.cursorInertiaDeceleration.value = min(10, max(1, snapshot.cursorInertiaDeceleration.doubleValue))
         itemRegistry.relativeTouchSlideThreshold.value = snapshot.relativeTouchSlideThreshold.doubleValue
         itemRegistry.singleTapSensitivity.value = snapshot.singleTapSensitivity.doubleValue
+        itemRegistry.delayLeftClick.value = snapshot.delayLeftClick
         itemRegistry.leftClickDelay.value = snapshot.leftClickDelayMs.doubleValue
+#endif
         itemRegistry.renderingBackend.value = snapshot.renderingBackend.intValue
         itemRegistry.fullColorRange.value = snapshot.fullColorRange
         itemRegistry.enableGraphs.value = snapshot.enableGraphs
@@ -2028,7 +2042,9 @@ final class SettingsSession: NSObject, ObservableObject {
         favoriteSettingIdentifiers = migratedFavoriteSettingIdentifiers(savedFavoriteIdentifiers)
         draggedFavoriteID = nil
         loadedRenderingBackend = snapshot.renderingBackend.intValue
+#if !os(tvOS)
         loadedUnlockDisplayOrientation = snapshot.unlockDisplayOrientation
+#endif
         let savedInterpolationMaximumDimension = snapshot.interpolationMaximumDimension.intValue
         itemRegistry.interpolationLevel.value = 1
         resolvedThemeStyle = ThemeManager.userInterfaceStyle().rawValue
@@ -4674,25 +4690,54 @@ final class SettingsSession: NSObject, ObservableObject {
 
     func refreshResolutionGeometry(for window: UIWindow? = nil) {
         guard !isPersistingSettings else { return }
-        let resolution = resolveVideoResolution(for: window)
+        refreshDynamicResolutionSizeCache(for: window)
         resolutionGeometryRevision &+= 1
 
-        // A detached settings session may have an old isStreaming value. Prefer
-        // the owner's live state and never change launch dimensions mid-stream.
         let streaming = (presentingController as? SettingsViewController)?
             .mainFrameViewController?.isStreaming() ?? isStreaming
-        guard !streaming,
-              let size = cachedDisplaySizes[itemRegistry.externalDisplayMode.value],
-              size.width > 0, size.height > 0 else { return }
+        guard !streaming, let window = window ?? resolutionWindow else { return }
 
         let dataManager = DataManager()
         guard let settings = dataManager.retrieveSettings() else { return }
-        if writeVideoResolution(to: settings, resolution: resolution) {
+        if writeFullscreenResolution(to: settings, window: window) {
             dataManager.saveData()
         }
     }
 
-    /// Shared by geometry refresh and menu persistence; scale the base exactly once.
+    /// Geometry changes may updates fullscreen dimensions
+    private func writeFullscreenResolution(to settings: Settings, window: UIWindow) -> Bool {
+        guard settings.resolutionSelected?.intValue == 4 else { return false }
+        let externalScreen = settings.externalDisplayMode?.intValue == ExternalDisplayMode.extended.rawValue
+            ? PublicUtils.externalScreen : nil
+        let screen = externalScreen ?? window.screen
+        let bounds = externalScreen?.bounds ?? window.bounds
+        let width = (bounds.width * screen.nativeScale).rounded()
+        let height = (bounds.height * screen.nativeScale).rounded()
+        guard width > 0, height > 0,
+              width <= Double(Int32.max), height <= Double(Int32.max) else { return false }
+        let preset = CMVideoDimensions(width: Int32(width), height: Int32(height))
+        var submitted = preset
+        if settings.framePacingMode?.intValue == FramePacingMode.interpolation.rawValue {
+            let interpolation = FrameInterpolator.interpolatableDimensionsBy(
+                preset,
+                maximumDimension: settings.interpolationMaximumDimension?.intValue ?? 0,
+                maximumPixelCount: settings.interpolationMaximumPixelCount?.intValue ?? 0
+            )
+            submitted = FrameInterpolator.scaledStreamDimensions(
+                presetDimensions: preset,
+                interpolationDimensions: interpolation,
+                scale: settings.streamDimensionScale?.floatValue ?? 1
+            )
+        }
+        guard submitted.width > 0, submitted.height > 0,
+              settings.width?.intValue != Int(submitted.width)
+                || settings.height?.intValue != Int(submitted.height) else { return false }
+        settings.width = NSNumber(value: submitted.width)
+        settings.height = NSNumber(value: submitted.height)
+        return true
+    }
+
+    /// Menu persistence commits the user's selection and its associated video settings.
     @discardableResult
     private func writeVideoResolution(
         to settings: Settings,
@@ -5939,6 +5984,20 @@ final class SettingsSession: NSObject, ObservableObject {
                 forKey: "controllerGyroSwitchButtonStackTip",
                 (ControllerElement(rawValue: profile.controllerGyroSwitchToggle) ?? .null).displayName,
                 (ControllerElement(rawValue: profile.controllerGyroSwitchHold) ?? .null).displayName,
+            )
+        } else if id == .doubleTapShortcut {
+            let profile = OSCProfilesManager.sharedManager(CGRect.zero).getSelectedProfile()
+            message = LocalizationHelper.localizedString(
+                forKey: "doubleTapShortcutStackTip",
+                profile.brushShortcut.isEmpty ? "Null".localized : profile.brushShortcut,
+                profile.eraserShortcut.isEmpty ? "Null".localized : profile.eraserShortcut
+            )
+        } else if id == .squeezeShortcut {
+            let profile = OSCProfilesManager.sharedManager(CGRect.zero).getSelectedProfile()
+            message = LocalizationHelper.localizedString(
+                forKey: "squeezeShortcutStackTip",
+                profile.squeezeStartShortcut.isEmpty ? "Null".localized : profile.squeezeStartShortcut,
+                profile.squeezeEndShortcut.isEmpty ? "Null".localized : profile.squeezeEndShortcut
             )
         } else if id == .controllerNavigation, let snapshot = DataManager().getSettings() {
             message = LocalizationHelper.localizedString(

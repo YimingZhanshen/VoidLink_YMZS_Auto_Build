@@ -18,7 +18,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 
 @interface LayoutOnScreenControlsViewController () <WidgetPickerViewControllerDelegate>
 

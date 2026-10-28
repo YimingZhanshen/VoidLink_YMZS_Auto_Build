@@ -19,7 +19,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 #import "PaddedLabel.h"
 #import "ImGuiRenderer.h"
 #import "MetalVideoRenderer.h"

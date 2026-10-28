@@ -19,7 +19,7 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
+#import "Settings+CoreDataClass.h"
 #import "AppAssetManager.h"
 #import "LocalizationHelper.h"
 #import "OSCProfile.h"

@@ -12,7 +12,7 @@
 #import "ImGuiRenderer.h"
 #import "MetalVideoRenderer.h"
 #import "MetalView.h"
-#import "TemporarySettings.h"
+@class TemporarySettings;
 
 @interface MetalViewController : UIViewController <MetalViewDelegate>
 

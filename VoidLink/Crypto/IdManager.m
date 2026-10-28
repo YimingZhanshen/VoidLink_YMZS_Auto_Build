@@ -10,7 +10,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 #import "VoidLink-Swift.h"
 
 @implementation IdManager

@@ -20,7 +20,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 #import "WakeOnLanManager.h"
 #import "AppListResponse.h"
 #import "ServerInfoResponse.h"
@@ -947,7 +946,7 @@ static NSMutableSet* hostList;
     
     bool sdrPerformanceWorkaround = false;
     switch (streamSettings.preferredCodec) {
-        case CODEC_PREF_AV1:
+        case TemporarySettingsCodecPreferenceAv1:
 #if defined(__IPHONE_16_0) || defined(__TVOS_16_0)
             if (VTIsHardwareDecodeSupported(kCMVideoCodecType_AV1)) {
                 _streamConfig.fullColorRange = false;
@@ -962,8 +961,8 @@ static NSMutableSet* hostList;
 #endif
             // Fall-through
             
-        case CODEC_PREF_AUTO:
-        case CODEC_PREF_HEVC:
+        case TemporarySettingsCodecPreferenceAuto:
+        case TemporarySettingsCodecPreferenceHevc:
             if (VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC)) {
                 if (streamSettings.enableYUV444) {
                     if(sdrPerformanceWorkaround && [Utils hdrSupported]) _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H265_REXT10_444; // 8bit performance degradation workaround
@@ -977,7 +976,7 @@ static NSMutableSet* hostList;
             }
             // Fall-through
             
-        case CODEC_PREF_H264:
+        case TemporarySettingsCodecPreferenceH264:
             if (streamSettings.enableYUV444) {
                 _streamConfig.supportedVideoFormats |= VIDEO_FORMAT_H264_HIGH8_444;
             } else {
@@ -2121,7 +2120,7 @@ static NSMutableSet* hostList;
     DataManager* dataMan = [[DataManager alloc] init];
     Settings* settings = [dataMan retrieveSettings];
     
-    settings.preferredCodec = VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) ? CODEC_PREF_HEVC : CODEC_PREF_H264;
+    settings.preferredCodec = VTIsHardwareDecodeSupported(kCMVideoCodecType_HEVC) ? TemporarySettingsCodecPreferenceHevc : TemporarySettingsCodecPreferenceH264;
     
     switch ([UIDevice currentDevice].userInterfaceIdiom) {
         case UIUserInterfaceIdiomPhone:

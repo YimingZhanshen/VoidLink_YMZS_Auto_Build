@@ -7,6 +7,7 @@
 //
 
 #import "MetalViewController.h"
+#import "VoidLink-Swift.h"
 #import "FrameQueue.h"
 #import "ImGuiRenderer.h"
 #import "MetalVideoRenderer.h"

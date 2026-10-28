@@ -382,3 +382,35 @@ final class SettingsViewController: UIViewController, RearNavigationBarMenuDeleg
 
     override func didReceiveMemoryWarning() { super.didReceiveMemoryWarning() }
 }
+
+#if !os(tvOS)
+@available(iOS 13.0, *)
+extension SettingsViewController: WidgetPickerViewControllerDelegate {
+    func widgetPickerViewController(_ controller: WidgetPickerViewController, didCreateWidget payload: NSDictionary) {
+        let profileManager = OSCProfilesManager.sharedManager(.zero)
+        let profile = profileManager.getSelectedProfile()
+        guard let command = payload["cmdString"] as? String else { return }
+
+        switch payload["shortcutIdentifier"] as? String {
+        case "eraser":
+            profile.eraserShortcut = command
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                PencilHandler.enterBrushShortcut(in: self)
+            }
+        case "brush":
+            profile.brushShortcut = command
+        case "squeezePress":
+            profile.squeezeStartShortcut = command
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                PencilHandler.enterSqueezeEndShortcut(in: self)
+            }
+        case "squeezeRelease":
+            profile.squeezeEndShortcut = command
+        default:
+            break
+        }
+
+        profileManager.replaceSelectedProfile(with: profile, overwriteDefault: true)
+    }
+}
+#endif

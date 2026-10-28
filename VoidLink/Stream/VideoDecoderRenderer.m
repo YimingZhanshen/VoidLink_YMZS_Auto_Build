@@ -16,7 +16,6 @@
 #import "AppDelegate.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 #import "VideoDecoderRenderer.h"
 #import "FrameQueue.h"
 #import "StreamView.h"

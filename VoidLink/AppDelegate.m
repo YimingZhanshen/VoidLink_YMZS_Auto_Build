@@ -15,7 +15,6 @@
 #import "VoidLink-Swift.h"
 #import "TemporaryHost.h"
 #import "TemporaryApp.h"
-#import "TemporarySettings.h"
 
 #if TARGET_OS_TV
 @interface AppDelegate ()

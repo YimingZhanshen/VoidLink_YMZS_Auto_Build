@@ -7,7 +7,7 @@
 //
 
 #import "StreamView.h"
-#import "TemporarySettings.h"
+@class TemporarySettings;
 
 NS_ASSUME_NONNULL_BEGIN
 

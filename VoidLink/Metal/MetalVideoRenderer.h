@@ -12,7 +12,7 @@
 #import "ConnectionCallbacks.h"
 #import "Frame.h"
 #import "Plot.h"
-#import "TemporarySettings.h"
+@class TemporarySettings;
 
 @interface MetalVideoRenderer : NSObject
 

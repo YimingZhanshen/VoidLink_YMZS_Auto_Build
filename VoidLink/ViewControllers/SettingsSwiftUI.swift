@@ -272,6 +272,7 @@ private let settingsLegacyHelpByStackIdentifier: [String: SettingsLegacyHelpCont
     "pencilModeStack": .init(messageKey: "pencilModeStackTip", learnMoreURLKey: nil),
     "doubleTapShortcutStack": .init(messageKey: "doubleTapShortcutStackTip", learnMoreURLKey: nil),
     "squeezeShortcutStack": .init(messageKey: "squeezeShortcutStackTip", learnMoreURLKey: nil),
+    "reverseBarrelRollStack": .init(messageKey: "reverseBarrelRollStackTip", learnMoreURLKey: nil),
 
     // Gestures
     "softKeyboardGestureStack": .init(messageKey: "softKeyboardGestureStackTip", learnMoreURLKey: "softKeyboardGestureStackDoc"),
@@ -380,6 +381,7 @@ enum SettingsItemID: String, Hashable, Identifiable {
     case pressureCurve = "pressureCurveStack"
     case doubleTapShortcut = "doubleTapShortcutStack"
     case squeezeShortcut = "squeezeShortcutStack"
+    case reverseBarrelRoll = "reverseBarrelRollStack"
     case pencilPausesNativeTouch = "pencilPausesNativeTouchStack"
     case disablePencilSlideGesture = "disablePencilSlideGestureStack"
     case pencilMode = "pencilModeStack"
@@ -504,6 +506,7 @@ enum SettingsItemID: String, Hashable, Identifiable {
         case .pressureCurve: return "Pressure Curve"
         case .doubleTapShortcut: return "Custom Double Tap Keyboard Shortcut"
         case .squeezeShortcut: return "Custom Squeeze Keyboard Shortcut"
+        case .reverseBarrelRoll: return "Reverse Barrel Roll"
         case .pencilPausesNativeTouch: return "Drawing Pauses Native Touch"
         case .disablePencilSlideGesture: return "Disable Slide Gesture for Pencil"
         case .pencilMode: return "Pencil Mode"
@@ -1289,6 +1292,7 @@ final class SettingsItemRegistry: ObservableObject {
     let pressureCurve = SettingsItemModel<Bool>(id: .pressureCurve, value: false)
     let doubleTapShortcut = SettingsItemModel<Bool>(id: .doubleTapShortcut, value: false)
     let squeezeShortcut = SettingsItemModel<Bool>(id: .squeezeShortcut, value: false)
+    let reverseBarrelRoll = SettingsItemModel<Bool>(id: .reverseBarrelRoll, value: false)
     let pencilPausesNativeTouch = SettingsItemModel<Bool>(id: .pencilPausesNativeTouch, value: false)
     let disablePencilSlideGesture = SettingsItemModel<Bool>(id: .disablePencilSlideGesture, value: false)
     let pencilMode = SettingsItemModel<Int>(id: .pencilMode, value: PencilAndHoverMode.pencilOnly.rawValue)
@@ -1420,6 +1424,7 @@ final class SettingsItemRegistry: ObservableObject {
             pressureCurve.objectWillChange,
             doubleTapShortcut.objectWillChange,
             squeezeShortcut.objectWillChange,
+            reverseBarrelRoll.objectWillChange,
             pencilPausesNativeTouch.objectWillChange,
             disablePencilSlideGesture.objectWillChange,
             pencilMode.objectWillChange,
@@ -1869,6 +1874,10 @@ final class SettingsSession: NSObject, ObservableObject {
     private var highlightMoveCancellationGeneration: UInt64 = 0
 
     init(presentingController: UIViewController) {
+        
+        PublicUtils.changeDefaultSettings(for: nil)
+        PublicUtils.updatePartialSettings()
+        
 #if os(tvOS)
         let initialSnapshot = (presentingController as? SettingsViewController)?
             .initialSettingsSnapshotForSwiftUI()
@@ -3189,44 +3198,55 @@ final class SettingsSession: NSObject, ObservableObject {
         [
             pickerItem(
                 \.pencilTick,
-                options: { $0.pencilTickOptions },
-                distribution: .equal,
-                hasInfo: true,
-                onValueChanged: { $0.pencilTickChanged() }
+                 options: { $0.pencilTickOptions },
+                 distribution: .equal,
+                 hasInfo: true,
+                 onValueChanged: { $0.pencilTickChanged() }
             ),
             sliderItem(
                 \.pencilTickInterval,
-                range: 1500...4000,
-                clampedTo: 1500...4000,
-                valueText: { _, model in "\(Int(model.value.rounded())) μs" },
-                isVisible: { $0.itemRegistry.pencilTick.value == PencilTickMode.manualTick.rawValue }
+                 range: 1500...4000,
+                 clampedTo: 1500...4000,
+                 valueText: { _, model in "\(Int(model.value.rounded())) μs" },
+                 isVisible: { $0.itemRegistry.pencilTick.value == PencilTickMode.manualTick.rawValue }
             ),
             toggleItem(
                 \.pencilTipOffset,
-                onValueChanged: { $0.pencilTipOffsetChanged() }
+                 onValueChanged: { $0.pencilTipOffsetChanged() }
             ),
             toggleItem(
                 \.pressureCurve,
-                isGameProfileSetting: true,
-                onValueChanged: { $0.pressureCurveChanged() }
+                 isGameProfileSetting: true,
+                 onValueChanged: { $0.pressureCurveChanged() }
             ),
             toggleItem(
                 \.doubleTapShortcut,
-                hasInfo: true,
-                isGameProfileSetting: true,
-                onValueChanged: { $0.doubleTapShortcutChanged() }
+                 hasInfo: true,
+                 isGameProfileSetting: true,
+                 onValueChanged: { $0.doubleTapShortcutChanged() }
             ),
             toggleItem(
                 \.squeezeShortcut,
+                 isEnabled: { _ in
+                     PublicUtils.iOS17_5Available
+                 },
+                 hasInfo: true,
+                 isGameProfileSetting: true,
+                 onValueChanged: { $0.squeezeShortcutChanged() }
+            ),
+            toggleItem(
+                \.reverseBarrelRoll,
+                isVisible: { _ in
+                    PublicUtils.iOS17_5Available && IAPManager.isValid(.PencilProPack)
+                },
                 isEnabled: { _ in
-                    if #available(iOS 17.5, *) {
-                        return true
-                    }
-                    return false
+                    PublicUtils.iOS17_5Available
                 },
                 hasInfo: true,
                 isGameProfileSetting: true,
-                onValueChanged: { $0.squeezeShortcutChanged() }
+                onValueChanged: { session in
+                    GenericUtils.handleFirstReversingBarrelRoll(in: session.presentingController)
+                }
             ),
             pickerItem(
                 \.pencilMode,
@@ -4117,6 +4137,29 @@ final class SettingsSession: NSObject, ObservableObject {
         return resolutionWindow?.screen ?? PublicUtils.currentScreen
     }
 
+    private func nativeResolution(for pointSize: CGSize, on screen: UIScreen) -> CGSize {
+        if pointSize == screen.bounds.size {
+            let nativeSize = screen.nativeBounds.size
+            if (pointSize.width > pointSize.height) != (nativeSize.width > nativeSize.height) {
+                return CGSize(width: nativeSize.height, height: nativeSize.width)
+            }
+            return nativeSize
+        }
+        return CGSize(
+            width: pointSize.width * screen.nativeScale,
+            height: pointSize.height * screen.nativeScale
+        )
+    }
+
+    private func nativeSafeAreaResolution(for window: UIWindow) -> CGSize {
+        let size = nativeResolution(for: window.bounds.size, on: window.screen)
+        let insets = window.safeAreaInsets
+        return CGSize(
+            width: size.width - (insets.left + insets.right) * window.screen.nativeScale,
+            height: size.height
+        )
+    }
+
     /// Mirrors UIKit's resolution-table inputs while Settings is attached to
     /// a window. Persistence happens after dismissal, when that window may no
     /// longer exist, so retain the last measured pixel sizes per display mode.
@@ -4132,16 +4175,9 @@ final class SettingsSession: NSObject, ObservableObject {
             ? (externalScreen ?? PublicUtils.currentScreen)
             : window.screen
         let displayBounds = usesExternalDisplay ? displayScreen.bounds : window.bounds
-        cachedDisplaySizes[displayMode] = CGSize(
-            width: displayBounds.width * displayScreen.nativeScale,
-            height: displayBounds.height * displayScreen.nativeScale
-        )
+        cachedDisplaySizes[displayMode] = nativeResolution(for: displayBounds.size, on: displayScreen)
 
-        let insets = window.safeAreaInsets
-        cachedSafeAreaSizes[displayMode] = CGSize(
-            width: (window.bounds.width - insets.left - insets.right) * window.screen.nativeScale,
-            height: window.bounds.height * window.screen.nativeScale
-        )
+        cachedSafeAreaSizes[displayMode] = nativeSafeAreaResolution(for: window)
     }
 
     private var availableDisplaySize: CGSize {
@@ -4154,7 +4190,7 @@ final class SettingsSession: NSObject, ObservableObject {
         let bounds = displayMode == ExternalDisplayMode.extended.rawValue
             ? screen.bounds
             : (resolutionWindow?.bounds ?? screen.bounds)
-        return CGSize(width: bounds.width * screen.nativeScale, height: bounds.height * screen.nativeScale)
+        return nativeResolution(for: bounds.size, on: screen)
     }
 
     private var availableSafeAreaSize: CGSize {
@@ -4166,11 +4202,7 @@ final class SettingsSession: NSObject, ObservableObject {
         guard let window = resolutionWindow else {
             return availableDisplaySize
         }
-        let insets = window.safeAreaInsets
-        return CGSize(
-            width: (window.bounds.width - insets.left - insets.right) * window.screen.nativeScale,
-            height: window.bounds.height * window.screen.nativeScale
-        )
+        return nativeSafeAreaResolution(for: window)
     }
 
     private var chosenDimensions: CMVideoDimensions {
@@ -4711,8 +4743,9 @@ final class SettingsSession: NSObject, ObservableObject {
             ? PublicUtils.externalScreen : nil
         let screen = externalScreen ?? window.screen
         let bounds = externalScreen?.bounds ?? window.bounds
-        let width = (bounds.width * screen.nativeScale).rounded()
-        let height = (bounds.height * screen.nativeScale).rounded()
+        let size = nativeResolution(for: bounds.size, on: screen)
+        let width = size.width.rounded()
+        let height = size.height.rounded()
         guard width > 0, height > 0,
               width <= Double(Int32.max), height <= Double(Int32.max) else { return false }
         let preset = CMVideoDimensions(width: Int32(width), height: Int32(height))
@@ -4908,6 +4941,7 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.pressureCurve.value = profile.pressureCurveEnabled
         itemRegistry.doubleTapShortcut.value = profile.doubleTapShorcutEnabled
         itemRegistry.squeezeShortcut.value = profile.squeezeShorcutEnabled
+        itemRegistry.reverseBarrelRoll.value = profile.reverseBarrelRoll
         itemRegistry.pencilMode.value = profile.pencilAndHoverMode.rawValue
         itemRegistry.pencilPausesNativeTouch.value = profile.pencilPausesNativeTouch
         itemRegistry.disablePencilSlideGesture.value = profile.disablePencilSlideGestures
@@ -5179,6 +5213,7 @@ final class SettingsSession: NSObject, ObservableObject {
         profile.pressureCurveEnabled = itemRegistry.pressureCurve.value
         profile.doubleTapShorcutEnabled = itemRegistry.doubleTapShortcut.value
         profile.squeezeShorcutEnabled = itemRegistry.squeezeShortcut.value
+        profile.reverseBarrelRoll = itemRegistry.reverseBarrelRoll.value
         profile.pencilAndHoverMode = PencilAndHoverMode(rawValue: itemRegistry.pencilMode.value) ?? .pencilOnly
         profile.pencilPausesNativeTouch = itemRegistry.pencilPausesNativeTouch.value
         profile.disablePencilSlideGestures = itemRegistry.disablePencilSlideGesture.value
@@ -5522,6 +5557,7 @@ final class SettingsSession: NSObject, ObservableObject {
         itemRegistry.pressureCurve.value = false
         itemRegistry.doubleTapShortcut.value = false
         itemRegistry.squeezeShortcut.value = false
+        itemRegistry.reverseBarrelRoll.value = false
         itemRegistry.pencilPausesNativeTouch.value = false
         itemRegistry.disablePencilSlideGesture.value = false
         itemRegistry.pencilTipOffset.value = false

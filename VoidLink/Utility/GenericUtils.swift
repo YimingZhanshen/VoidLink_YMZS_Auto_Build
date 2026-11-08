@@ -588,6 +588,9 @@ import UIKit
     @objc public static func handleFirstGamepadConnection(in vc: UIViewController?,with controller: GCController, handler: @escaping () -> Void) {
         if PublicUtils.isTVOS {
             AlertControllerUtil.alertController.dismiss(animated: true)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                ControllerNavigator.uiNavigationDelegate?.restoreControllerNavigationHighlight()
+            }
         }
 
         if isFirstConnectingG8PlusMFi(controller) {
@@ -658,7 +661,7 @@ import UIKit
     
     @objc public static func handleFirstSettingNativeTrackpad(in vc: UIViewController?) {
         DispatchQueue.main.async {
-            let key = "isFirstSettingNativeTrackpad"
+            let key = "isFirstSettingNativeTrackpad3"
             guard !UserDefaults.standard.bool(forKey: key) else {
                 return
             }
@@ -669,11 +672,11 @@ import UIKit
                 title: LocalizationHelper.localizedString(forKey: "Tips"),
                 message: LocalizationHelper.localizedString(forKey: "nativeTrackpadTip"),
                 withCancel: true,
-                buttonTitle: LocalizationHelper.localizedString(forKey: "Go for Sunshine-Foundation"),
+                buttonTitle: LocalizationHelper.localizedString(forKey: "Learn More"),
                 countdown: 0,
                 completion: {
                     if !AlertControllerUtil.actionCancelled {
-                        PublicUtils.openUrl("https://github.com/AlkaidLab/foundation-sunshine")
+                        PublicUtils.openUrl("nativeTrackpadHostLink".localized)
                     }
                 }
             )

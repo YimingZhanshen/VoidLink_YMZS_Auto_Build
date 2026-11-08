@@ -31,6 +31,8 @@
     
     TemporaryHost *_host; // May be nil
     NSString* _baseHTTPSURL;
+    NSMutableSet<NSURLSessionTask *> *_requestTasks;
+    BOOL _requestsCancelled;
 }
 
 + (NSData*) fixXmlVersion:(NSData*) xmlData {
@@ -105,7 +107,22 @@
     return YES;
 }
 
+- (void)cancelRequests {
+    NSArray<NSURLSessionTask *> *tasks;
+    @synchronized (self) {
+        _requestsCancelled = YES;
+        tasks = _requestTasks.allObjects;
+    }
+    for (NSURLSessionTask *task in tasks) {
+        [task cancel];
+    }
+}
+
 - (void) executeRequestSynchronously:(HttpRequest*)request {
+    [self executeRequestSynchronously:request deadline:DISPATCH_TIME_FOREVER];
+}
+
+- (void) executeRequestSynchronously:(HttpRequest*)request deadline:(dispatch_time_t)deadline {
     // This is a special case to handle failure of HTTPS port fetching
     if (!request.request) {
         if (request.response) {
@@ -121,9 +138,8 @@
     __block dispatch_semaphore_t requestLock = dispatch_semaphore_create(0);
     
     Log(LOG_D, @"Making Request: %@", request);
-    NSURLSession* urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration] delegate:self delegateQueue:nil];
-    [[urlSession dataTaskWithRequest:request.request completionHandler:^(NSData * __nullable data, NSURLResponse * __nullable response, NSError * __nullable error) {
-        
+    void (^completion)(NSData *, NSURLResponse *, NSError *) = ^(NSData * __nullable data, NSURLResponse * __nullable response, NSError * __nullable error) {
+
         if (error != NULL) {
             Log(LOG_D, @"Connection error: %@", error);
             respError = error;
@@ -140,13 +156,38 @@
                 }
             }
         }
-        
+
         dispatch_semaphore_signal(requestLock);
-    }] resume];
-    
-    dispatch_semaphore_wait(requestLock, DISPATCH_TIME_FOREVER);
+    };
+
+    NSURLSession *urlSession;
+    NSURLSessionDataTask *task;
+    @synchronized (self) {
+        if (_requestsCancelled) {
+            request.response.statusCode = NSURLErrorCancelled;
+            return;
+        }
+        urlSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration ephemeralSessionConfiguration] delegate:self delegateQueue:nil];
+        task = [urlSession dataTaskWithRequest:request.request completionHandler:completion];
+        if (!_requestTasks) {
+            _requestTasks = [NSMutableSet set];
+        }
+        [_requestTasks addObject:task];
+        [task resume];
+    }
+
+    BOOL timedOut = dispatch_semaphore_wait(requestLock, deadline) != 0;
     [urlSession invalidateAndCancel];
+    @synchronized (self) {
+        [_requestTasks removeObject:task];
+    }
     
+    if (timedOut) {
+        request.response.statusCode = NSURLErrorTimedOut;
+        request.response.statusMessage = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil].localizedDescription;
+        return;
+    }
+
     if (!respError && request.response) {
         [request.response populateWithData:requestResp];
         
@@ -156,7 +197,7 @@
             request.request = request.fallbackRequest;
             request.fallbackError = 0;
             request.fallbackRequest = NULL;
-            [self executeRequestSynchronously:request];
+            [self executeRequestSynchronously:request deadline:deadline];
         }
     }
     else if (respError && [respError code] == NSURLErrorServerCertificateUntrusted) {
@@ -171,7 +212,7 @@
             request.request = request.fallbackRequest;
             request.fallbackError = 0;
             request.fallbackRequest = NULL;
-            [self executeRequestSynchronously:request];
+            [self executeRequestSynchronously:request deadline:deadline];
         }
     }
     else if (respError && request.response) {

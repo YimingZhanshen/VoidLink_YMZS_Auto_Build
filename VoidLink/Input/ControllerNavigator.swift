@@ -27,6 +27,7 @@ private var controllerNavigationHighlightGenerationKey: UInt8 = 0
 private var controllerMouseCurvePreviewViewKey: UInt8 = 0
 private var controllerMouseCurvePreviewDismissWorkItemKey: UInt8 = 0
 private let settingsControllerNavigationHighlightedIdentifierKey = "SettingsControllerNavigationHighlightedIdentifier"
+private var deeplinkNavigationHighlightKey: UInt8 = 0
 private let hostControllerNavigationHighlightedUUIDKey = "HostControllerNavigationHighlightedUUID"
 private let settingsExcludedControllerNavigationSectionIdentifiers: Set<String> = [
     "SettingsSectionTouch&Controller",
@@ -352,6 +353,9 @@ final class ControllerNavigator: NSObject {
         
         restartListening()
         GamepadNavigationIllustrationHud.updateHud()
+        if let mainFrameVC = uiNavigationDelegate as? MainFrameViewController {
+            mainFrameVC.restoreControllerNavigationHighlight()
+        }
     }
 
     @objc static func restoreUINavigationHighlight() {
@@ -990,7 +994,11 @@ final class ControllerNavigator: NSObject {
          */
 
         if let uiNavigationDelegate = uiNavigationDelegate, !mainFrameVC.isStreaming() || mainFrameVC.settingsExpandedInStreamView || uiNavigationDelegate is UIAlertController || isProfileSelectorNavigationDelegate(uiNavigationDelegate) || uiNavigationDelegate is ToolboxViewController {
-            let navigations = uiNavigationDelegate.getNavigationElements()
+            // Register every possible host-card button once. The active card resolves
+            // its current action when the button is pressed, even if its state changed.
+            let navigations = uiNavigationDelegate is HostCollectionViewController
+                ? HostCardNavigationAction.allCases.map(\.element)
+                : uiNavigationDelegate.getNavigationElements()
             let buttonNavigations = navigations.filter({$0.control.type == .button})
             // let stickNavigations = navigations.filter({$0.control.type == .stick || $0.control.type == .stickAxis})
             
@@ -2038,6 +2046,23 @@ extension SettingsViewController: ControllerUINavigationDelegate {
 
 @available(iOS 13.0, *)
 extension ControllerCollectionNavigationDelegate {
+    var isShowingDeeplinkNavigationHighlight: Bool {
+        get { objc_getAssociatedObject(self, &deeplinkNavigationHighlightKey) as? Bool == true }
+        set { objc_setAssociatedObject(self, &deeplinkNavigationHighlightKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    func showDeeplinkNavigationHighlight(at indexPath: IndexPath) {
+        isShowingDeeplinkNavigationHighlight = true
+        controllerNavigationHighlightItemForControllerNavigator(at: indexPath, animated: false)
+    }
+
+    func finishDeeplinkNavigationHighlight() {
+        isShowingDeeplinkNavigationHighlight = false
+        if !ControllerNavigator.enabled || ControllerUtil.primaryGCController == nil {
+            clearCollectionControllerNavigationHighlightForControllerNavigator()
+        }
+    }
+
     var controllerNavigationSelectedIndexPath: IndexPath? {
         get {
             objc_getAssociatedObject(self, &controllerNavigationSelectedIndexPathKey) as? IndexPath
@@ -2079,8 +2104,7 @@ extension ControllerCollectionNavigationDelegate {
             return
         }
         clearControllerNavigationHighlightBorder(in: cell)
-        guard highlighted else { return }
-        let highlightedView = controllerNavigationHighlightTargetView(for: cell)
+        guard highlighted, let highlightedView = controllerNavigationHighlightTargetView(for: cell) else { return }
         let isDarkTheme = ThemeManager.userInterfaceStyle() == .dark
         if self is ToolboxViewController {
             highlightedView.layer.borderColor = UIColor.systemOrange.withAlphaComponent(isDarkTheme ? 0.8 : 0.97).cgColor
@@ -2113,7 +2137,12 @@ extension ControllerCollectionNavigationDelegate {
         }
     }
 
-    private func controllerNavigationHighlightTargetView(for cell: UICollectionViewCell) -> UIView {
+    private func controllerNavigationHighlightTargetView(for cell: UICollectionViewCell) -> UIView? {
+        if let hostCell = cell as? HostCell {
+            // The card owns the rounded corners even before it has been laid out.
+            return hostCell.cardView
+        }
+
         if let highlightProvider = cell as? ControllerNavigationHighlightTargetProviding {
             return highlightProvider.controllerNavigationHighlightTargetView
         }
@@ -2125,7 +2154,7 @@ extension ControllerCollectionNavigationDelegate {
         return cell.contentView
     }
 
-    private func controllerNavigationContentView(in cell: UICollectionViewCell) -> UIView? {
+    fileprivate func controllerNavigationContentView(in cell: UICollectionViewCell) -> UIView? {
         let contentSubviews = cell.contentView.subviews.filter {
             !$0.isHidden && $0.alpha > 0.01 && !$0.bounds.isEmpty
         }
@@ -2190,7 +2219,7 @@ extension ControllerCollectionNavigationDelegate {
         guard ControllerNavigator.enabled, ControllerUtil.primaryGCController != nil else {return}
 
         PublicUtils.runOnMain { [weak self] in
-            guard let self else { return }
+            guard let self, !self.isShowingDeeplinkNavigationHighlight else { return }
 
             if let hostCollectionVC = self as? HostCollectionViewController {
                 self.restoreHostControllerNavigationHighlight(in: hostCollectionVC)
@@ -2219,25 +2248,46 @@ extension ControllerCollectionNavigationDelegate {
         return controllerNavigationContentView(in: cell)
     }
 
+    private func currentControllerNavigationHostCard() -> HostCardView? {
+        guard let hostCollection = self as? HostCollectionViewController,
+              let indexPath = controllerNavigationSelectedIndexPath,
+              indexPath.item >= 0, indexPath.item < hostCollection.items.count,
+              let host = hostCollection.items[indexPath.item] as? TemporaryHost,
+              let cell = currentControllerNavigationCell() as? HostCell,
+              let card = cell.cardView, card.host === host else { return nil }
+        return card
+    }
+
+#if os(tvOS)
+    private func currentControllerNavigationApp(in mainFrame: MainFrameViewController) -> TemporaryApp? {
+        guard let index = controllerNavigationSelectedIndexPath?.item,
+              let apps = mainFrame.sortedAppList, apps.indices.contains(index) else { return nil }
+        return apps[index]
+    }
+#endif
+
     func controllerNavigationPerformDefaultButtonAction(pressed: Bool, from navigation: ControllerNavigationElement) {
         PublicUtils.runOnMain { [weak self] in
             guard let self else { return }
 
             if pressed {
-                if self is HostCollectionViewController {
-                    guard let hostCardView = self.currentControllerNavigationContentView() as? HostCardView else { return }
-                    
-                    switch navigation.action {
-                    case "launchPairWake":
-                        hostCardView.launchButtonTapped()
-                        hostCardView.pairButtonTapped()
-                        hostCardView.wakeupButtonTapped()
-                    case "applications":
-                        hostCardView.appButtonTapped()
-                    default:
-                        break
-                    }
+                if let hostCollection = self as? HostCollectionViewController {
+                    guard ControllerNavigator.uiNavigationDelegate === hostCollection else { return }
+                    self.currentControllerNavigationHostCard()?.performNavigationAction(for: navigation.control)
+                    return
                 }
+#if os(tvOS)
+                if navigation.action == HostCardNavigationAction.addToTopShelf.rawValue ||
+                    navigation.action == HostCardNavigationAction.removeFromTopShelf.rawValue {
+                    if let presenter = self as? MainFrameViewController,
+                       ControllerNavigator.uiNavigationDelegate === presenter,
+                       presenter.isInAppView(), presenter.hasNoPresentedVC,
+                       let app = self.currentControllerNavigationApp(in: presenter), let host = app.host {
+                        DeeplinkCoordinator.toggleTopShelf(host: host, app: app, presenter: presenter)
+                    }
+                    return
+                }
+#endif
                 if let mainFrameVC = self as? MainFrameViewController {
                     let appView = self.currentControllerNavigationContentView() as? UIAppView
                     switch navigation.action {
@@ -2256,14 +2306,30 @@ extension ControllerCollectionNavigationDelegate {
     }
     
     func controllerNavigationDefaultNavigationElements() -> [ControllerNavigationElement] {
+        let isLeft = ControllerNavigator.radialMenuButtonPosition == .left
+        let menu = ControllerNavigationElement(control: ControllerNavigator.radialMenuButton, action: "radialMenu")
+        let stick = ControllerNavigationElement(control: isLeft ? .rightStick : .leftStick, action: "focusNavigation")
+        let directional = ControllerNavigationElement(control: isLeft ? .abxy : .dpad, action: "focusNavigation")
+        guard self is HostCollectionViewController || self is MainFrameViewController else {
+            return [menu, stick, directional]
+        }
+
         var elements: [ControllerNavigationElement] = []
-        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButton, action: "radialMenu"))
-        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .rightStick : .leftStick, action: "focusNavigation"))
-        elements.append(ControllerNavigationElement(control:ControllerNavigator.radialMenuButtonPosition == .left ? .abxy : .dpad, action: "focusNavigation"))
-        if self is HostCollectionViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "applications"))}
-        if self is HostCollectionViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .x, action: "launchPairWake"))}
-        if self is MainFrameViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadRight : .a, action: "launch"))}
-        if self is MainFrameViewController {elements.append(ControllerNavigationElement(control: ControllerNavigator.radialMenuButtonPosition == .left ? .dpadUp : .b, action: "quitApp"))}
+        if let mainFrame = self as? MainFrameViewController {
+            elements.append(ControllerNavigationElement(control: isLeft ? .dpadRight : .a, action: "launch"))
+            elements.append(ControllerNavigationElement(control: isLeft ? .dpadUp : .b, action: "quitApp"))
+#if os(tvOS)
+            var action = HostCardNavigationAction.addToTopShelf
+            if let app = currentControllerNavigationApp(in: mainFrame), let host = app.host,
+               DeeplinkCoordinator.isOnTopShelf(host: host, app: app) {
+                action = .removeFromTopShelf
+            }
+            elements.append(action.element)
+#endif
+        } else if let card = currentControllerNavigationHostCard() {
+            elements.append(contentsOf: card.getNavElements())
+        }
+        elements.append(contentsOf: [directional, stick, menu])
         return elements
     }
     
@@ -2339,29 +2405,41 @@ extension ControllerCollectionNavigationDelegate {
     }
 
     private func persistAppControllerNavigationHighlight() {
-        guard let appView = currentControllerNavigationContentView() as? UIAppView,
-              let appID = appView.app.id,
-              !appID.isEmpty,
-              let host = appView.app.host else {
+        guard let mainFrameVC = self as? MainFrameViewController,
+              let host = mainFrameVC.sortedAppList.first?.host,
+              let appID = host.controllerNavigationHighlightedAppID,
+              !appID.isEmpty else {
             return
         }
-        host.controllerNavigationHighlightedAppID = appID
         DataManager().update(host)
     }
 
     private func restoreAppControllerNavigationHighlight(in mainFrameVC: MainFrameViewController) {
-        guard let appID = mainFrameVC.sortedAppList.first?.host?.controllerNavigationHighlightedAppID,
-              !appID.isEmpty else {
-            restoreFirstControllerNavigationItemIfNeeded()
-            return
-        }
-        
-        for (index, app) in mainFrameVC.sortedAppList.enumerated() where app.id == appID {
-            controllerNavigationHighlightItemForControllerNavigator(at: IndexPath(item: index, section: 0))
+        guard mainFrameVC.canApplyAppNavigationHighlight else { return }
+        let apps = mainFrameVC.sortedAppList ?? []
+        guard let firstApp = apps.first else {
+            clearCollectionControllerNavigationHighlight()
             return
         }
 
-        restoreFirstControllerNavigationItemIfNeeded()
+        let appID = firstApp.host?.controllerNavigationHighlightedAppID
+        let index = apps.firstIndex { appID != nil && $0.id == appID } ?? 0
+        let indexPath = IndexPath(item: index, section: 0)
+        controllerNavigationSelectedIndexPath = indexPath
+
+        let collectionView = controllerNavigationCollectionView
+        collectionView.layoutIfNeeded()
+        for cell in collectionView.visibleCells {
+            guard let cellIndexPath = collectionView.indexPath(for: cell) else { continue }
+            mainFrameVC.applyAppNavigationHighlight(to: cell, at: cellIndexPath)
+        }
+        if collectionView.numberOfItems(inSection: 0) > indexPath.item,
+           !collectionView.indexPathsForVisibleItems.contains(indexPath) {
+            collectionView.scrollToItem(at: indexPath, at: [.centeredHorizontally, .centeredVertically], animated: false)
+        }
+#if os(tvOS)
+        mainFrameVC.refreshAppTopShelfNavigationHud()
+#endif
     }
 
     private func restoreFirstControllerNavigationItemIfNeeded() {
@@ -2474,9 +2552,9 @@ extension ControllerCollectionNavigationDelegate {
         currentControllerNavigationIndexPath()
     }
 
-    func controllerNavigationHighlightItemForControllerNavigator(at indexPath: IndexPath) {
+    func controllerNavigationHighlightItemForControllerNavigator(at indexPath: IndexPath, animated: Bool = true) {
         PublicUtils.runOnMain { [weak self] in
-            guard let self else { return }
+            guard let self, !animated || !self.isShowingDeeplinkNavigationHighlight else { return }
 
             let collectionView = self.controllerNavigationCollectionView
             guard indexPath.section < collectionView.numberOfSections,
@@ -2484,6 +2562,14 @@ extension ControllerCollectionNavigationDelegate {
                   indexPath.item < collectionView.numberOfItems(inSection: indexPath.section) else {
                 self.clearCollectionControllerNavigationHighlight()
                 return
+            }
+
+            if let mainFrameVC = self as? MainFrameViewController {
+                guard mainFrameVC.canApplyAppNavigationHighlight,
+                      let apps = mainFrameVC.sortedAppList,
+                      apps.indices.contains(indexPath.item) else { return }
+                let app = apps[indexPath.item]
+                app.host?.controllerNavigationHighlightedAppID = app.id
             }
 
             collectionView.layoutIfNeeded()
@@ -2499,7 +2585,17 @@ extension ControllerCollectionNavigationDelegate {
                 self.applyControllerNavigationHighlight(to: previousCell, highlighted: false)
             }
 
-            collectionView.scrollToItem(at: indexPath, at: [.centeredHorizontally, .centeredVertically], animated: true)
+            collectionView.scrollToItem(at: indexPath, at: [.centeredHorizontally, .centeredVertically], animated: animated)
+            if !animated { collectionView.layoutIfNeeded() }
+            if let mainFrameVC = self as? MainFrameViewController {
+                if let cell = collectionView.cellForItem(at: indexPath) {
+                    mainFrameVC.applyAppNavigationHighlight(to: cell, at: indexPath)
+                }
+#if os(tvOS)
+                mainFrameVC.refreshAppTopShelfNavigationHud()
+#endif
+                return
+            }
             self.applyControllerNavigationHighlightWhenCellIsReady(at: indexPath, generation: highlightGeneration, remainingAttempts: 8)
         }
     }
@@ -2514,6 +2610,7 @@ extension ControllerCollectionNavigationDelegate {
         if let cell = collectionView.cellForItem(at: indexPath) {
             applyControllerNavigationHighlight(to: cell, highlighted: true)
             ControllerNavigator.controllerNavigationHighlightedView = controllerNavigationHighlightTargetView(for: cell)
+            (self as? HostCollectionViewController)?.refreshHostNavigationHudIfActive()
             return
         }
 
@@ -2536,6 +2633,10 @@ extension ControllerCollectionNavigationDelegate {
             self.controllerNavigationHighlightGeneration += 1
             self.controllerNavigationSelectedIndexPath = nil
             ControllerNavigator.controllerNavigationHighlightedView = nil
+            (self as? HostCollectionViewController)?.refreshHostNavigationHudIfActive()
+#if os(tvOS)
+            (self as? MainFrameViewController)?.refreshAppTopShelfNavigationHud()
+#endif
         }
     }
 
@@ -2580,6 +2681,40 @@ extension MainFrameViewController {
         }
         else {
             self.launch(app)
+        }
+    }
+}
+
+@available(iOS 13.0, *)
+extension MainFrameViewController {
+#if os(tvOS)
+    fileprivate func refreshAppTopShelfNavigationHud() {
+        guard ControllerNavigator.uiNavigationDelegate === self,
+              ControllerNavigator.radialMenuView == nil else { return }
+        GamepadNavigationIllustrationHud.updateHud()
+    }
+#endif
+
+    fileprivate var canApplyAppNavigationHighlight: Bool {
+        isInAppView() && viewIfLoaded?.window != nil && !collectionView.isHidden &&
+            (isShowingDeeplinkNavigationHighlight ||
+             (ControllerNavigator.enabled && ControllerUtil.primaryGCController != nil &&
+              ControllerNavigator.uiNavigationDelegate === self))
+    }
+
+    @objc(applyAppNavigationHighlightToCell:atIndexPath:)
+    func applyAppNavigationHighlight(to cell: UICollectionViewCell, at indexPath: IndexPath) {
+        let appView = controllerNavigationContentView(in: cell) as? UIAppView
+        let apps = sortedAppList ?? []
+        let highlighted = canApplyAppNavigationHighlight &&
+            controllerNavigationSelectedIndexPath == indexPath &&
+            apps.indices.contains(indexPath.item) &&
+            appView?.app === apps[indexPath.item]
+        applyControllerNavigationHighlight(to: cell, highlighted: highlighted)
+        if highlighted {
+            ControllerNavigator.controllerNavigationHighlightedView = appView
+        } else if let appView, ControllerNavigator.controllerNavigationHighlightedView === appView {
+            ControllerNavigator.controllerNavigationHighlightedView = nil
         }
     }
 }

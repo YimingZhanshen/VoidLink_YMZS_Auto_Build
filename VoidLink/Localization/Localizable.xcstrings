@@ -1,259 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "This VoidLink shortcut target is no longer available." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此 VoidLink 快捷指令目标已不可用。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此 VoidLink 捷徑目標已無法使用。"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此 VoidLink 捷徑目標已無法使用。"
-          }
-        }
-      }
-    },
-    "Open VoidLink Target" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开 VoidLink 目标"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟 VoidLink 目標"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟 VoidLink 目標"
-          }
-        }
-      }
-    },
-    "Streaming Target" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流目标"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流目標"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "串流目標"
-          }
-        }
-      }
-    },
-    "Removed from Shortcuts List" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已从快捷指令清单移除"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已從捷徑清單移除"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已從捷徑清單移除"
-          }
-        }
-      }
-    },
-    "Added to Shortcuts List" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已加入快捷指令清单"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已加入捷徑清單"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已加入捷徑清單"
-          }
-        }
-      }
-    },
-    "Remove from Shortcuts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从快捷指令移除"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "從捷徑移除"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "從捷徑移除"
-          }
-        }
-      }
-    },
-    "Add to Shortcuts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "加入快捷指令"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "加入捷徑"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "加入捷徑"
-          }
-        }
-      }
-    },
-    "Shortcuts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "快捷方式"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "捷徑"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "捷徑"
-          }
-        }
-      }
-    },
-    "Launch Now" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即启动"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即啟動"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即啟動"
-          }
-        }
-      }
-    },
-    "Waiting for host system initialization" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "等待主机系统初始化"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "等待主機系統初始化"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "等待主機系統初始化"
-          }
-        }
-      }
-    },
-    "Sent Wake-on-LAN" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已尝试唤醒主机"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已嘗試喚醒電腦"
-          }
-        },
-        "zh-HK" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已嘗試喚醒電腦"
-          }
-        }
-      }
-    },
     "\nHost processing latency min/max/avg: %.1f/%.1f/%.1f ms" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5410,6 +5157,29 @@
         }
       }
     },
+    "Add to Shortcuts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入快捷指令"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入捷徑"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加入捷徑"
+          }
+        }
+      }
+    },
     "Add to Top Shelf" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5452,6 +5222,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已將「%@」加入主畫面"
+          }
+        }
+      }
+    },
+    "Added to Shortcuts List" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已加入快捷指令清单"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已加入捷徑清單"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已加入捷徑清單"
           }
         }
       }
@@ -7680,6 +7473,12 @@
             "state" : "translated",
             "value" : "複製 DeepLink"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "複製 DeepLink"
+          }
         }
       }
     },
@@ -8284,6 +8083,12 @@
             "state" : "translated",
             "value" : "找不到 DeepLink 對應的應用程式。"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 DeepLink 對應的應用程式。"
+          }
         }
       }
     },
@@ -8301,6 +8106,12 @@
             "state" : "translated",
             "value" : "DeepLink 已複製到剪貼簿"
           }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepLink 已複製到剪貼簿"
+          }
         }
       }
     },
@@ -8314,6 +8125,12 @@
           }
         },
         "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DeepLink 對應的主機未上線。"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "DeepLink 對應的主機未上線。"
@@ -12137,6 +11954,29 @@
         }
       }
     },
+    "Get Foundation Sunshine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取 Foundation Sunshine"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得 Foundation Sunshine"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得 Foundation Sunshine"
+          }
+        }
+      }
+    },
     "Go to Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13764,6 +13604,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "啟動應用程式"
+          }
+        }
+      }
+    },
+    "Launch Now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即启动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即啟動"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即啟動"
           }
         }
       }
@@ -16535,6 +16398,29 @@
         }
       }
     },
+    "Open VoidLink Target" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开 VoidLink 目标"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟 VoidLink 目標"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟 VoidLink 目標"
+          }
+        }
+      }
+    },
     "Opens pencil pressure curve tool" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19226,6 +19112,29 @@
         }
       }
     },
+    "Remove from Shortcuts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从快捷指令移除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從捷徑移除"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從捷徑移除"
+          }
+        }
+      }
+    },
     "Remove from Top Shelf" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19291,6 +19200,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移除項目"
+          }
+        }
+      }
+    },
+    "Removed from Shortcuts List" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已从快捷指令清单移除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已從捷徑清單移除"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已從捷徑清單移除"
           }
         }
       }
@@ -20808,6 +20740,29 @@
         }
       }
     },
+    "Sent Wake-on-LAN" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已尝试唤醒主机"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已嘗試喚醒電腦"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已嘗試喚醒電腦"
+          }
+        }
+      }
+    },
     "Set all" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21050,6 +21005,29 @@
         }
       }
     },
+    "Shortcuts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷方式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "捷徑"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "捷徑"
+          }
+        }
+      }
+    },
     "ShortcutsTab" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21112,6 +21090,12 @@
           }
         },
         "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示 DeepLink"
+          }
+        },
+        "zh-HK" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示 DeepLink"
@@ -22146,6 +22130,29 @@
         }
       }
     },
+    "Streaming Target" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流目标"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流目標"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "串流目標"
+          }
+        }
+      }
+    },
     "streamingRadialMenuButtonTip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23004,6 +23011,29 @@
         }
       }
     },
+    "This VoidLink shortcut target is no longer available." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 VoidLink 快捷指令目标已不可用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 VoidLink 捷徑目標已無法使用。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此 VoidLink 捷徑目標已無法使用。"
+          }
+        }
+      }
+    },
     "Tick Interval" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23850,6 +23880,29 @@
         }
       }
     },
+    "USB Hosts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "USB 主机"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "USB 主機"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "USB 主機"
+          }
+        }
+      }
+    },
     "Use Built-in Mic" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24303,6 +24356,29 @@
         }
       }
     },
+    "Waiting for host system initialization" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待主机系统初始化"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待主機系統初始化"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "等待主機系統初始化"
+          }
+        }
+      }
+    },
     "Wake PC" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24389,7 +24465,7 @@
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "聯絡開發者 True砖家"
           }
         },
@@ -24743,6 +24819,64 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "寬度: %.2f"
+          }
+        }
+      }
+    },
+    "wiredStreamingSunshineLink" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/biuzs1/tbxv49ko2lfupqym"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/biuzs1/tqogfftganrmdf3y"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/biuzs1/tqogfftganrmdf3y"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "https://voidlink.yuque.com/org-wiki-voidlink-znirha/biuzs1/tqogfftganrmdf3y"
+          }
+        }
+      }
+    },
+    "wiredStreamingTip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink now supports USB wired streaming with Foundation Sunshine (custom build).\n- The USB button will reappear in the navigation bar when a USB host is detected.\n- Your host PC’s USB port or your USB cable may be unable to power your iPad or iPhone. Keep an eye on your battery level while streaming over USB.\n- A loose connection at the cable or port can cause more frequent streaming interruptions than a wireless connection.\n- VoidLink caps the requested USB streaming bitrate at 240 Mbps. If the picture is still unstable, lower the bitrate further."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink 现已支持配合 Foundation Sunshine (定制版) 实现USB有线连接串流。\n- 检测到 USB 主机时， 导航栏将再次显示 \"USB\" 按钮。\n- 主机 USB 接口或您的 USB 线缆可能无法为 iPad/iPhone 供电，有线串流时请注意电量消耗。\n- 线缆或端口接触不良时，甚至比无线连接更容易断流。\n- App已将 USB 串流请求的码率限制在 240Mbps。如果出现画面不稳定的情况，请继续降低码率。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink 現已支援搭配 Foundation Sunshine (客製版) 透過 USB 進行有線串流。\n- 偵測到 USB 主機時，導覽列會再次顯示「USB」按鈕。\n- 主機的 USB 連接埠或您的 USB 連接線可能無法為 iPad/iPhone 供電，有線串流時請留意電量消耗。\n- 連接線或連接埠接觸不良時，甚至比無線連線更容易中斷串流。\n- App 已將 USB 串流請求的位元率限制在 240 Mbps。如果畫面不穩定，請繼續降低位元率。"
+          }
+        },
+        "zh-HK" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "VoidLink 現已支援搭配 Foundation Sunshine (客製版) 透過 USB 進行有線串流。\n- 偵測到 USB 主機時，導覽列會再次顯示「USB」按鈕。\n- 主機的 USB 連接埠或您的 USB 連接線可能無法為 iPad/iPhone 供電，有線串流時請留意電量消耗。\n- 連接線或連接埠接觸不良時，甚至比無線連線更容易中斷串流。\n- App 已將 USB 串流請求的位元率限制在 240 Mbps。如果畫面不穩定，請繼續降低位元率。"
           }
         }
       }

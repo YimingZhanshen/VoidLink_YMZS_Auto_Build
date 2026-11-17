@@ -17,6 +17,8 @@
 @property (atomic, nullable, retain) NSString * currentGame;
 @property (atomic) unsigned short httpsPort;
 @property (atomic) BOOL isNvidiaServerSoftware;
+@property (atomic) BOOL usesUSBStreamTunnel;
+@property (atomic, copy) NSString *usbTunnelSessionID;
 
 @property (atomic, nullable, retain) NSData *serverCert;
 @property (atomic, nullable, retain) NSString *address;
